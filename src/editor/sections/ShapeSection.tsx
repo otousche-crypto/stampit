@@ -5,6 +5,9 @@ import { useEditor } from '../EditorProvider'
 
 type Shape = BadgeConfig['shape']
 
+/** "Square" keeps a small corner: a third of the capsule radius (6px at size M). */
+const SQUARE_RADIUS = 1 / 3
+
 export function ShapeSection() {
   const { config, update } = useEditor()
   const shape = config.shape
@@ -15,7 +18,7 @@ export function ShapeSection() {
       <Choice
         label="Corners"
         value={shape.radius >= 0.5 ? 'round' : 'square'}
-        onChange={(v) => set({ radius: v === 'round' ? 1 : 0 })}
+        onChange={(v) => set({ radius: v === 'round' ? 1 : SQUARE_RADIUS })}
         options={[
           { value: 'square', label: 'Square' },
           { value: 'round', label: 'Round' },
