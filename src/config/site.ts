@@ -1,8 +1,8 @@
 /**
- * Open points (PRD §16): the domain and the GitHub repository aren't decided
- * yet. Replace these placeholders once they are.
+ * Open point (PRD §16): the domain isn't decided
+ * yet. Replace the placeholder once it is.
  */
-export const GITHUB_URL = 'https://github.com/' // TODO(§16): repository URL
+export const GITHUB_URL = 'https://github.com/otousche-crypto/stampit'
 
 /** Where the editor lives. At runtime the current origin wins, so any deploy works. */
 export function editorBaseUrl(): string {

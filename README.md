@@ -29,4 +29,4 @@ npm run build      # demo badge + type check + Vite build
 
 ## Open points (PRD §16)
 
-The domain and the GitHub repository are placeholders: `src/config/site.ts` and the meta tags in `index.html`.
+The domain is still a placeholder: `src/config/site.ts` and the meta tags in `index.html`.
