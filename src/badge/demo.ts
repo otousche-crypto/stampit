@@ -20,7 +20,7 @@ export const DEMO_CONFIG: BadgeConfig = {
       dark: { background: '#14141C', border: '#2E2E3A', textNormal: '#8A8A99', textBold: '#FFFFFF', icon: '#8A8A99', blur: 0 },
     },
   },
-  shape: { radius: 1, borderWidth: 1, shadow: 'soft', showIcon: true },
+  shape: { radius: 1, borderWidth: 1, shadow: 'soft', showIcon: true, iconStyle: 'arrow' },
   motion: { entrance: 'none', hover: 'none' },
   click: {
     mode: 'link',

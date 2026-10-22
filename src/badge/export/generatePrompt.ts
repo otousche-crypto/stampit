@@ -13,6 +13,18 @@ import {
   type GenerateHtmlOptions,
 } from './generateHtml'
 
+const ICON_TEXT = {
+  arrow: 'an "arrow-up-right" (Lucide path: line 7,17 → 17,7 and polyline 7,7 17,7 17,17)',
+  triangle: 'a small filled triangle pointing right, rounded corners',
+  link: 'a "link" chain (Lucide link icon)',
+} as const
+
+const ICON_HOVER_TEXT = {
+  arrow: 'the arrow slides 2px up and 2px right',
+  triangle: 'the triangle slides 2px right',
+  link: 'the link icon tilts 15°',
+} as const
+
 /** Where the agent should put the uploaded photo. */
 export const UPLOAD_PUBLIC_PATH = '/stampit-avatar.webp'
 
@@ -80,7 +92,7 @@ export function generatePrompt(config: BadgeConfig, options: GeneratePromptOptio
     out.push(
       bubbles
         ? `- Icon: a "+" (two 2px strokes, round caps), ${size.icon}px, in the icon color. It rotates 45° into "×" while the menu is open.`
-        : `- Icon: an "arrow-up-right" (Lucide path: line 7,17 → 17,7 and polyline 7,7 17,7 17,17), ${size.icon}px, 2px stroke, currentColor, in the icon color, aria-hidden.`,
+        : `- Icon: ${ICON_TEXT[config.shape.iconStyle]}, ${size.icon}px, 2px stroke, currentColor, in the icon color, aria-hidden (exact SVG in the reference).`,
     )
   } else {
     out.push('- Icon: none.')
@@ -127,7 +139,7 @@ export function generatePrompt(config: BadgeConfig, options: GeneratePromptOptio
     out.push(
       `- Mode: Link. The whole badge is one <a href="${url || '(missing)'}">${config.click.link.newTab && !mail ? ' opening in a new tab (target="_blank" rel="noopener noreferrer")' : ''}.`,
     )
-    if (config.shape.showIcon) out.push('- Hover and keyboard focus: the arrow slides 2px up and 2px right (fast spring).')
+    if (config.shape.showIcon) out.push(`- Hover and keyboard focus: ${ICON_HOVER_TEXT[config.shape.iconStyle]} (fast spring).`)
     if (config.shape.shadow === 'soft') out.push('- Hover: the shadow grows as specified (fast spring).')
   } else {
     const { channels, labels } = config.click.bubbles

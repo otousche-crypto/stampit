@@ -1,6 +1,6 @@
-import { Circle, Square } from 'lucide-react'
+import { ArrowUpRight, Ban, Circle, Link, Play, Square } from 'lucide-react'
 import type { BadgeConfig } from '@/badge/schema'
-import { SelectRow, SwitchRow } from '../controls'
+import { SelectRow } from '../controls'
 import { useEditor } from '../EditorProvider'
 
 type Shape = BadgeConfig['shape']
@@ -43,7 +43,17 @@ export function ShapeSection() {
           { value: 'soft', label: 'Soft' },
         ]}
       />
-      <SwitchRow label="Show icon" checked={shape.showIcon} onToggle={() => set({ showIcon: !shape.showIcon })} />
+      <SelectRow
+        label="Icon"
+        value={shape.showIcon ? shape.iconStyle : 'none'}
+        onChange={(v) => set(v === 'none' ? { showIcon: false } : { showIcon: true, iconStyle: v })}
+        options={[
+          { value: 'none', label: 'None', icon: Ban },
+          { value: 'arrow', label: 'Arrow', icon: ArrowUpRight },
+          { value: 'triangle', label: 'Triangle', icon: Play },
+          { value: 'link', label: 'Link', icon: Link },
+        ]}
+      />
     </div>
   )
 }

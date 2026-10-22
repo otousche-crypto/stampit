@@ -113,6 +113,18 @@ export function resolveAvatar(config: BadgeConfig, options: GenerateHtmlOptions 
 
 export const ARROW_ICON =
   '<line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/>'
+/** Rounded play triangle, pointing right. */
+export const TRIANGLE_ICON = '<path d="M9 7l6 5-6 5z" fill="currentColor"/>'
+/** Lucide "link". */
+export const LINK_ICON =
+  '<path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/>'
+
+export const LINK_ICONS: Record<BadgeConfig['shape']['iconStyle'], { body: string; hover: string }> = {
+  arrow: { body: ARROW_ICON, hover: 'translate(2px,-2px)' },
+  triangle: { body: TRIANGLE_ICON, hover: 'translateX(2px)' },
+  link: { body: LINK_ICON, hover: 'rotate(-15deg)' },
+}
+
 export const PLUS_ICON = '<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>'
 
 function strokeSvg(cls: string, size: number, body: string): string {
@@ -239,9 +251,11 @@ function buildCss(config: BadgeConfig, avatar: ResolvedAvatar, previewScheme?: '
   rules.push(`.${c}__b{color:var(${v}tb);font-weight:${config.text.boldWeight}}`)
 
   if (showIcon && !bubbles) {
-    // Link: the arrow slides 2px up-right on hover and focus.
+    // Link: the icon nudges on hover and focus (arrow: 2px up-right).
     rules.push(`.${c}__ic{flex:none;display:block;color:var(${v}ic);transition:${transition(ctx, 'transform', 'fast')}}`)
-    rules.push(`.${c}__pill:hover .${c}__ic,.${c}__pill:focus-visible .${c}__ic{transform:translate(2px,-2px)}`)
+    rules.push(
+      `.${c}__pill:hover .${c}__ic,.${c}__pill:focus-visible .${c}__ic{transform:${LINK_ICONS[config.shape.iconStyle].hover}}`,
+    )
   }
   if (showIcon && bubbles) {
     // Bubbles: the "+" nudges on hover and turns into "×" when open.
@@ -470,7 +484,9 @@ export function generateBadge(config: BadgeConfig, options: GenerateHtmlOptions 
   const inner = [
     avatarHtml(c, avatar, size.avatar),
     textHtml(c, config),
-    config.shape.showIcon ? strokeSvg(`${c}__ic`, size.icon, bubbles ? PLUS_ICON : ARROW_ICON) : '',
+    config.shape.showIcon
+      ? strokeSvg(`${c}__ic`, size.icon, bubbles ? PLUS_ICON : LINK_ICONS[config.shape.iconStyle].body)
+      : '',
   ].filter(Boolean)
   const body = `\n    ${inner.join('\n    ')}\n  `
 

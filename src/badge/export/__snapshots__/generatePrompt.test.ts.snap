@@ -19,7 +19,7 @@ Match the visual spec and behavior below exactly. The reference implementation a
 - Corner radius: 18px (a full capsule).
 - Border: 1px, drawn as an inner ring (box-shadow: inset 0 0 0 1px <border color>) so it never changes the size.
 - Shadow: 0 1px 6px rgba(0,0,0,.08); on hover 0 2px 12px rgba(0,0,0,.12).
-- Icon: an "arrow-up-right" (Lucide path: line 7,17 → 17,7 and polyline 7,7 17,7 17,17), 14px, 2px stroke, currentColor, in the icon color, aria-hidden.
+- Icon: an "arrow-up-right" (Lucide path: line 7,17 → 17,7 and polyline 7,7 17,7 17,17), 14px, 2px stroke, currentColor, in the icon color, aria-hidden (exact SVG in the reference).
 - Avatar: round, 28px, background #FF6B35, initials "GH" in #000000, weight 600, 11px.
 - Colors follow the site theme through prefers-color-scheme.
 - Light palette:
@@ -290,7 +290,7 @@ Match the visual spec and behavior below exactly. The reference implementation a
 - Corner radius: 15px (a full capsule).
 - Border: 1px, drawn as an inner ring (box-shadow: inset 0 0 0 1px <border color>) so it never changes the size.
 - Shadow: none.
-- Icon: an "arrow-up-right" (Lucide path: line 7,17 → 17,7 and polyline 7,7 17,7 17,17), 12px, 2px stroke, currentColor, in the icon color, aria-hidden.
+- Icon: an "arrow-up-right" (Lucide path: line 7,17 → 17,7 and polyline 7,7 17,7 17,17), 12px, 2px stroke, currentColor, in the icon color, aria-hidden (exact SVG in the reference).
 - Avatar: none. Left and right padding are equal.
 - Colors:
   - Background: #FFFFFF14
@@ -359,7 +359,7 @@ Match the visual spec and behavior below exactly. The reference implementation a
 - Corner radius: 18px (a full capsule).
 - Border: 1px, drawn as an inner ring (box-shadow: inset 0 0 0 1px <border color>) so it never changes the size.
 - Shadow: 0 1px 6px rgba(0,0,0,.08); on hover 0 2px 12px rgba(0,0,0,.12).
-- Icon: an "arrow-up-right" (Lucide path: line 7,17 → 17,7 and polyline 7,7 17,7 17,17), 14px, 2px stroke, currentColor, in the icon color, aria-hidden.
+- Icon: an "arrow-up-right" (Lucide path: line 7,17 → 17,7 and polyline 7,7 17,7 17,17), 14px, 2px stroke, currentColor, in the icon color, aria-hidden (exact SVG in the reference).
 - Avatar: round, 28px, background #FF6B35, initials "AL" in #000000, weight 600, 11px.
 - Colors:
   - Background: #FFFFFF

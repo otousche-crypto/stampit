@@ -35,6 +35,8 @@ export const CHANNEL_TYPES = [
 export const ENTRANCES = ['none', 'fade', 'grow', 'slide', 'pulse', 'shake'] as const
 export const HOVERS = ['none', 'grow', 'lift', 'pulse', 'shake'] as const
 
+export const ICON_STYLES = ['arrow', 'triangle', 'link'] as const
+
 export const channelSchema = z.object({
   id: z.string().min(1).max(32),
   type: z.enum(CHANNEL_TYPES),
@@ -80,6 +82,8 @@ export const badgeConfigSchema = z.object({
     borderWidth: z.union([z.literal(0), z.literal(1), z.literal(2)]),
     shadow: z.enum(['none', 'soft']),
     showIcon: z.boolean(),
+    /** Link mode's icon when `showIcon` is on. Bubbles mode always uses "+". */
+    iconStyle: z.enum(ICON_STYLES),
   }),
 
   motion: z.object({
@@ -105,6 +109,7 @@ export type BadgeConfig = z.infer<typeof badgeConfigSchema>
 export type PaletteKey = 'light' | 'dark'
 export type PresetName = BadgeConfig['preset']
 export type BadgeSize = BadgeConfig['text']['size']
+export type IconStyle = (typeof ICON_STYLES)[number]
 export type Entrance = (typeof ENTRANCES)[number]
 export type HoverEffect = (typeof HOVERS)[number]
 
@@ -155,7 +160,7 @@ export function createDefaultConfig(overrides?: { id?: string; updatedAt?: strin
       base: 'light',
       palettes: { light: { ...LIGHT_PALETTE }, dark: { ...DARK_PALETTE } },
     },
-    shape: { radius: 1, borderWidth: 1, shadow: 'soft', showIcon: true },
+    shape: { radius: 1, borderWidth: 1, shadow: 'soft', showIcon: true, iconStyle: 'arrow' },
     motion: { entrance: 'none', hover: 'none' },
     click: {
       mode: 'link',
