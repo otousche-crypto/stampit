@@ -1,6 +1,6 @@
-import { Switch } from '@/components/ui/switch'
+import { Circle, Square } from 'lucide-react'
 import type { BadgeConfig } from '@/badge/schema'
-import { Choice } from '../controls'
+import { SelectRow, SwitchRow } from '../controls'
 import { useEditor } from '../EditorProvider'
 
 type Shape = BadgeConfig['shape']
@@ -14,38 +14,36 @@ export function ShapeSection() {
   const set = (patch: Partial<Shape>) => update((c) => ({ ...c, shape: { ...c.shape, ...patch } }))
 
   return (
-    <div className="flex flex-col gap-4">
-      <Choice
+    <div className="flex flex-col">
+      <SelectRow
         label="Corners"
         value={shape.radius >= 0.5 ? 'round' : 'square'}
         onChange={(v) => set({ radius: v === 'round' ? 1 : SQUARE_RADIUS })}
         options={[
-          { value: 'square', label: 'Square' },
-          { value: 'round', label: 'Round' },
+          { value: 'square', label: 'Square', icon: Square },
+          { value: 'round', label: 'Round', icon: Circle },
         ]}
       />
-      <div className="grid grid-cols-2 gap-2">
-        <Choice
-          label="Border"
-          value={String(shape.borderWidth) as '0' | '1' | '2'}
-          onChange={(w) => set({ borderWidth: Number(w) as Shape['borderWidth'] })}
-          options={[
-            { value: '0', label: '0' },
-            { value: '1', label: '1 px' },
-            { value: '2', label: '2 px' },
-          ]}
-        />
-        <Choice
-          label="Shadow"
-          value={shape.shadow}
-          onChange={(shadow) => set({ shadow })}
-          options={[
-            { value: 'none', label: 'None' },
-            { value: 'soft', label: 'Soft' },
-          ]}
-        />
-      </div>
-      <Switch label="Show icon" checked={shape.showIcon} onToggle={() => set({ showIcon: !shape.showIcon })} size="compact" />
+      <SelectRow
+        label="Border"
+        value={String(shape.borderWidth) as '0' | '1' | '2'}
+        onChange={(w) => set({ borderWidth: Number(w) as Shape['borderWidth'] })}
+        options={[
+          { value: '0', label: 'None' },
+          { value: '1', label: '1 px' },
+          { value: '2', label: '2 px' },
+        ]}
+      />
+      <SelectRow
+        label="Shadow"
+        value={shape.shadow}
+        onChange={(shadow) => set({ shadow })}
+        options={[
+          { value: 'none', label: 'None' },
+          { value: 'soft', label: 'Soft' },
+        ]}
+      />
+      <SwitchRow label="Show icon" checked={shape.showIcon} onToggle={() => set({ showIcon: !shape.showIcon })} />
     </div>
   )
 }

@@ -1,5 +1,8 @@
 import { useId, type ReactNode } from 'react'
 import { RadioGroup, RadioItem } from '@/components/ui/radio-group'
+import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select'
+import { Switch } from '@/components/ui/switch'
+import type { IconComponent } from '@/lib/icon-context'
 import { ColorPickerPopover } from '@/components/ui/color-picker'
 import { Tooltip } from '@/components/ui/tooltip'
 import { formatRatio, type ContrastIssue } from '@/badge/contrast'
@@ -154,5 +157,61 @@ export function Suggestions({
         </button>
       ))}
     </div>
+  )
+}
+
+export type SelectRowOption<T extends string> = { value: T; label: string; icon?: IconComponent }
+
+/** Settings row: muted label on the left, a borderless select on the right. */
+export function SelectRow<T extends string>({
+  label,
+  options,
+  value,
+  onChange,
+  placeholder = 'Custom',
+}: {
+  label: string
+  options: SelectRowOption<T>[]
+  value: T | null
+  onChange: (value: T) => void
+  placeholder?: string
+}) {
+  const id = useId()
+  const current = options.find((o) => o.value === value)
+  return (
+    <div className="flex min-h-9 items-center justify-between gap-2 pl-2">
+      <span id={id} className={cn('text-muted-foreground', typeClass('body'))}>
+        {label}
+      </span>
+      <Select size="compact" value={value ?? ''} onValueChange={(v) => onChange(v as T)}>
+        <SelectTrigger
+          variant="borderless"
+          aria-labelledby={id}
+          icon={current?.icon}
+          placeholder={placeholder}
+          className="w-auto min-w-0"
+        />
+        <SelectContent>
+          {options.map((o, i) => (
+            <SelectItem key={o.value} index={i} value={o.value} icon={o.icon}>
+              {o.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
+  )
+}
+
+/** Settings row with a switch on the right (Fluid Switch, label first). */
+export function SwitchRow({ label, checked, onToggle }: { label: string; checked: boolean; onToggle: () => void }) {
+  return (
+    <Switch
+      label={label}
+      checked={checked}
+      onToggle={onToggle}
+      size="compact"
+      className="min-h-9 w-full flex-row-reverse justify-between pr-2 pl-2"
+    />
   )
 }
