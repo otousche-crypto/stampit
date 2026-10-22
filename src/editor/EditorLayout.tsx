@@ -56,7 +56,7 @@ export function EditorLayout() {
         </header>
         <div className="flex h-[35dvh] min-h-44 shrink-0 flex-col border-b border-border" style={backdrop}>
           <PreviewControls className="justify-between px-3 py-1.5 [&>*]:rounded-lg [&>*]:bg-background/80" />
-          <PreviewStage showHint={false} framed={false} className="flex-1" />
+          <PreviewStage showHint={false} className="flex-1" />
         </div>
         <div aria-label="Settings" role="region" className="min-h-0 flex-1 overflow-y-auto">
           <SettingsPanel />

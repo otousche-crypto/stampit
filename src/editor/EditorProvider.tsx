@@ -6,7 +6,6 @@ import { createDefaultConfig, type BadgeConfig, type Palette, type PaletteKey } 
 import { validate, type EditorErrors } from './validation'
 
 export type PreviewBackground = 'light' | 'dark'
-export type PreviewDevice = 'desktop' | 'mobile'
 export type EditorNotice = 'invalid-link' | 'missing-photo'
 
 /** Preview backdrops: Décadi's panel grey, and a matching night. */
@@ -25,9 +24,6 @@ type EditorContextValue = {
   setPreviewBackground: (bg: PreviewBackground) => void
   zoom: 1 | 2
   setZoom: (zoom: 1 | 2) => void
-  /** Preview device: the bare stage, or a phone-sized viewport. */
-  device: PreviewDevice
-  setDevice: (device: PreviewDevice) => void
 
   /** Palette the colour controls edit (follows the preview background when adapting). */
   editingKey: PaletteKey
@@ -81,7 +77,6 @@ export function EditorProvider({
     initialConfig.theme.adaptToSite ? 'light' : initialConfig.theme.base,
   )
   // 2× by default; 1× on phones, where a 2× badge wouldn't fit.
-  const [device, setDevice] = useState<PreviewDevice>('desktop')
   const [zoom, setZoom] = useState<1 | 2>(() =>
     typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches ? 1 : 2,
   )
@@ -157,8 +152,6 @@ export function EditorProvider({
     setPreviewBackground,
     zoom,
     setZoom,
-    device,
-    setDevice,
     editingKey,
     editingPalette,
     uploadDataUrl,
