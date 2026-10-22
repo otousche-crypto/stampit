@@ -4,7 +4,8 @@ import { InputField, InputGroup } from '@/components/ui/input-group'
 import { Switch } from '@/components/ui/switch'
 import { normalizeUrl } from '@/badge/channels'
 import type { BadgeConfig } from '@/badge/schema'
-import { Choice } from '../controls'
+import { Choice, Hint } from '../controls'
+import { ChannelsEditor } from '../ChannelsEditor'
 import { useEditor } from '../EditorProvider'
 
 type Click = BadgeConfig['click']
@@ -51,14 +52,29 @@ export function ClickSection() {
             />
             </div>
           </InputGroup>
-          <Switch
-            label="Open in new tab"
-            checked={click.link.newTab}
-            onToggle={() => setLink({ newTab: !click.link.newTab })}
-            size="compact"
+        </>
+      )}
+      {click.mode === 'bubbles' && (
+        <>
+          <ChannelsEditor />
+          {errors.channels && click.bubbles.channels.length !== 1 && <Hint tone="error">{errors.channels}</Hint>}
+          <Choice
+            label="Labels"
+            value={click.bubbles.labels}
+            onChange={(labels) => update((c) => ({ ...c, click: { ...c.click, bubbles: { ...c.click.bubbles, labels } } }))}
+            options={[
+              { value: 'icon', label: 'Icon only' },
+              { value: 'icon-label', label: 'Icon + label' },
+            ]}
           />
         </>
       )}
+      <Switch
+        label="Open in new tab"
+        checked={click.link.newTab}
+        onToggle={() => setLink({ newTab: !click.link.newTab })}
+        size="compact"
+      />
     </div>
   )
 }

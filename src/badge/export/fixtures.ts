@@ -25,6 +25,45 @@ export const FIXTURES: Record<string, BadgeConfig> = {
     },
     applyPreset(base(), 'glass'),
   ),
+  'bubbles-2': with_({
+    text: { normal: 'Launched by', bold: 'Olivier Tousche' },
+    avatar: { source: 'url', url: '/olivier-avatar.png' },
+    click: {
+      mode: 'bubbles',
+      link: { newTab: true },
+      bubbles: {
+        labels: 'icon',
+        channels: [
+          { id: 'c1', type: 'linkedin', url: 'https://www.linkedin.com/in/olivier' },
+          { id: 'c2', type: 'website', url: 'https://olivier.dev' },
+        ],
+      },
+    },
+  }),
+  'bubbles-8': with_(
+    {
+      text: { bold: 'Eight Links', size: 's' },
+      shape: { radius: 0.3 },
+      click: {
+        mode: 'bubbles',
+        link: { newTab: false },
+        bubbles: {
+          labels: 'icon-label',
+          channels: [
+            { id: 'a1', type: 'x', url: 'https://x.com/eight' },
+            { id: 'a2', type: 'github', url: 'https://github.com/eight' },
+            { id: 'a3', type: 'linkedin', url: 'https://linkedin.com/in/eight' },
+            { id: 'a4', type: 'dribbble', url: 'https://dribbble.com/eight' },
+            { id: 'a5', type: 'youtube', url: 'https://youtube.com/@eight' },
+            { id: 'a6', type: 'bluesky', url: 'https://bsky.app/profile/eight' },
+            { id: 'a7', type: 'email', url: 'mailto:eight@example.com' },
+            { id: 'a8', type: 'custom', url: 'https://eight.example', label: 'Portfolio' },
+          ],
+        },
+      },
+    },
+    applyPreset(base(), 'dark'),
+  ),
   adaptive: with_(
     {
       text: { normal: 'Built by', bold: 'Grace Hopper' },

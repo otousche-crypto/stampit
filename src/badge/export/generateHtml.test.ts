@@ -31,6 +31,23 @@ describe('generateHtml', () => {
     expect(generateBadge(FIXTURES.adaptive).css).toContain('@media (prefers-color-scheme:dark)')
   })
 
+  it('emits the bubble menu only in Bubbles mode', () => {
+    const b = generateBadge(FIXTURES['bubbles-2'])
+    expect(b.js).not.toBeNull()
+    expect(b.html).toContain('popover="auto"')
+    expect(b.html).toContain('popovertarget="sp-test1234-menu"')
+    expect(b.html).toContain('aria-label="Launched by Olivier Tousche, show links"')
+    expect(b.html).toContain('aria-label="LinkedIn, opens in a new tab"')
+    expect(b.css).toContain(':popover-open')
+    expect(b.css).toContain('--sp-test1234-slow:linear(')
+    const eight = generateBadge(FIXTURES['bubbles-8'])
+    expect(eight.html.match(/<li>/g)).toHaveLength(8)
+    expect(eight.html).toContain('aria-label="Email Eight Links"')
+    expect(eight.html).not.toContain('target="_blank"')
+    // Only the icons of channels in use.
+    expect(generateBadge(FIXTURES['bubbles-2']).html.match(/<path /g)).toHaveLength(2)
+  })
+
   it('reproduces the Décadi badge in Light / M', () => {
     const { css } = generateBadge(FIXTURES['link-initials'])
     expect(css).toContain('height:36px')
