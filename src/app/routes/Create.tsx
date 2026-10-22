@@ -1,3 +1,13 @@
+import { useMemo } from 'react'
+import { createDefaultConfig } from '@/badge/schema'
+import { EditorProvider } from '@/editor/EditorProvider'
+import { EditorLayout } from '@/editor/EditorLayout'
+
 export function Create() {
-  return <main className="p-8">Editor</main>
+  const initial = useMemo(() => createDefaultConfig(), [])
+  return (
+    <EditorProvider initialConfig={initial}>
+      <EditorLayout />
+    </EditorProvider>
+  )
 }
