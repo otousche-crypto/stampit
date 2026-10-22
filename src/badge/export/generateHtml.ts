@@ -30,6 +30,12 @@ export type GenerateHtmlOptions = {
   uploadPath?: string
   /** The editor saw the avatar image fail: render initials instead. */
   avatarFailed?: boolean
+  /**
+   * Preview only: with "Adapt to site theme", show one palette regardless of
+   * the OS setting (the editor's preview background picks it). The copied
+   * snippet never sets this.
+   */
+  previewScheme?: 'light' | 'dark'
 }
 
 // ---------------------------------------------------------------------------
@@ -141,7 +147,7 @@ function transition(ctx: CssContext, property: string, name: CssSpringName, dela
   return `${property} ${CSS_SPRINGS[name].duration} ${springVar(ctx, name)}${delay ? ` ${delay}` : ''}`
 }
 
-function buildCss(config: BadgeConfig, avatar: ResolvedAvatar): string {
+function buildCss(config: BadgeConfig, avatar: ResolvedAvatar, previewScheme?: 'light' | 'dark'): string {
   const id = config.id
   const ctx: CssContext = { c: `sp-${id}`, v: `--sp-${id}-`, config, springs: new Set() }
   const { c, v } = ctx
@@ -238,7 +244,8 @@ function buildCss(config: BadgeConfig, avatar: ResolvedAvatar): string {
       const darkInitials = initialsColor(config, dark)
       if (lightInitials !== darkInitials) darkRules += `.${c}__av{color:${css(darkInitials)}}`
     }
-    rules.push(`@media (prefers-color-scheme:dark){${darkRules}}`)
+    if (previewScheme === 'dark') rules.push(darkRules)
+    else if (previewScheme !== 'light') rules.push(`@media (prefers-color-scheme:dark){${darkRules}}`)
   }
 
   rules.push(`@media (prefers-reduced-motion:reduce){.${c}__ic{transition:none}.${c} .${c}__ic{transform:none}}`)
@@ -280,7 +287,7 @@ export function generateBadge(config: BadgeConfig, options: GenerateHtmlOptions 
   const size = SIZES[config.text.size]
   const avatar = resolveAvatar(config, options)
   const label = badgeText(config)
-  const cssText = buildCss(config, avatar)
+  const cssText = buildCss(config, avatar, options.previewScheme)
   const inner = [
     avatarHtml(c, avatar, size.avatar),
     textHtml(c, config),
