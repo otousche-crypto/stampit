@@ -5,6 +5,8 @@ import { typeClass } from '@/lib/type-scale'
 import { fontWeights } from '@/lib/font-weight'
 import { cn } from '@/lib/utils'
 import { useMediaQuery } from '@/hooks/use-media-query'
+import { usePinnedTheme } from '@/hooks/use-pinned-theme'
+import { useEditor } from './EditorProvider'
 import { SettingsPanel } from './SettingsPanel'
 import { PreviewControls, PreviewStage, useBackdropStyle } from './PreviewPanel'
 import { ExportPanel } from './ExportPanel'
@@ -42,6 +44,8 @@ export function EditorLayout() {
   const desktop = useMediaQuery('(min-width: 1024px)')
   const tablet = useMediaQuery('(min-width: 768px)')
   const backdrop = useBackdropStyle()
+  // The whole editor follows the preview's Light / Dark switch.
+  usePinnedTheme(useEditor().previewBackground)
 
   if (!tablet) {
     return (
