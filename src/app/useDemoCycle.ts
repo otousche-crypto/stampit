@@ -22,13 +22,19 @@ const initialsOf = (name: string) =>
  * The home demo badge, alternating two effects:
  * 1. the verb is retyped ("Crafted by" → "Shipped by" → "Built by"…),
  * 2. then the name spins like a roulette and lands on a new random one
- *    (initials follow).
+ *    (initials replace the photo). It starts on `first`, never comes back.
  * The name slot is sized once to the widest name, so the badge never
  * changes width when the name does. Elements are looked up at every step:
  * the snippet can be re-injected (Light / Dark) at any time.
  * With reduced motion, words and names simply swap.
  */
-export function useDemoCycle(host: RefObject<HTMLElement | null>, verbs: string[], names: string[], suffix = ' by') {
+export function useDemoCycle(
+  host: RefObject<HTMLElement | null>,
+  verbs: string[],
+  first: string,
+  names: string[],
+  suffix = ' by',
+) {
   useEffect(() => {
     let cancelled = false
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -40,7 +46,7 @@ export function useDemoCycle(host: RefObject<HTMLElement | null>, verbs: string[
       const keep = bold.textContent
       bold.style.display = 'inline-block'
       let widest = 0
-      for (const n of names) {
+      for (const n of [first, ...names]) {
         bold.textContent = n
         widest = Math.max(widest, bold.getBoundingClientRect().width / zoomOf(bold))
       }
@@ -66,16 +72,21 @@ export function useDemoCycle(host: RefObject<HTMLElement | null>, verbs: string[
           })
         }
       }
-      if (avatar && !avatar.querySelector('img')) avatar.textContent = initialsOf(name)
+      if (avatar && name !== first) {
+        // The photo belongs to the first name only: others get initials,
+        // styled like the generator's initials avatar.
+        avatar.textContent = initialsOf(name)
+        Object.assign(avatar.style, { color: '#000', fontSize: '11px', fontWeight: '600', lineHeight: '1' })
+      }
     }
     const pick = (not: string) => {
-      const pool = names.filter((n) => n !== not)
+      const pool = names.filter((n) => n !== not && n !== first)
       return pool[Math.floor(Math.random() * pool.length)]
     }
 
     const run = async () => {
       let v = 0
-      let name = names[0]
+      let name = first
       // Size the slot as soon as the snippet is there.
       while (!cancelled && !find('[class$="__b"]')) await sleep(50)
       if (cancelled) return
@@ -119,7 +130,7 @@ export function useDemoCycle(host: RefObject<HTMLElement | null>, verbs: string[
     return () => {
       cancelled = true
     }
-  }, [host, verbs, names, suffix])
+  }, [host, verbs, first, names, suffix])
 }
 
 /** The preview scales the badge with CSS zoom: measure in the badge's own px. */

@@ -13,25 +13,25 @@ import { useDemoCycle } from '../useDemoCycle'
 import { useAppearance } from '../appearance'
 
 /** First words the demo badge cycles through. */
-const DEMO_WORDS = ['Crafted', 'Shipped', 'Built']
+const DEMO_WORDS = ['Designed', 'Crafted', 'Shipped', 'Built']
 
 /**
- * Names the demo badge spins through, John Doe first. Short and close in
- * width, so the fixed name slot never looks half empty.
+ * The demo starts on "Designed by Olivier Tousche", then spins through these
+ * (never back to Olivier). All about as wide as his name, so the fixed name
+ * slot never looks half empty.
  */
+const DEMO_FIRST = 'Olivier Tousche'
 const DEMO_NAMES = [
-  'John Doe',
-  'Ada Park',
-  'Mia Ross',
-  'Leo Hart',
-  'Zoe Lane',
-  'Max Bell',
-  'Eva Cruz',
-  'Tom Reed',
-  'Ana Diaz',
-  'Ben Ford',
-  'Ivy Chen',
-  'Noa Kato',
+  'Camille Bernard',
+  'Lucas Fontaine',
+  'Hannah Schmidt',
+  'Mateo Gonzalez',
+  'Clara Hoffmann',
+  'Sofia Marchetti',
+  'Jonas Lindqvist',
+  'Amélie Rousseau',
+  'Daniel Okafor',
+  'Yuki Nakamura',
 ]
 
 // The editor lives right under the landing; it carries most of the UI kit.
@@ -95,7 +95,7 @@ function PhoneBottom({ children }: { children: ReactNode }) {
 export function Home() {
   const editorRef = useRef<HTMLElement>(null)
   const demoRef = useRef<HTMLDivElement>(null)
-  useDemoCycle(demoRef, DEMO_WORDS, DEMO_NAMES)
+  useDemoCycle(demoRef, DEMO_WORDS, DEMO_FIRST, DEMO_NAMES)
   // The demo follows the site's Light / Dark.
   const demoHtml = useAppearance() === 'dark' ? DEMO_HTML_DARK : DEMO_HTML_LIGHT
   return (
