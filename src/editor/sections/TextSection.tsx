@@ -3,7 +3,7 @@ import type { BadgeConfig } from '@/badge/schema'
 import { Suggestions, WELL_FIELD } from '../controls'
 import { useEditor } from '../EditorProvider'
 
-const NORMAL_SUGGESTIONS = ['Made by', 'Launched by', 'Built by', 'Designed by', 'Crafted by']
+const NORMAL_SUGGESTIONS = ['Made by', 'Launched by', 'Built by', 'Designed by']
 
 type Text = BadgeConfig['text']
 
@@ -21,7 +21,7 @@ export function TextSection({ autoFocusBold }: { autoFocusBold?: boolean }) {
             index={0}
             label="Normal text"
             className={WELL_FIELD}
-            placeholder="Made by"
+            placeholder="Crafted by"
             value={text.normal}
             maxLength={24}
             onChange={(normal) => set({ normal })}
