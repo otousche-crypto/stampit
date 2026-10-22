@@ -162,7 +162,7 @@ export function createDefaultConfig(overrides?: { id?: string; updatedAt?: strin
     updatedAt: overrides?.updatedAt ?? new Date().toISOString(),
     preset: 'light',
     text: {
-      normal: 'Made by',
+      normal: 'Crafted by',
       bold: 'Your Name',
       order: 'normal-first',
       boldWeight: 500,
