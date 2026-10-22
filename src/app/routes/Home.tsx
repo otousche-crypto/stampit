@@ -9,6 +9,10 @@ import { fontWeights } from '@/lib/font-weight'
 import { typeClass } from '@/lib/type-scale'
 import { cn } from '@/lib/utils'
 import { DEMO_HTML } from '../demo.generated'
+import { useTypewriter } from '../useTypewriter'
+
+/** First words the demo badge cycles through. */
+const DEMO_WORDS = ['Crafted', 'Shipped', 'Built']
 
 // The editor lives right under the landing; it carries most of the UI kit.
 const Create = lazy(() => import('@/app/routes/Create').then((m) => ({ default: m.Create })))
@@ -70,6 +74,8 @@ function PhoneBottom({ children }: { children: ReactNode }) {
 
 export function Home() {
   const editorRef = useRef<HTMLElement>(null)
+  const demoRef = useRef<HTMLDivElement>(null)
+  useTypewriter(demoRef, DEMO_WORDS)
   return (
     <>
       <div className={cn('flex min-h-dvh flex-col', PAGE_BACKGROUND)}>
@@ -97,7 +103,9 @@ export function Home() {
 
           <PhoneBottom>
             {/* 1.25× fits the phone's width. */}
-            <BadgePreview code={DEMO_HTML} scale={1.25} />
+            <div ref={demoRef}>
+              <BadgePreview code={DEMO_HTML} scale={1.25} />
+            </div>
           </PhoneBottom>
 
           {/* Scrolls down to the editor, right below. */}
