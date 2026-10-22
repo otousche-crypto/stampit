@@ -103,12 +103,25 @@ describe('animations', () => {
   })
 
   it('animates the wrapper on appear and the pill on hover', () => {
-    const config = mergeDeep(FIXTURES['link-initials'], { motion: { entrance: 'grow', hover: 'shake' } })
+    const config = mergeDeep(FIXTURES['link-initials'], { motion: { entrance: 'bump', hover: 'shake' } })
     const { css } = generateBadge(config)
-    expect(css).toContain('@keyframes sp-test1234-in{from{opacity:0;transform:scale(.6)}}')
-    expect(css).toContain('.sp-test1234{animation:sp-test1234-in .24s var(--sp-test1234-slow) backwards}')
+    expect(css).toContain('@keyframes sp-test1234-in{0%,100%{transform:none}35%{transform:scale(1.08)}65%{transform:scale(.97)}}')
+    expect(css).toContain('.sp-test1234{animation:sp-test1234-in .48s var(--sp-test1234-attention) backwards}')
     expect(css).toContain('.sp-test1234__pill:hover{animation:sp-test1234-hv .48s var(--sp-test1234-attention)}')
     expect(css).toContain('animation:none;transform:none}')
+  })
+
+  it('sweeps a sheen across the pill for Shine', () => {
+    const { css } = generateBadge(mergeDeep(FIXTURES['link-initials'], { motion: { entrance: 'shine' } }))
+    expect(css).toContain('.sp-test1234__pill{position:relative;overflow:hidden}')
+    expect(css).toContain('.sp-test1234__pill::after{content:""')
+    expect(css).toContain('--sp-test1234-shine:cubic-bezier(')
+  })
+
+  it('reads retired appear values as none', async () => {
+    const { parseConfig } = await import('../schema')
+    const result = parseConfig({ ...FIXTURES['link-initials'], motion: { entrance: 'grow', hover: 'none' } })
+    expect(result.ok && result.config.motion.entrance).toBe('none')
   })
 
   it('uses a transition for grow and lift', () => {

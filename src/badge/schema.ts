@@ -32,7 +32,7 @@ export const CHANNEL_TYPES = [
 ] as const
 
 /** Badge animations (editor "Animation" section). */
-export const ENTRANCES = ['none', 'fade', 'grow', 'slide', 'pulse', 'shake'] as const
+export const ENTRANCES = ['none', 'shake', 'bump', 'shine'] as const
 export const HOVERS = ['none', 'grow', 'lift', 'pulse', 'shake'] as const
 
 /** Social links shown as round icons next to the badge (one field per network). */
@@ -90,7 +90,8 @@ export const badgeConfigSchema = z.object({
   }),
 
   motion: z.object({
-    entrance: z.enum(ENTRANCES),
+    // Retired values (fade, grow…) from older links fall back to none.
+    entrance: z.enum(ENTRANCES).catch('none'),
     hover: z.enum(HOVERS),
   }),
 

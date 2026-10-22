@@ -46,6 +46,12 @@ export const CSS_SPRINGS = {
     duration: '.48s',
     easing: 'cubic-bezier(.4,0,.2,1)',
   },
+  /** One light sweep across the badge ("Shine" on appear). */
+  shine: {
+    name: 'shine',
+    duration: '.9s',
+    easing: 'cubic-bezier(.4,0,.2,1)',
+  },
 } as const satisfies Record<string, CssSpring>
 
 export type CssSpringName = keyof typeof CSS_SPRINGS

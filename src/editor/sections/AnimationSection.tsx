@@ -1,4 +1,4 @@
-import { Activity, ArrowUp, Ban, Eye, Maximize2, Vibrate } from 'lucide-react'
+import { Activity, ArrowUp, Ban, Maximize2, Sparkles, Vibrate } from 'lucide-react'
 import type { BadgeConfig, Entrance, HoverEffect } from '@/badge/schema'
 import { SelectRow } from '../controls'
 import { useEditor } from '../EditorProvider'
@@ -7,11 +7,9 @@ type Motion = BadgeConfig['motion']
 
 const ENTRANCE_OPTIONS: { value: Entrance; label: string; icon: typeof Ban }[] = [
   { value: 'none', label: 'None', icon: Ban },
-  { value: 'fade', label: 'Fade', icon: Eye },
-  { value: 'grow', label: 'Grow', icon: Maximize2 },
-  { value: 'slide', label: 'Slide up', icon: ArrowUp },
-  { value: 'pulse', label: 'Pulse', icon: Activity },
   { value: 'shake', label: 'Shake', icon: Vibrate },
+  { value: 'bump', label: 'Bump', icon: Maximize2 },
+  { value: 'shine', label: 'Shine', icon: Sparkles },
 ]
 
 const HOVER_OPTIONS: { value: HoverEffect; label: string; icon: typeof Ban }[] = [
