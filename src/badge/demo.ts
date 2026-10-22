@@ -10,9 +10,9 @@ export const DEMO_CONFIG: BadgeConfig = {
   id: 'olivierT',
   updatedAt: '2026-10-22T12:00:00Z',
   preset: 'light',
-  text: { normal: 'Crafted by', bold: 'John Doe', order: 'normal-first', boldWeight: 500, size: 'm', font: 'sans' },
-  // Initials, so they follow the name roulette on the home page.
-  avatar: { source: 'initials', initials: null, url: null, background: '#FF6B35' },
+  text: { normal: 'Designed by', bold: 'Olivier Tousche', order: 'normal-first', boldWeight: 500, size: 'm', font: 'sans' },
+  // Olivier's photo first; the home page swaps in initials when the name spins.
+  avatar: { source: 'url', initials: null, url: '/olivier-avatar.png', background: '#FF6B35' },
   theme: {
     // Light and dark palettes: the home page shows the one matching the site.
     adaptToSite: true,
