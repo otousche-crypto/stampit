@@ -31,6 +31,10 @@ export const CHANNEL_TYPES = [
   'custom',
 ] as const
 
+/** Badge animations (editor "Animation" section). */
+export const ENTRANCES = ['none', 'fade', 'grow', 'slide', 'pulse', 'shake'] as const
+export const HOVERS = ['none', 'grow', 'lift', 'pulse', 'shake'] as const
+
 export const channelSchema = z.object({
   id: z.string().min(1).max(32),
   type: z.enum(CHANNEL_TYPES),
@@ -78,6 +82,11 @@ export const badgeConfigSchema = z.object({
     showIcon: z.boolean(),
   }),
 
+  motion: z.object({
+    entrance: z.enum(ENTRANCES),
+    hover: z.enum(HOVERS),
+  }),
+
   click: z.object({
     mode: z.enum(['link', 'bubbles']),
     link: z.object({ url: z.string().max(2048), newTab: z.boolean() }),
@@ -96,6 +105,8 @@ export type BadgeConfig = z.infer<typeof badgeConfigSchema>
 export type PaletteKey = 'light' | 'dark'
 export type PresetName = BadgeConfig['preset']
 export type BadgeSize = BadgeConfig['text']['size']
+export type Entrance = (typeof ENTRANCES)[number]
+export type HoverEffect = (typeof HOVERS)[number]
 
 export const CURRENT_SCHEMA_VERSION = 1
 
@@ -145,6 +156,7 @@ export function createDefaultConfig(overrides?: { id?: string; updatedAt?: strin
       palettes: { light: { ...LIGHT_PALETTE }, dark: { ...DARK_PALETTE } },
     },
     shape: { radius: 1, borderWidth: 1, shadow: 'soft', showIcon: true },
+    motion: { entrance: 'none', hover: 'none' },
     click: {
       mode: 'link',
       link: { url: '', newTab: true },

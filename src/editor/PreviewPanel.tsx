@@ -1,3 +1,6 @@
+import { useState } from 'react'
+import { RotateCcw } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 import { TabsSubtle, TabsSubtleItem } from '@/components/ui/tabs-subtle'
 import { BadgePreview } from '@/badge/render/BadgePreview'
 import { typeClass } from '@/lib/type-scale'
@@ -28,11 +31,24 @@ export function PreviewControls({ className }: { className?: string }) {
 
 /** The badge itself, centred on the preview backdrop (which the layout paints). */
 export function PreviewStage({ showHint = true, className }: { showHint?: boolean; className?: string }) {
-  const { preview, previewBackground, zoom } = useEditor()
+  const { preview, previewBackground, zoom, config } = useEditor()
   const dark = previewBackground === 'dark'
+  // Re-mounting the snippet replays its appear animation.
+  const [replays, setReplays] = useState(0)
   return (
     <section aria-label="Preview" className={cn('relative flex min-h-0 items-center justify-center', className)}>
-      <BadgePreview code={preview.code} interceptLinks scale={zoom} />
+      <BadgePreview key={replays} code={preview.code} interceptLinks scale={zoom} />
+      {config.motion.entrance !== 'none' && (
+        <Button
+          variant="secondary"
+          size="compact"
+          leadingIcon={RotateCcw}
+          className="absolute right-3 top-3"
+          onClick={() => setReplays((n) => n + 1)}
+        >
+          Replay
+        </Button>
+      )}
       {showHint && (
         <p
           className={cn(

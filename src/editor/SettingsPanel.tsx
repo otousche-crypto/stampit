@@ -7,6 +7,7 @@ import { AvatarSection } from './sections/AvatarSection'
 import { ColorsSection } from './sections/ColorsSection'
 import { ShapeSection } from './sections/ShapeSection'
 import { ClickSection } from './sections/ClickSection'
+import { AnimationSection } from './sections/AnimationSection'
 
 const NOTICES = {
   'invalid-link': "This link couldn't be read. We loaded a fresh badge.",
@@ -43,6 +44,9 @@ export function SettingsPanel() {
       </Group>
       <Group>
         <ShapeSection />
+      </Group>
+      <Group>
+        <AnimationSection />
       </Group>
       <Group>
         <ClickSection />
