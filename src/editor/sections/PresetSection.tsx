@@ -19,7 +19,7 @@ export function PresetSection() {
   const current = config.preset === 'custom' ? null : matchPreset(editingPalette, brandColor)
 
   return (
-    <section aria-label="Preset" className="px-2 pt-2 pb-1">
+    <div>
       <SelectRow
         label="Preset"
         options={OPTIONS}
@@ -41,6 +41,6 @@ export function PresetSection() {
         </div>
       )}
       {current === 'glass' && previewBackground === 'light' && <Hint>Glass works best on dark backgrounds.</Hint>}
-    </section>
+    </div>
   )
 }

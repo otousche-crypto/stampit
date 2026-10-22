@@ -3,6 +3,8 @@ import { ImageUp } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import type { BadgeConfig } from '@/badge/schema'
 import { AvatarCropDialog } from '../AvatarCropDialog'
+import { typeClass } from '@/lib/type-scale'
+import { cn } from '@/lib/utils'
 import { Hint } from '../controls'
 import { useEditor } from '../EditorProvider'
 
@@ -54,7 +56,9 @@ export function AvatarSection() {
           e.target.value = ''
         }}
       />
-      <div className="flex items-center gap-2 px-1">
+      <div className="flex min-h-9 items-center justify-between gap-2 pl-2">
+        <span className={cn('text-muted-foreground', typeClass('body'))}>Avatar</span>
+        <div className="flex items-center gap-2">
         {uploadDataUrl && (
           <img src={uploadDataUrl} alt="Your uploaded photo" width={36} height={36} className="size-9 rounded-full object-cover" />
         )}
@@ -67,6 +71,7 @@ export function AvatarSection() {
         >
           {uploadDataUrl ? 'Replace photo' : 'Upload photo'}
         </Button>
+        </div>
       </div>
       {fileError ? (
         <Hint id="avatar-file-error" tone="error">

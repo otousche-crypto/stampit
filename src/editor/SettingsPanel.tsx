@@ -1,5 +1,4 @@
-import { useState } from 'react'
-import { AccordionContent, AccordionGroup, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
+import { useState, type ReactNode } from 'react'
 import { Banner, BannerTitle } from '@/components/ui/banner'
 import { useEditor } from './EditorProvider'
 import { PresetSection } from './sections/PresetSection'
@@ -9,14 +8,6 @@ import { ColorsSection } from './sections/ColorsSection'
 import { ShapeSection } from './sections/ShapeSection'
 import { ClickSection } from './sections/ClickSection'
 
-const SECTIONS = [
-  { value: 'text', label: 'Text', Component: TextSection },
-  { value: 'avatar', label: 'Avatar', Component: AvatarSection },
-  { value: 'colors', label: 'Colors', Component: ColorsSection },
-  { value: 'shape', label: 'Shape', Component: ShapeSection },
-  { value: 'click', label: 'On click', Component: ClickSection },
-] as const
-
 const NOTICES = {
   'invalid-link': "This link couldn't be read. We loaded a fresh badge.",
   'missing-photo': "Your photo isn't stored in this link. Upload it again or use an image URL.",
@@ -24,14 +15,17 @@ const NOTICES = {
 
 const isDesktop = () => typeof window !== 'undefined' && window.matchMedia('(min-width: 1024px)').matches
 
+/** A group of settings, separated from the next by a hairline. No title: every option is in view. */
+function Group({ children }: { children: ReactNode }) {
+  return <div className="flex flex-col border-b border-border px-2 py-3 last:border-b-0">{children}</div>
+}
+
 export function SettingsPanel() {
-  // All sections open on desktop; only "Text" on smaller screens.
-  const [open, setOpen] = useState<string[]>(() => (isDesktop() ? SECTIONS.map((s) => s.value) : ['text']))
   const [autoFocus] = useState(isDesktop)
   const { notice, dismissNotice } = useEditor()
 
   return (
-    <div className="flex flex-col pb-24 lg:pb-6">
+    <div className="flex flex-col pb-24 lg:pb-3">
       {notice && (
         <div className="px-3 pt-3">
           <Banner status={notice === 'invalid-link' ? 'error' : 'warning'} size="compact" dismissible onDismiss={dismissNotice}>
@@ -39,26 +33,20 @@ export function SettingsPanel() {
           </Banner>
         </div>
       )}
-      <PresetSection />
-      <AccordionGroup
-        type="multiple"
-        size="compact"
-        value={open}
-        onValueChange={setOpen}
-        highlight="trigger"
-        className="w-auto px-1"
-      >
-        {SECTIONS.map(({ value, label, Component }, index) => (
-          <AccordionItem key={value} value={value} index={index}>
-            <AccordionTrigger>{label}</AccordionTrigger>
-            <AccordionContent>
-              <div className="px-2 pt-1 pb-4">
-                {value === 'text' ? <TextSection autoFocusBold={autoFocus} /> : <Component />}
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-        ))}
-      </AccordionGroup>
+      <Group>
+        <TextSection autoFocusBold={autoFocus} />
+      </Group>
+      <Group>
+        <PresetSection />
+        <ColorsSection />
+        <AvatarSection />
+      </Group>
+      <Group>
+        <ShapeSection />
+      </Group>
+      <Group>
+        <ClickSection />
+      </Group>
     </div>
   )
 }
