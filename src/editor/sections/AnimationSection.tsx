@@ -26,6 +26,7 @@ export function AnimationSection() {
   return (
     <div className="flex flex-col">
       <SelectRow label="On appear" value={config.motion.entrance} onChange={(entrance) => set({ entrance })} options={ENTRANCE_OPTIONS} />
+      <SelectRow label="On delay" value={config.motion.repeat} onChange={(repeat) => set({ repeat })} options={ENTRANCE_OPTIONS} />
       <SelectRow label="On hover" value={config.motion.hover} onChange={(hover) => set({ hover })} options={HOVER_OPTIONS} />
     </div>
   )

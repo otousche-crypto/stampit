@@ -282,7 +282,7 @@ function buildCss(config: BadgeConfig, avatar: ResolvedAvatar, previewScheme?: '
 
   // Reduced motion: nothing travels, rotates or scales; state changes are instant or fade.
   const reduced = [`.${c}__ic{transition:none}`]
-  if (config.motion.entrance !== 'none' || config.motion.hover !== 'none') {
+  if (config.motion.entrance !== 'none' || config.motion.repeat !== 'none' || config.motion.hover !== 'none') {
     reduced.push(`.${c},.${c} .${c}__pill,.${c} .${c}__pill:hover{animation:none;transform:none}.${c} .${c}__pill::after{animation:none;opacity:0}`)
   }
   if (!bubbles) {
@@ -310,25 +310,64 @@ const ENTRANCE_FRAMES: Record<'shake' | 'bump', { frames: string; tier: CssSprin
   bump: { frames: '0%,100%{transform:none}35%{transform:scale(1.08)}65%{transform:scale(.97)}', tier: 'attention' },
 }
 
+/** Keyframes for one "On delay" cycle: the effect at the start, then rest. */
+function repeatFrames(effect: Exclude<BadgeConfig['motion']['repeat'], 'none'>): string {
+  const period = parseFloat(CSS_SPRINGS.repeat.duration)
+  const pct = (seconds: number, at: number) => `${Math.round(((seconds / period) * at) * 1000) / 10}%`
+  const attention = parseFloat(CSS_SPRINGS.attention.duration)
+  switch (effect) {
+    case 'shake': {
+      const p = (at: number) => pct(attention, at)
+      return `0%,${p(1)},100%{transform:none}${p(0.2)},${p(0.6)}{transform:translateX(-3px)}${p(0.4)},${p(0.8)}{transform:translateX(3px)}`
+    }
+    case 'bump': {
+      const p = (at: number) => pct(attention, at)
+      return `0%,${p(1)},100%{transform:none}${p(0.35)}{transform:scale(1.08)}${p(0.65)}{transform:scale(.97)}`
+    }
+    case 'shine': {
+      const end = pct(parseFloat(CSS_SPRINGS.shine.duration), 1)
+      return `0%{transform:translateX(-110%)}${end},100%{transform:translateX(110%)}`
+    }
+  }
+}
+
 /**
  * Appear animation on the wrapper (so it never restarts when a hover
  * animation on the pill ends), hover effect on the pill.
  */
 function motionRules(ctx: CssContext): string[] {
   const { c, config } = ctx
-  const { entrance, hover } = config.motion
+  const { entrance, repeat, hover } = config.motion
   const rules: string[] = []
+  // Appear (once) and On delay (every few seconds) can stack on the same
+  // element: their animations are listed together.
+  const wrapper: string[] = []
+  const sheen: string[] = []
+
   if (entrance === 'shake' || entrance === 'bump') {
     const { frames, tier } = ENTRANCE_FRAMES[entrance]
     rules.push(`@keyframes ${c}-in{${frames}}`)
-    rules.push(`.${c}{animation:${c}-in ${CSS_SPRINGS[tier].duration} ${springVar(ctx, tier)} backwards}`)
+    wrapper.push(`${c}-in ${CSS_SPRINGS[tier].duration} ${springVar(ctx, tier)} backwards`)
   }
   if (entrance === 'shine') {
-    // A light band sweeps once across the pill, clipped to its shape.
     rules.push(`@keyframes ${c}-in{from{transform:translateX(-110%)}to{transform:translateX(110%)}}`)
+    sheen.push(`${c}-in ${CSS_SPRINGS.shine.duration} ${springVar(ctx, 'shine')} .2s backwards`)
+  }
+  if (repeat !== 'none') {
+    // One cycle = the effect, then rest; no fill, so the first wait leaves
+    // the appear animation alone.
+    const period = CSS_SPRINGS.repeat.duration
+    rules.push(`@keyframes ${c}-rp{${repeatFrames(repeat)}}`)
+    const anim = `${c}-rp ${period} ${springVar(ctx, 'repeat')} ${period} infinite`
+    if (repeat === 'shine') sheen.push(anim)
+    else wrapper.push(anim)
+  }
+  if (wrapper.length) rules.push(`.${c}{animation:${wrapper.join(',')}}`)
+  if (sheen.length) {
+    // A light band sweeps across the pill, clipped to its shape.
     rules.push(`.${c}__pill{position:relative;overflow:hidden}`)
     rules.push(
-      `.${c}__pill::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;background:linear-gradient(105deg,transparent 30%,rgba(255,255,255,.55) 50%,transparent 70%);transform:translateX(110%);animation:${c}-in ${CSS_SPRINGS.shine.duration} ${springVar(ctx, 'shine')} .2s backwards}`,
+      `.${c}__pill::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;background:linear-gradient(105deg,transparent 30%,rgba(255,255,255,.55) 50%,transparent 70%);transform:translateX(110%);animation:${sheen.join(',')}}`,
     )
   }
   switch (hover) {
