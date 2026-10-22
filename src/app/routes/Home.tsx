@@ -1,6 +1,5 @@
 import { lazy, Suspense, useRef, useSyncExternalStore, type ReactNode } from 'react'
 import { ArrowDown } from 'lucide-react'
-import { GITHUB_URL } from '@/config/site'
 import { Button } from '@/components/ui/button'
 import { BadgePreview } from '@/badge/render/BadgePreview'
 import { fontWeights } from '@/lib/font-weight'
@@ -147,11 +146,6 @@ export function Home() {
               }
             >
               Create yours
-            </Button>
-            <Button asChild variant="secondary">
-              <a href={GITHUB_URL} target="_blank" rel="noopener noreferrer">
-                View on GitHub
-              </a>
             </Button>
           </div>
         </main>
