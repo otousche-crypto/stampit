@@ -27,7 +27,8 @@ export function PreviewPanel({ compact = false }: { compact?: boolean }) {
       </div>
       <div
         className={cn(
-          'relative mx-3 mb-3 flex flex-1 min-h-0 items-center justify-center overflow-hidden rounded-xl',
+          'relative mx-3 flex flex-1 min-h-0 items-center justify-center overflow-hidden rounded-xl',
+          compact ? 'mb-2' : 'mb-3',
           dark ? 'ring-1 ring-white/10' : 'ring-1 ring-black/5',
         )}
         style={{ background: PREVIEW_BACKDROPS[previewBackground], colorScheme: dark ? 'dark' : 'light' }}
@@ -36,6 +37,7 @@ export function PreviewPanel({ compact = false }: { compact?: boolean }) {
         <p
           className={cn(
             'pointer-events-none absolute bottom-2 left-0 right-0 text-center',
+            compact && 'hidden',
             typeClass('caption'),
             dark ? 'text-white/50' : 'text-black/45',
           )}

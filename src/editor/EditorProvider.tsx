@@ -76,7 +76,10 @@ export function EditorProvider({
   const [previewBackground, setPreviewBackground] = useState<PreviewBackground>(
     initialConfig.theme.adaptToSite ? 'light' : initialConfig.theme.base,
   )
-  const [zoom, setZoom] = useState<1 | 2>(2)
+  // 2× by default; 1× on phones, where a 2× badge wouldn't fit.
+  const [zoom, setZoom] = useState<1 | 2>(() =>
+    typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches ? 1 : 2,
+  )
   const [uploadDataUrl, setUploadState] = useState<string | null>(initialUpload)
   const [avatarFailed, setAvatarFailed] = useState(false)
 
