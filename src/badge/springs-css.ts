@@ -37,6 +37,15 @@ export const CSS_SPRINGS = {
     duration: '.16s',
     easing: 'cubic-bezier(.4,0,1,1)',
   },
+  /**
+   * Multi-step attention effects (shake, pulse): keyframes rather than a
+   * spring, so one smooth curve and a length of two slow springs.
+   */
+  attention: {
+    name: 'attention',
+    duration: '.48s',
+    easing: 'cubic-bezier(.4,0,.2,1)',
+  },
 } as const satisfies Record<string, CssSpring>
 
 export type CssSpringName = keyof typeof CSS_SPRINGS

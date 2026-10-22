@@ -196,9 +196,14 @@ function buildCss(config: BadgeConfig, avatar: ResolvedAvatar, previewScheme?: '
     'outline:none',
   ]
   if (anyBlur) pill.push(`-webkit-backdrop-filter:blur(var(${v}blur))`, `backdrop-filter:blur(var(${v}blur))`)
-  if (soft) pill.push(`transition:${transition(ctx, 'box-shadow', 'fast')}`)
+  const hover = config.motion.hover
+  const pillTransitions: string[] = []
+  if (soft) pillTransitions.push(transition(ctx, 'box-shadow', 'fast'))
+  if (hover === 'grow' || hover === 'lift') pillTransitions.push(transition(ctx, 'transform', 'fast'))
+  if (pillTransitions.length) pill.push(`transition:${pillTransitions.join(',')}`)
   rules.push(`.${c}__pill{${pill.join(';')}}`)
   if (soft) rules.push(`.${c}__pill:hover{box-shadow:${shadow(SOFT_SHADOW_HOVER)}}`)
+  rules.push(...motionRules(ctx))
   rules.push(`.${c}__pill:focus-visible{outline:2px solid var(${v}tb);outline-offset:2px}`)
   if (bubbles) rules.push(`.${c}__pill{-webkit-appearance:none;appearance:none;text-align:left}`)
 
@@ -262,6 +267,9 @@ function buildCss(config: BadgeConfig, avatar: ResolvedAvatar, previewScheme?: '
 
   // Reduced motion: nothing travels, rotates or scales; state changes are instant or fade.
   const reduced = [`.${c}__ic{transition:none}`]
+  if (config.motion.entrance !== 'none' || config.motion.hover !== 'none') {
+    reduced.push(`.${c},.${c} .${c}__pill,.${c} .${c}__pill:hover{animation:none;transform:none}`)
+  }
   if (!bubbles) {
     reduced.push(`.${c} .${c}__pill:hover .${c}__ic,.${c} .${c}__pill:focus-visible .${c}__ic{transform:none}`)
   } else {
@@ -280,6 +288,46 @@ function buildCss(config: BadgeConfig, avatar: ResolvedAvatar, previewScheme?: '
     rules.unshift(`.${c}{${decl}}`)
   }
   return rules.join('')
+}
+
+const ENTRANCE_FRAMES: Record<Exclude<BadgeConfig['motion']['entrance'], 'none'>, { frames: string; tier: CssSpringName }> = {
+  fade: { frames: 'from{opacity:0}', tier: 'moderate' },
+  grow: { frames: 'from{opacity:0;transform:scale(.6)}', tier: 'slow' },
+  slide: { frames: 'from{opacity:0;transform:translateY(8px)}', tier: 'slow' },
+  pulse: { frames: '0%{opacity:0;transform:scale(.9)}50%{opacity:1;transform:scale(1.06)}100%{transform:none}', tier: 'attention' },
+  shake: { frames: '0%,100%{transform:none}20%,60%{transform:translateX(-3px)}40%,80%{transform:translateX(3px)}', tier: 'attention' },
+}
+
+/**
+ * Appear animation on the wrapper (so it never restarts when a hover
+ * animation on the pill ends), hover effect on the pill.
+ */
+function motionRules(ctx: CssContext): string[] {
+  const { c, config } = ctx
+  const { entrance, hover } = config.motion
+  const rules: string[] = []
+  if (entrance !== 'none') {
+    const { frames, tier } = ENTRANCE_FRAMES[entrance]
+    rules.push(`@keyframes ${c}-in{${frames}}`)
+    rules.push(`.${c}{animation:${c}-in ${CSS_SPRINGS[tier].duration} ${springVar(ctx, tier)} backwards}`)
+  }
+  switch (hover) {
+    case 'grow':
+      rules.push(`.${c}__pill:hover{transform:scale(1.04)}`)
+      break
+    case 'lift':
+      rules.push(`.${c}__pill:hover{transform:translateY(-2px)}`)
+      break
+    case 'pulse':
+      rules.push(`@keyframes ${c}-hv{50%{transform:scale(1.05)}}`)
+      rules.push(`.${c}__pill:hover{animation:${c}-hv ${CSS_SPRINGS.attention.duration} ${springVar(ctx, 'attention')} infinite}`)
+      break
+    case 'shake':
+      rules.push(`@keyframes ${c}-hv{20%,60%{transform:translateX(-2px)}40%,80%{transform:translateX(2px)}}`)
+      rules.push(`.${c}__pill:hover{animation:${c}-hv ${CSS_SPRINGS.attention.duration} ${springVar(ctx, 'attention')}}`)
+      break
+  }
+  return rules
 }
 
 /** §8 — the bubble menu. Only emitted in Bubbles mode. */

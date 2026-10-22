@@ -149,6 +149,26 @@ export function generatePrompt(config: BadgeConfig, options: GeneratePromptOptio
       '- Hide the menu when printing.',
     )
   }
+  const { entrance, hover } = config.motion
+  const ENTRANCE_TEXT = {
+    fade: 'fades in (moderate spring)',
+    grow: 'grows from 60% to full size while fading in (slow spring)',
+    slide: 'slides up 8px while fading in (slow spring)',
+    pulse: 'fades in with a single pulse: scale 0.9 → 1.06 → 1',
+    shake: 'gives a short horizontal shake (±3px)',
+  } as const
+  const HOVER_TEXT = {
+    grow: 'scales to 1.04 (fast spring)',
+    lift: 'rises 2px (fast spring)',
+    pulse: 'pulses to 1.05 and back, looping while hovered',
+    shake: 'gives a short horizontal shake (±2px), once per hover',
+  } as const
+  if (entrance !== 'none') {
+    out.push(`- On appear: the badge ${ENTRANCE_TEXT[entrance]}. Animate a wrapper, not the clickable element, so the hover effect never restarts it.`)
+  }
+  if (hover !== 'none') {
+    out.push(`- On hover: the badge ${HOVER_TEXT[hover]}${hover === 'pulse' || hover === 'shake' ? `, over ${seconds(CSS_SPRINGS.attention.duration)}` : ''}.`)
+  }
   out.push(
     '- prefers-reduced-motion: reduce → no movement, rotation or scaling; state changes are instant or fade only.',
   )

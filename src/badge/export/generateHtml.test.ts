@@ -95,3 +95,26 @@ describe('reduced motion', () => {
     expect(link).toContain('.sp-test1234 .sp-test1234__pill:hover .sp-test1234__ic,.sp-test1234 .sp-test1234__pill:focus-visible .sp-test1234__ic{transform:none}')
   })
 })
+
+describe('animations', () => {
+  it('emits nothing by default', () => {
+    const { css } = generateBadge(FIXTURES['link-initials'])
+    expect(css).not.toContain('@keyframes')
+  })
+
+  it('animates the wrapper on appear and the pill on hover', () => {
+    const config = mergeDeep(FIXTURES['link-initials'], { motion: { entrance: 'grow', hover: 'shake' } })
+    const { css } = generateBadge(config)
+    expect(css).toContain('@keyframes sp-test1234-in{from{opacity:0;transform:scale(.6)}}')
+    expect(css).toContain('.sp-test1234{animation:sp-test1234-in .24s var(--sp-test1234-slow) backwards}')
+    expect(css).toContain('.sp-test1234__pill:hover{animation:sp-test1234-hv .48s var(--sp-test1234-attention)}')
+    expect(css).toContain('animation:none;transform:none}')
+  })
+
+  it('uses a transition for grow and lift', () => {
+    const config = mergeDeep(FIXTURES['link-initials'], { motion: { hover: 'lift' } })
+    const { css } = generateBadge(config)
+    expect(css).toContain('transform .08s var(--sp-test1234-fast)')
+    expect(css).toContain('.sp-test1234__pill:hover{transform:translateY(-2px)}')
+  })
+})
