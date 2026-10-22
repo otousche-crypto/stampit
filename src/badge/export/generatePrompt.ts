@@ -170,7 +170,7 @@ export function generatePrompt(config: BadgeConfig, options: GeneratePromptOptio
       `  Each is a ${SIZES[config.text.size].height}px square with the badge's background, border, shadow and corner radius, the network logo in the icon color. They sit outside the layout (absolutely positioned right of the badge) and stay hidden until the badge is hovered or focused: then they slide in from 6px left and scale 0.8 → 1 with a fade (slow spring), ${BUBBLE_STAGGER_MS}ms apart, left to right, and leave together (slow exit). Always visible on touch screens (hover: none). Hovering one scales it to 1.06 (fast spring). Accessible name "{Network}${config.click.link.newTab ? ', opens in a new tab' : ''}".`,
     )
   }
-  const { entrance, hover } = config.motion
+  const { entrance, repeat, hover } = config.motion
   const ENTRANCE_TEXT = {
     shake: 'gives a short horizontal shake (±3px)',
     bump: 'gives a small bump: scale 1 → 1.08 → 0.97 → 1',
@@ -184,6 +184,11 @@ export function generatePrompt(config: BadgeConfig, options: GeneratePromptOptio
   } as const
   if (entrance !== 'none') {
     out.push(`- On appear: the badge ${ENTRANCE_TEXT[entrance]}. Animate a wrapper, not the clickable element, so the hover effect never restarts it.`)
+  }
+  if (repeat !== 'none') {
+    out.push(
+      `- On delay: every ${seconds(CSS_SPRINGS.repeat.duration)}, starting ${seconds(CSS_SPRINGS.repeat.duration)} after load, the badge ${ENTRANCE_TEXT[repeat].replace(' (a gradient band on a clipped ::after, 0.2s after load)', ' (a gradient band on a clipped ::after)')}. Loop it with CSS (one keyframe cycle per period), no timers.`,
+    )
   }
   if (hover !== 'none') {
     out.push(`- On hover: the badge ${HOVER_TEXT[hover]}${hover === 'pulse' || hover === 'shake' ? `, over ${seconds(CSS_SPRINGS.attention.duration)}` : ''}.`)

@@ -21,7 +21,7 @@ export const DEMO_CONFIG: BadgeConfig = {
     },
   },
   shape: { radius: 1, borderWidth: 1, shadow: 'soft', showIcon: true, iconStyle: 'arrow' },
-  motion: { entrance: 'none', hover: 'none' },
+  motion: { entrance: 'none', repeat: 'none', hover: 'none' },
   click: {
     mode: 'link',
     link: { url: 'https://www.linkedin.com/in/olivier-tousche-a6160b122/', newTab: true },

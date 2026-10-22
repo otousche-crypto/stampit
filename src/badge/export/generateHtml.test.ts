@@ -157,3 +157,19 @@ describe('social links', () => {
     expect(generateBadge(FIXTURES['link-initials']).css).not.toContain('__so')
   })
 })
+
+describe('on delay', () => {
+  it('replays the effect every 5 s without disturbing the appear animation', () => {
+    const { css } = generateBadge(mergeDeep(FIXTURES['link-initials'], { motion: { entrance: 'bump', repeat: 'shake' } }))
+    expect(css).toContain('@keyframes sp-test1234-rp{0%,9.6%,100%{transform:none}1.9%,5.8%{transform:translateX(-3px)}3.8%,7.7%{transform:translateX(3px)}}')
+    expect(css).toContain(
+      '.sp-test1234{animation:sp-test1234-in .48s var(--sp-test1234-attention) backwards,sp-test1234-rp 5s var(--sp-test1234-repeat) 5s infinite}',
+    )
+  })
+
+  it('stacks two sheens on the same pill', () => {
+    const { css } = generateBadge(mergeDeep(FIXTURES['link-initials'], { motion: { entrance: 'shine', repeat: 'shine' } }))
+    expect(css).toContain('@keyframes sp-test1234-rp{0%{transform:translateX(-110%)}18%,100%{transform:translateX(110%)}}')
+    expect(css.match(/__pill::after\{content/g)).toHaveLength(1)
+  })
+})

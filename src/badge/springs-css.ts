@@ -52,6 +52,12 @@ export const CSS_SPRINGS = {
     duration: '.9s',
     easing: 'cubic-bezier(.4,0,.2,1)',
   },
+  /** "On delay": one effect every 5 s. Keyframes carry the shape, so linear. */
+  repeat: {
+    name: 'repeat',
+    duration: '5s',
+    easing: 'linear',
+  },
 } as const satisfies Record<string, CssSpring>
 
 export type CssSpringName = keyof typeof CSS_SPRINGS

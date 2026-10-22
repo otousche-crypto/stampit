@@ -92,6 +92,8 @@ export const badgeConfigSchema = z.object({
   motion: z.object({
     // Retired values (fade, grow…) from older links fall back to none.
     entrance: z.enum(ENTRANCES).catch('none'),
+    /** Same effects, replayed every 5 s. */
+    repeat: z.enum(ENTRANCES).catch('none'),
     hover: z.enum(HOVERS),
   }),
 
@@ -174,7 +176,7 @@ export function createDefaultConfig(overrides?: { id?: string; updatedAt?: strin
       palettes: { light: { ...LIGHT_PALETTE }, dark: { ...DARK_PALETTE } },
     },
     shape: { radius: 1, borderWidth: 1, shadow: 'soft', showIcon: true, iconStyle: 'arrow' },
-    motion: { entrance: 'none', hover: 'none' },
+    motion: { entrance: 'none', repeat: 'none', hover: 'none' },
     click: {
       mode: 'link',
       link: { url: '', newTab: true },
