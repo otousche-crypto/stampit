@@ -1,6 +1,6 @@
 import { bestOn, contrastRatio } from '../contrast'
-import type { BadgeConfig, BadgeSize, Palette } from '../schema'
-import { CHANNELS, channelLabel } from '../channels'
+import { SOCIALS, type BadgeConfig, type BadgeSize, type Palette, type SocialNetwork } from '../schema'
+import { CHANNELS, channelLabel, isValidUrl } from '../channels'
 import { CSS_SPRINGS, TOOLTIP_DELAY, type CssSpringName } from '../springs-css'
 import { badgeRuntime } from './runtime'
 
@@ -188,7 +188,7 @@ function buildCss(config: BadgeConfig, avatar: ResolvedAvatar, previewScheme?: '
   const vars = [paletteVars(lightOrBase, v)]
   if (anyBlur) vars.push(`${v}blur:${lightOrBase.blur}px`)
   rules.push(
-    `.${c}{${vars.join(';')};display:inline-block;position:relative;vertical-align:middle;font-family:${FONT_STACKS[config.text.font]};font-size:${size.text}px;font-weight:400;font-style:normal;font-variant:normal;line-height:1.2;text-align:left;white-space:nowrap;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}`,
+    `.${c}{${vars.join(';')};display:inline-flex;align-items:center;gap:6px;position:relative;vertical-align:middle;font-family:${FONT_STACKS[config.text.font]};font-size:${size.text}px;font-weight:400;font-style:normal;font-variant:normal;line-height:1.2;text-align:left;white-space:nowrap;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}`,
   )
 
   const pill = [
@@ -264,6 +264,7 @@ function buildCss(config: BadgeConfig, avatar: ResolvedAvatar, previewScheme?: '
     rules.push(`.${c}__pill[aria-expanded=true] .${c}__ic{transform:rotate(45deg)}`)
   }
   if (bubbles) rules.push(...bubbleRules(ctx, { radius: config.shape.radius, ring, soft, anyBlur }))
+  if (activeSocials(config).length) rules.push(...socialRules(ctx, { radius, ring, soft, anyBlur }))
 
   if (adaptToSite) {
     const dark = palettes.dark
@@ -342,6 +343,62 @@ function motionRules(ctx: CssContext): string[] {
       break
   }
   return rules
+}
+
+/** Social links with a valid address, in display order. */
+export function activeSocials(config: BadgeConfig): { network: SocialNetwork; url: string }[] {
+  return SOCIALS.map((network) => ({ network, url: config.socials[network].trim() })).filter(({ url }) =>
+    isValidUrl(url),
+  )
+}
+
+/** Round icon links to the right of the badge: same surface, height and corner as the pill. */
+function socialRules(
+  ctx: CssContext,
+  { radius, ring, soft, anyBlur }: { radius: number; ring: string; soft: boolean; anyBlur: boolean },
+): string[] {
+  const { c, v, config } = ctx
+  const size = SIZES[config.text.size]
+  const shadow = (s: string) => [ring, soft ? s : ''].filter(Boolean).join(',') || 'none'
+  const so = [
+    'flex:none',
+    'display:grid',
+    'place-items:center',
+    `width:${size.height}px`,
+    `height:${size.height}px`,
+    `border-radius:${radius}px`,
+    `background:var(${v}bg)`,
+    `box-shadow:${shadow(SOFT_SHADOW)}`,
+    `color:var(${v}ic)`,
+    'outline:none',
+    '-webkit-tap-highlight-color:transparent',
+    `transition:${transition(ctx, 'transform', 'fast')}${soft ? `,${transition(ctx, 'box-shadow', 'fast')}` : ''}`,
+  ]
+  if (anyBlur) so.push(`-webkit-backdrop-filter:blur(var(${v}blur))`, `backdrop-filter:blur(var(${v}blur))`)
+  const icon = Math.round(size.height * 0.44)
+  const rules = [
+    `.${c}__so{${so.join(';')}}`,
+    `.${c}__so svg{display:block;width:${icon}px;height:${icon}px}`,
+    `.${c}__so:hover{transform:scale(1.06)${soft ? `;box-shadow:${shadow(SOFT_SHADOW_HOVER)}` : ''}}`,
+    `.${c}__so:focus-visible{outline:2px solid var(${v}tb);outline-offset:2px}`,
+    `@media (prefers-reduced-motion:reduce){.${c}__so,.${c}__so:hover{transform:none;transition:none}}`,
+  ]
+  // Keep 44 px touch targets on small badges.
+  if (size.height < 44) rules.push(`.${c}__so{position:relative}.${c}__so::before{content:"";position:absolute;inset:-${(44 - size.height) / 2}px}`)
+  return rules
+}
+
+function socialsHtml(c: string, config: BadgeConfig): string {
+  const newTab = config.click.link.newTab
+  return activeSocials(config)
+    .map(({ network, url }) => {
+      const name = CHANNELS[network].label
+      const attrs = [`class="${c}__so"`, `href="${escapeHtml(url)}"`]
+      if (newTab) attrs.push('target="_blank"', 'rel="noopener noreferrer"')
+      attrs.push(`aria-label="${escapeHtml(newTab ? `${name}, opens in a new tab` : name)}"`)
+      return `\n  <a ${attrs.join(' ')}>${channelIconSvg(network)}</a>`
+    })
+    .join('')
 }
 
 /** §8 — the bubble menu. Only emitted in Bubbles mode. */
@@ -503,7 +560,7 @@ export function generateBadge(config: BadgeConfig, options: GenerateHtmlOptions 
       `aria-controls="${menuId}"`,
       `aria-label="${escapeHtml(label ? `${label}, show links` : 'Show links')}"`,
     ]
-    html = `<div class="${c}">\n  <button ${attrs.join(' ')}>${body}</button>\n${bubblesHtml(c, config)}\n</div>`
+    html = `<div class="${c}">\n  <button ${attrs.join(' ')}>${body}</button>\n${bubblesHtml(c, config)}${socialsHtml(c, config)}\n</div>`
     js = badgeRuntime(c)
   } else {
     const { url, newTab } = config.click.link
@@ -512,7 +569,7 @@ export function generateBadge(config: BadgeConfig, options: GenerateHtmlOptions 
     const attrs = [`class="${c}__pill"`, `href="${escapeHtml(url || '#')}"`]
     if (blank) attrs.push('target="_blank"', 'rel="noopener noreferrer"')
     if (blank) attrs.push(`aria-label="${escapeHtml(`${label}, opens in a new tab`)}"`)
-    html = `<div class="${c}">\n  <a ${attrs.join(' ')}>${body}</a>\n</div>`
+    html = `<div class="${c}">\n  <a ${attrs.join(' ')}>${body}</a>${socialsHtml(c, config)}\n</div>`
   }
 
   const header = `<!-- Stampit badge${options.editUrl ? ` · edit: ${commentSafe(options.editUrl)}` : ''} -->`

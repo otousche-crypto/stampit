@@ -11,6 +11,11 @@ export const FIXTURES: Record<string, BadgeConfig> = {
     text: { bold: 'Ada Lovelace' },
     click: { link: { url: 'https://ada.dev', newTab: true } },
   }),
+  'link-socials': with_({
+    text: { bold: 'Ada Lovelace' },
+    click: { link: { url: 'https://ada.dev', newTab: true } },
+    socials: { github: 'https://github.com/ada', x: 'https://x.com/ada', dribbble: 'not a url' },
+  }),
   'link-photo': with_({
     text: { normal: 'Launched by', bold: 'Olivier Tousche', size: 'l', font: 'serif', boldWeight: 600 },
     avatar: { source: 'url', url: 'https://example.com/avatar.png' },

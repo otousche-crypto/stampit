@@ -27,4 +27,5 @@ export const DEMO_CONFIG: BadgeConfig = {
     link: { url: 'https://www.linkedin.com/in/olivier-tousche-a6160b122/', newTab: true },
     bubbles: { labels: 'icon', channels: [] },
   },
+  socials: { github: '', linkedin: '', x: '', instagram: '', dribbble: '' },
 }

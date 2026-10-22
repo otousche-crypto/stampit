@@ -35,6 +35,9 @@ export const CHANNEL_TYPES = [
 export const ENTRANCES = ['none', 'fade', 'grow', 'slide', 'pulse', 'shake'] as const
 export const HOVERS = ['none', 'grow', 'lift', 'pulse', 'shake'] as const
 
+/** Social links shown as round icons next to the badge (one field per network). */
+export const SOCIALS = ['github', 'linkedin', 'x', 'instagram', 'dribbble'] as const
+
 export const ICON_STYLES = ['arrow', 'triangle', 'link'] as const
 
 export const channelSchema = z.object({
@@ -99,6 +102,14 @@ export const badgeConfigSchema = z.object({
       channels: z.array(channelSchema).max(8),
     }),
   }),
+
+  socials: z.object({
+    github: z.string().max(2048),
+    linkedin: z.string().max(2048),
+    x: z.string().max(2048),
+    instagram: z.string().max(2048),
+    dribbble: z.string().max(2048),
+  }),
 })
 
 export type Hex = string
@@ -109,6 +120,7 @@ export type BadgeConfig = z.infer<typeof badgeConfigSchema>
 export type PaletteKey = 'light' | 'dark'
 export type PresetName = BadgeConfig['preset']
 export type BadgeSize = BadgeConfig['text']['size']
+export type SocialNetwork = (typeof SOCIALS)[number]
 export type IconStyle = (typeof ICON_STYLES)[number]
 export type Entrance = (typeof ENTRANCES)[number]
 export type HoverEffect = (typeof HOVERS)[number]
@@ -167,6 +179,7 @@ export function createDefaultConfig(overrides?: { id?: string; updatedAt?: strin
       link: { url: '', newTab: true },
       bubbles: { labels: 'icon', channels: [] },
     },
+    socials: { github: '', linkedin: '', x: '', instagram: '', dribbble: '' },
   }
 }
 

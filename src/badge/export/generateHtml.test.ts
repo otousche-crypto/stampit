@@ -130,3 +130,17 @@ describe('icon styles', () => {
     expect(none.html).not.toContain('<svg')
   })
 })
+
+describe('social links', () => {
+  it('adds one round link per valid address, after the pill', () => {
+    const { html, css } = generateBadge(FIXTURES['link-socials'])
+    expect(html.match(/class="sp-test1234__so"/g)).toHaveLength(2)
+    expect(html).toContain('aria-label="GitHub, opens in a new tab"')
+    expect(html.indexOf('__so')).toBeGreaterThan(html.indexOf('__pill'))
+    expect(css).toContain('.sp-test1234__so{')
+  })
+
+  it('emits no social CSS without socials', () => {
+    expect(generateBadge(FIXTURES['link-initials']).css).not.toContain('__so')
+  })
+})

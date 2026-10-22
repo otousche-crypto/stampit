@@ -5,6 +5,7 @@ import { normalizeUrl } from '@/badge/channels'
 import type { BadgeConfig } from '@/badge/schema'
 import { Hint, SelectRow, SwitchRow } from '../controls'
 import { ChannelsEditor } from '../ChannelsEditor'
+import { SocialLinks } from '../SocialLinks'
 import { useEditor } from '../EditorProvider'
 
 type Click = BadgeConfig['click']
@@ -68,6 +69,7 @@ export function ClickSection() {
           />
         </>
       )}
+      <SocialLinks />
       <SwitchRow label="Open in new tab" checked={click.link.newTab} onToggle={() => setLink({ newTab: !click.link.newTab })} />
     </div>
   )
