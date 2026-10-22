@@ -43,7 +43,7 @@ export function AvatarSection() {
   }
 
   return (
-    <div className="flex flex-col gap-1">
+    <div className="mb-3 flex flex-col gap-1">
       <input
         ref={fileRef}
         type="file"
@@ -74,11 +74,11 @@ export function AvatarSection() {
         </div>
       </div>
       {fileError ? (
-        <Hint id="avatar-file-error" tone="error">
+        <Hint id="avatar-file-error" tone="error" className="pt-0 text-right">
           {fileError}
         </Hint>
       ) : (
-        <Hint id="avatar-file-hint">PNG, JPG or WebP, up to 10 MB.</Hint>
+        <Hint id="avatar-file-hint" className="pt-0 text-right">PNG, JPG or WebP, up to 10 MB.</Hint>
       )}
       <AvatarCropDialog
         src={cropSrc}
