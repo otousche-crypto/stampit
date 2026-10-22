@@ -1,5 +1,5 @@
-import { Switch } from '@/components/ui/switch'
 import { enableAdaptToSite } from '@/badge/presets'
+import { SwitchRow } from '../controls'
 import { useEditor } from '../EditorProvider'
 
 export function ColorsSection() {
@@ -17,5 +17,5 @@ export function ColorsSection() {
     }
   }
 
-  return <Switch label="Adapt to site theme" checked={adapt} onToggle={toggleAdapt} size="compact" />
+  return <SwitchRow label="Adapt to site theme" checked={adapt} onToggle={toggleAdapt} />
 }

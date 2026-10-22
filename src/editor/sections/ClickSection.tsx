@@ -1,10 +1,9 @@
 import { useState } from 'react'
-import { Link2 } from 'lucide-react'
+import { Link2, Shapes } from 'lucide-react'
 import { InputField, InputGroup } from '@/components/ui/input-group'
-import { Switch } from '@/components/ui/switch'
 import { normalizeUrl } from '@/badge/channels'
 import type { BadgeConfig } from '@/badge/schema'
-import { Choice, Hint } from '../controls'
+import { Hint, SelectRow, SwitchRow } from '../controls'
 import { ChannelsEditor } from '../ChannelsEditor'
 import { useEditor } from '../EditorProvider'
 
@@ -18,14 +17,14 @@ export function ClickSection() {
     update((c) => ({ ...c, click: { ...c.click, link: { ...c.click.link, ...patch } } }))
 
   return (
-    <div className="flex flex-col gap-4">
-      <Choice
+    <div className="flex flex-col gap-2">
+      <SelectRow
         label="Mode"
         value={click.mode}
         onChange={(mode) => update((c) => ({ ...c, click: { ...c.click, mode } }))}
         options={[
-          { value: 'link', label: 'Link' },
-          { value: 'bubbles', label: 'Bubbles' },
+          { value: 'link', label: 'Link', icon: Link2 },
+          { value: 'bubbles', label: 'Bubbles', icon: Shapes },
         ]}
       />
       {click.mode === 'link' && (
@@ -58,7 +57,7 @@ export function ClickSection() {
         <>
           <ChannelsEditor />
           {errors.channels && click.bubbles.channels.length !== 1 && <Hint tone="error">{errors.channels}</Hint>}
-          <Choice
+          <SelectRow
             label="Labels"
             value={click.bubbles.labels}
             onChange={(labels) => update((c) => ({ ...c, click: { ...c.click, bubbles: { ...c.click.bubbles, labels } } }))}
@@ -69,12 +68,7 @@ export function ClickSection() {
           />
         </>
       )}
-      <Switch
-        label="Open in new tab"
-        checked={click.link.newTab}
-        onToggle={() => setLink({ newTab: !click.link.newTab })}
-        size="compact"
-      />
+      <SwitchRow label="Open in new tab" checked={click.link.newTab} onToggle={() => setLink({ newTab: !click.link.newTab })} />
     </div>
   )
 }

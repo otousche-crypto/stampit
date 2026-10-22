@@ -428,3 +428,13 @@
 .dark .stampit-code .shiki span {
   color: var(--shiki-dark);
 }
+  @property --sf-start {
+    syntax: "<number>";
+    inherits: false;
+    initial-value: 1;
+}
+  @property --sf-end {
+    syntax: "<number>";
+    inherits: false;
+    initial-value: 1;
+}

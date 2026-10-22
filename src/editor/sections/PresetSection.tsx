@@ -1,10 +1,16 @@
 import { ColorPickerPopover } from '@/components/ui/color-picker'
 import { applyPreset, matchPreset, PRESET_LABELS, type FixedPreset } from '@/badge/presets'
 import { DEFAULT_BRAND_COLOR } from '@/badge/schema'
-import { Choice, Hint, normalizeHex } from '../controls'
+import { Layers, Moon, Palette, Sun } from 'lucide-react'
+import { Hint, SelectRow, normalizeHex } from '../controls'
 import { useEditor } from '../EditorProvider'
 
-const OPTIONS = (Object.keys(PRESET_LABELS) as FixedPreset[]).map((value) => ({ value, label: PRESET_LABELS[value] }))
+const ICONS = { light: Sun, dark: Moon, glass: Layers, brand: Palette }
+const OPTIONS = (Object.keys(PRESET_LABELS) as FixedPreset[]).map((value) => ({
+  value,
+  label: PRESET_LABELS[value],
+  icon: ICONS[value],
+}))
 
 export function PresetSection() {
   const { config, update, editingKey, editingPalette, previewBackground } = useEditor()
@@ -13,15 +19,15 @@ export function PresetSection() {
   const current = config.preset === 'custom' ? null : matchPreset(editingPalette, brandColor)
 
   return (
-    <section aria-label="Preset" className="px-3 pt-3 pb-2">
-      <Choice
+    <section aria-label="Preset" className="px-2 pt-2 pb-1">
+      <SelectRow
         label="Preset"
         options={OPTIONS}
         value={current}
         onChange={(preset) => update((c) => applyPreset(c, preset, editingKey))}
       />
       {current === 'brand' && (
-        <div className="pt-2 [&>div]:flex [&>div]:w-full">
+        <div className="px-2 pt-1 [&>div]:flex [&>div]:w-full">
           <ColorPickerPopover
             size="compact"
             triggerLabel="Brand color"
