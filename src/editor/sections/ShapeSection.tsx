@@ -5,8 +5,8 @@ import { useEditor } from '../EditorProvider'
 
 type Shape = BadgeConfig['shape']
 
-/** "Square" keeps a small corner: a third of the capsule radius (6px at size M). */
-const SQUARE_RADIUS = 1 / 3
+/** "Rounded": a small corner, a third of the capsule radius (6px at size M). */
+const ROUNDED_RADIUS = 1 / 3
 
 export function ShapeSection() {
   const { config, update } = useEditor()
@@ -16,12 +16,12 @@ export function ShapeSection() {
   return (
     <div className="flex flex-col">
       <SelectRow
-        label="Corners"
-        value={shape.radius >= 0.5 ? 'round' : 'square'}
-        onChange={(v) => set({ radius: v === 'round' ? 1 : SQUARE_RADIUS })}
+        label="Radius"
+        value={shape.radius >= 0.5 ? 'pill' : 'rounded'}
+        onChange={(v) => set({ radius: v === 'pill' ? 1 : ROUNDED_RADIUS })}
         options={[
-          { value: 'square', label: 'Square', icon: Square },
-          { value: 'round', label: 'Round', icon: Circle },
+          { value: 'rounded', label: 'Rounded', icon: Square },
+          { value: 'pill', label: 'Pill', icon: Circle },
         ]}
       />
       <SelectRow

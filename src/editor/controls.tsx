@@ -183,7 +183,7 @@ export function SelectRow<T extends string>({
       <span id={id} className={cn('text-muted-foreground', typeClass('body'))}>
         {label}
       </span>
-      <Select size="compact" value={value ?? ''} onValueChange={(v) => onChange(v as T)}>
+      <Select size="default" value={value ?? ''} onValueChange={(v) => onChange(v as T)}>
         <SelectTrigger
           variant="borderless"
           aria-labelledby={id}
@@ -210,7 +210,7 @@ export function SwitchRow({ label, checked, onToggle }: { label: string; checked
       label={label}
       checked={checked}
       onToggle={onToggle}
-      size="compact"
+      size="default"
       className="min-h-9 w-full flex-row-reverse justify-between pr-2 pl-2"
     />
   )
