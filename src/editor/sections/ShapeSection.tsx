@@ -1,6 +1,4 @@
-import { Slider } from '@/components/ui/slider'
 import { Switch } from '@/components/ui/switch'
-import { SIZES } from '@/badge/export/generateHtml'
 import type { BadgeConfig } from '@/badge/schema'
 import { Choice } from '../controls'
 import { useEditor } from '../EditorProvider'
@@ -10,21 +8,18 @@ type Shape = BadgeConfig['shape']
 export function ShapeSection() {
   const { config, update } = useEditor()
   const shape = config.shape
-  const height = SIZES[config.text.size].height
   const set = (patch: Partial<Shape>) => update((c) => ({ ...c, shape: { ...c.shape, ...patch } }))
-  const toPx = (percent: number) => Math.round(((percent / 100) * height) / 2)
 
   return (
     <div className="flex flex-col gap-4">
-      <Slider
-        size="compact"
-        label="Radius"
-        min={0}
-        max={100}
-        step={1}
-        value={Math.round(shape.radius * 100)}
-        formatValue={(v) => `${v}% · ${toPx(v)}px`}
-        onChange={(v) => set({ radius: (v as number) / 100 })}
+      <Choice
+        label="Corners"
+        value={shape.radius >= 0.5 ? 'round' : 'square'}
+        onChange={(v) => set({ radius: v === 'round' ? 1 : 0 })}
+        options={[
+          { value: 'square', label: 'Square' },
+          { value: 'round', label: 'Round' },
+        ]}
       />
       <div className="grid grid-cols-2 gap-2">
         <Choice

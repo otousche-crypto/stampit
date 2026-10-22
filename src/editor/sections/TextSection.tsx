@@ -37,15 +37,6 @@ export function TextSection({ autoFocusBold }: { autoFocusBold?: boolean }) {
           onChange={(bold) => set({ bold })}
         />
       </InputGroup>
-      <Choice
-          label="Order"
-          value={text.order}
-          onChange={(order) => set({ order })}
-          options={[
-            { value: 'normal-first', label: 'Normal → Bold' },
-            { value: 'bold-first', label: 'Bold → Normal' },
-          ]}
-        />
       <div className="grid grid-cols-3 gap-1">
         <Choice
           label="Bold weight"
