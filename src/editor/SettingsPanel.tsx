@@ -21,8 +21,8 @@ function Group({ children }: { children: ReactNode }) {
   return <div className="flex flex-col border-b border-border px-2 py-3 last:border-b-0">{children}</div>
 }
 
-export function SettingsPanel() {
-  const [autoFocus] = useState(isDesktop)
+export function SettingsPanel({ autoFocus: allowAutoFocus = true }: { autoFocus?: boolean }) {
+  const [autoFocus] = useState(() => allowAutoFocus && isDesktop())
   const { notice, dismissNotice } = useEditor()
 
   return (

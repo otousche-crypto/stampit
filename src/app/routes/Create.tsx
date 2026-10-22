@@ -35,7 +35,8 @@ async function loadInitial(): Promise<Initial> {
 /** Autosave delay (§6.2). Not an animation timing. */
 const SAVE_DELAY_MS = 300
 
-export function Create() {
+/** `embedded`: the editor sits under the home page, so it must not grab focus (and scroll) on load. */
+export function Create({ embedded = false }: { embedded?: boolean }) {
   const [initial, setInitial] = useState<Initial | null>(null)
   const timer = useRef<number | undefined>(undefined)
 
@@ -57,7 +58,7 @@ export function Create() {
       try {
         const encoded = await encodeConfig(config)
         // replaceState: no history entry per keystroke.
-        window.history.replaceState(window.history.state, '', `/create#c=${encoded}`)
+        window.history.replaceState(window.history.state, '', `${window.location.pathname}#c=${encoded}`)
       } catch {
         /* the hash is a convenience; localStorage already has it */
       }
@@ -74,7 +75,7 @@ export function Create() {
       onChange={persist}
       onUploadChange={saveAvatar}
     >
-      <EditorLayout />
+      <EditorLayout autoFocus={!embedded} />
     </EditorProvider>
   )
 }

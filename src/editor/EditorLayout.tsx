@@ -40,7 +40,7 @@ function Card({ children, className, label }: { children: ReactNode; className?:
  * Mobile: preview pinned on top, settings below, export in a sheet.
  * One ExportPanel at a time (it owns ids and a live region).
  */
-export function EditorLayout() {
+export function EditorLayout({ autoFocus = true }: { autoFocus?: boolean }) {
   const desktop = useMediaQuery('(min-width: 1024px)')
   const tablet = useMediaQuery('(min-width: 768px)')
   const backdrop = useBackdropStyle()
@@ -59,7 +59,7 @@ export function EditorLayout() {
           <PreviewStage showHint={false} className="flex-1" />
         </div>
         <div aria-label="Settings" role="region" className="min-h-0 flex-1 overflow-y-auto">
-          <SettingsPanel />
+          <SettingsPanel autoFocus={autoFocus} />
         </div>
         <ExportSheet />
       </div>
@@ -73,7 +73,7 @@ export function EditorLayout() {
         <ResetButton />
       </div>
       <div className="min-h-0 flex-1 overflow-y-auto">
-        <SettingsPanel />
+        <SettingsPanel autoFocus={autoFocus} />
       </div>
     </Card>
   )
