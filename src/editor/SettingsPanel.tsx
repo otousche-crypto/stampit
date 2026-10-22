@@ -46,7 +46,7 @@ export function SettingsPanel() {
         value={open}
         onValueChange={setOpen}
         highlight="trigger"
-        className="px-1"
+        className="w-auto px-1"
       >
         {SECTIONS.map(({ value, label, Component }, index) => (
           <AccordionItem key={value} value={value} index={index}>
