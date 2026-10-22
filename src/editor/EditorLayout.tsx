@@ -6,8 +6,11 @@ import { SettingsPanel } from './SettingsPanel'
 import { PreviewPanel } from './PreviewPanel'
 import { ExportPanel } from './ExportPanel'
 import { ResetButton } from './ResetButton'
+import { useMediaQuery } from '@/hooks/use-media-query'
 
 export function EditorLayout() {
+  // One export panel at a time (it owns ids and a live region).
+  const wide = useMediaQuery('(min-width: 1024px)')
   return (
     <div className="flex h-dvh flex-col bg-background">
       <header className="flex h-12 shrink-0 items-center justify-between border-b border-border px-3">
@@ -28,13 +31,17 @@ export function EditorLayout() {
           <div className="min-h-0 flex-1">
             <PreviewPanel />
           </div>
-          <div className="border-t border-border lg:hidden">
-            <ExportPanel />
-          </div>
+          {!wide && (
+            <div className="border-t border-border">
+              <ExportPanel />
+            </div>
+          )}
         </main>
-        <aside aria-label="Export" className="hidden min-h-0 overflow-y-auto border-l border-border lg:block">
-          <ExportPanel />
-        </aside>
+        {wide && (
+          <aside aria-label="Export" className="min-h-0 overflow-y-auto border-l border-border">
+            <ExportPanel />
+          </aside>
+        )}
       </div>
     </div>
   )
