@@ -38,6 +38,8 @@ export type GenerateHtmlOptions = {
    * snippet never sets this.
    */
   previewScheme?: 'light' | 'dark'
+  /** Preview only: leave out the appear animation (it would replay on every edit). */
+  skipEntrance?: boolean
 }
 
 // ---------------------------------------------------------------------------
@@ -589,6 +591,9 @@ export type GeneratedBadge = { html: string; css: string; js: string | null; cod
 
 /** Pure: config → standalone HTML/CSS(/JS) snippet. What the preview shows is what gets copied. */
 export function generateBadge(config: BadgeConfig, options: GenerateHtmlOptions = {}): GeneratedBadge {
+  if (options.skipEntrance && config.motion.entrance !== 'none') {
+    config = { ...config, motion: { ...config.motion, entrance: 'none' } }
+  }
   const c = `sp-${config.id}`
   const size = SIZES[config.text.size]
   const avatar = resolveAvatar(config, options)
