@@ -8,11 +8,29 @@ import { GITHUB_URL } from '@/config/site'
 import { fontWeights } from '@/lib/font-weight'
 import { typeClass } from '@/lib/type-scale'
 import { cn } from '@/lib/utils'
-import { DEMO_HTML } from '../demo.generated'
+import { DEMO_HTML_DARK, DEMO_HTML_LIGHT } from '../demo.generated'
 import { useTypewriter } from '../useTypewriter'
+import { useNameRoulette } from '../useNameRoulette'
+import { useAppearance } from '../appearance'
 
 /** First words the demo badge cycles through. */
 const DEMO_WORDS = ['Crafted', 'Shipped', 'Built']
+
+/** Names the demo badge spins through (it starts on John Doe). */
+const DEMO_NAMES = [
+  'John Doe',
+  'Ada Park',
+  'Lena Moreau',
+  'Sam Rivera',
+  'Yuki Tanaka',
+  'Noah Becker',
+  'Maya Singh',
+  'Leo Martin',
+  'Chloé Dubois',
+  'Omar Haddad',
+  'Iris Nguyen',
+  'Theo Rossi',
+]
 
 // The editor lives right under the landing; it carries most of the UI kit.
 const Create = lazy(() => import('@/app/routes/Create').then((m) => ({ default: m.Create })))
@@ -76,6 +94,9 @@ export function Home() {
   const editorRef = useRef<HTMLElement>(null)
   const demoRef = useRef<HTMLDivElement>(null)
   useTypewriter(demoRef, DEMO_WORDS)
+  useNameRoulette(demoRef, DEMO_NAMES, 'John Doe')
+  // The demo follows the site's Light / Dark.
+  const demoHtml = useAppearance() === 'dark' ? DEMO_HTML_DARK : DEMO_HTML_LIGHT
   return (
     <>
       <div className={cn('flex min-h-dvh flex-col', PAGE_BACKGROUND)}>
@@ -104,7 +125,7 @@ export function Home() {
           <PhoneBottom>
             {/* 1.25× fits the phone's width. */}
             <div ref={demoRef}>
-              <BadgePreview code={DEMO_HTML} scale={1.25} />
+              <BadgePreview code={demoHtml} scale={1.25} />
             </div>
           </PhoneBottom>
 
