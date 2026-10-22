@@ -5,10 +5,8 @@ import { typeClass } from '@/lib/type-scale'
 import { fontWeights } from '@/lib/font-weight'
 import { cn } from '@/lib/utils'
 import { useMediaQuery } from '@/hooks/use-media-query'
-import { usePinnedTheme } from '@/hooks/use-pinned-theme'
-import { useEditor } from './EditorProvider'
 import { SettingsPanel } from './SettingsPanel'
-import { PreviewControls, PreviewStage, useBackdropStyle } from './PreviewPanel'
+import { PreviewStage, useBackdropStyle } from './PreviewPanel'
 import { ExportPanel } from './ExportPanel'
 import { ExportSheet } from './ExportSheet'
 import { ResetButton } from './ResetButton'
@@ -44,8 +42,6 @@ export function EditorLayout({ autoFocus = true }: { autoFocus?: boolean }) {
   const desktop = useMediaQuery('(min-width: 1024px)')
   const tablet = useMediaQuery('(min-width: 768px)')
   const backdrop = useBackdropStyle()
-  // The whole editor follows the preview's Light / Dark switch.
-  usePinnedTheme(useEditor().previewBackground)
 
   if (!tablet) {
     return (
@@ -55,7 +51,6 @@ export function EditorLayout({ autoFocus = true }: { autoFocus?: boolean }) {
           <ResetButton />
         </header>
         <div className="flex h-[35dvh] min-h-44 shrink-0 flex-col border-b border-border" style={backdrop}>
-          <PreviewControls className="justify-between px-3 py-1.5 [&>*]:rounded-lg [&>*]:bg-background/80" />
           <PreviewStage showHint={false} className="flex-1" />
         </div>
         <div aria-label="Settings" role="region" className="min-h-0 flex-1 overflow-y-auto">
@@ -80,11 +75,6 @@ export function EditorLayout({ autoFocus = true }: { autoFocus?: boolean }) {
 
   const center = (
     <div className="flex min-h-0 flex-1 flex-col">
-      <div className="flex justify-center">
-        <Elevated offset={2} className="rounded-xl p-1">
-          <PreviewControls />
-        </Elevated>
-      </div>
       <PreviewStage className="flex-1" />
     </div>
   )

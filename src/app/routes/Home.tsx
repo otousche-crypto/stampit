@@ -39,39 +39,27 @@ function Bone({ className }: { className?: string }) {
  */
 function PhoneBottom({ children }: { children: ReactNode }) {
   return (
-    <div
-      className="relative h-[min(520px,52dvh)] w-[min(422px,calc(100vw-24px))] overflow-hidden [mask-image:linear-gradient(to_bottom,transparent,#000_96px)]"
-    >
+    // Wider than the phone so its rim and shadow are never clipped; only the
+    // top fades out.
+    <div className="relative -mb-16 h-[min(580px,60dvh)] w-[min(582px,100vw)] overflow-hidden [mask-image:linear-gradient(to_bottom,transparent,#000_88px)]">
       <div
-        className="absolute bottom-0 left-1/2 -translate-x-1/2 rounded-[62px] bg-[#1a1a1c] shadow-2xl ring-1 ring-black/40"
+        className="absolute bottom-[104px] left-1/2 -translate-x-1/2 rounded-[62px] bg-[#1a1a1c] shadow-[0_0_0_2px_#c7c7cc,0_0_0_3px_rgba(0,0,0,0.1),0_40px_80px_-24px_rgba(0,0,0,0.45)] dark:shadow-[0_0_0_2px_#48484d,0_0_0_3px_rgba(255,255,255,0.06),0_40px_80px_-24px_rgba(0,0,0,0.8)]"
         style={{ width: IPHONE_17.width + 2 * IPHONE_17.bezel, padding: IPHONE_17.bezel }}
       >
         <div className="flex flex-col overflow-hidden rounded-[52px] bg-[#F2F2F7] dark:bg-[#1C1C1E]" style={{ height: IPHONE_17.height }}>
-          {/* Skeleton page above the footer */}
-          <div className="flex min-h-0 flex-1 flex-col justify-end gap-3 px-5 pb-6">
+          {/* Skeleton page: kept to a hint */}
+          <div className="flex min-h-0 flex-1 flex-col justify-end gap-3 px-6 pb-8">
             <Bone className="h-40 w-full rounded-2xl" />
-            <Bone className="h-3 w-11/12" />
-            <Bone className="h-3 w-4/5" />
-            <Bone className="h-3 w-3/5" />
-            <div className="grid grid-cols-2 gap-3 pt-2">
-              <Bone className="h-28 rounded-2xl" />
-              <Bone className="h-28 rounded-2xl" />
-            </div>
+            <Bone className="h-3 w-3/4" />
+            <Bone className="h-3 w-1/2" />
           </div>
           {/* Footer: the badge */}
-          <div className="flex shrink-0 flex-col items-center gap-3 border-t border-black/[0.06] px-5 pt-5 pb-4 dark:border-white/[0.08]">
+          <div className="flex shrink-0 justify-center border-t border-black/[0.06] px-5 py-6 dark:border-white/[0.08]">
             {children}
-            <Bone className="h-2.5 w-28" />
           </div>
           {/* Safari's bottom bar, in skeleton */}
-          <div aria-hidden="true" className="flex shrink-0 flex-col items-center gap-3 px-4 pb-2 pt-2">
-            <div className="flex w-full items-center gap-2">
-              <Bone className="size-11 rounded-full" />
-              <div className="flex h-11 flex-1 items-center justify-center rounded-full bg-black/[0.06] dark:bg-white/[0.08]">
-                <Bone className="h-3 w-24 bg-black/[0.08] dark:bg-white/[0.12]" />
-              </div>
-              <Bone className="size-11 rounded-full" />
-            </div>
+          <div aria-hidden="true" className="flex shrink-0 flex-col items-center gap-3 px-6 pb-2 pt-1">
+            <Bone className="h-11 w-full rounded-full" />
             <div className="h-[5px] w-[134px] rounded-full bg-black/80 dark:bg-white/70" />
           </div>
         </div>

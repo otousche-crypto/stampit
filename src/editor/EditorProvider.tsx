@@ -4,6 +4,7 @@ import { generateBadge, type GeneratedBadge } from '@/badge/export/generateHtml'
 import { activePaletteKey } from '@/badge/presets'
 import { createDefaultConfig, type BadgeConfig, type Palette, type PaletteKey } from '@/badge/schema'
 import { validate, type EditorErrors } from './validation'
+import { setAppearance, useAppearance } from '@/app/appearance'
 
 export type PreviewBackground = 'light' | 'dark'
 export type EditorNotice = 'invalid-link' | 'missing-photo'
@@ -22,8 +23,8 @@ type EditorContextValue = {
 
   previewBackground: PreviewBackground
   setPreviewBackground: (bg: PreviewBackground) => void
+  /** Preview scale: 2× on large screens, 1× on phones (no control). */
   zoom: 1 | 2
-  setZoom: (zoom: 1 | 2) => void
 
   /** Palette the colour controls edit (follows the preview background when adapting). */
   editingKey: PaletteKey
@@ -81,11 +82,11 @@ export function EditorProvider({
 }: EditorProviderProps) {
   const [config, setConfig] = useState(initialConfig)
   const [notice, setNotice] = useState<EditorNotice | null>(initialNotice)
-  const [previewBackground, setPreviewBackground] = useState<PreviewBackground>(
-    initialConfig.theme.adaptToSite ? 'light' : initialConfig.theme.base,
-  )
+  // The preview backdrop is the site's Light / Dark (one sticky switch).
+  const previewBackground: PreviewBackground = useAppearance()
+  const setPreviewBackground = setAppearance
   // 2× by default; 1× on phones, where a 2× badge wouldn't fit.
-  const [zoom, setZoom] = useState<1 | 2>(() =>
+  const [zoom] = useState<1 | 2>(() =>
     typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches ? 1 : 2,
   )
   const [uploadDataUrl, setUploadState] = useState<string | null>(initialUpload)
@@ -111,7 +112,6 @@ export function EditorProvider({
     setUploadState(null)
     setAvatarFailed(false)
     setNotice(null)
-    setPreviewBackground('light')
     setConfig(createDefaultConfig())
   }, [config.id, onUploadChange])
 
@@ -183,7 +183,6 @@ export function EditorProvider({
     previewBackground,
     setPreviewBackground,
     zoom,
-    setZoom,
     editingKey,
     editingPalette,
     uploadDataUrl,
