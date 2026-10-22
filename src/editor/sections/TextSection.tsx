@@ -1,6 +1,6 @@
 import { InputField, InputGroup } from '@/components/ui/input-group'
 import type { BadgeConfig } from '@/badge/schema'
-import { Suggestions } from '../controls'
+import { Suggestions, WELL_FIELD } from '../controls'
 import { useEditor } from '../EditorProvider'
 
 const NORMAL_SUGGESTIONS = ['Made by', 'Launched by', 'Built by', 'Designed by', 'Crafted by']
@@ -20,6 +20,7 @@ export function TextSection({ autoFocusBold }: { autoFocusBold?: boolean }) {
           <InputField
             index={0}
             label="Normal text"
+            className={WELL_FIELD}
             placeholder="Made by"
             value={text.normal}
             maxLength={24}
@@ -30,6 +31,7 @@ export function TextSection({ autoFocusBold }: { autoFocusBold?: boolean }) {
           <InputField
             index={0}
             label="Bold text"
+            className={WELL_FIELD}
             placeholder="Your Name"
             value={text.bold}
             maxLength={32}
