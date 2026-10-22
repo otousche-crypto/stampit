@@ -34,12 +34,12 @@ export function SettingsPanel() {
         </div>
       )}
       <Group>
+        <AvatarSection />
         <TextSection autoFocusBold={autoFocus} />
       </Group>
       <Group>
         <PresetSection />
         <ColorsSection />
-        <AvatarSection />
       </Group>
       <Group>
         <ShapeSection />
