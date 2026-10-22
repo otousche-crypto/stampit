@@ -33,7 +33,12 @@
     var li = [].slice.call(m.children), h = li.length ? li[0].offsetHeight * z : 0;
     var wd = function (e) { return e.offsetWidth * z; };
     var sum = function (row) { return row.reduce(function (t, e) { return t + wd(e); }, 0) + G * (row.length - 1); };
-    var k = Math.ceil(li.length / 2), rows = sum(li) > vw - 2 * E && li.length > 1 ? [li.slice(0, k), li.slice(k)] : [li];
+    /* One row if it fits, else 2 (more only if labels are very long), the longest nearest the badge. */
+    var rows = [li], nr = 1;
+    while (nr < li.length && rows.some(function (row) { return sum(row) > vw - 2 * E; })) {
+      nr++; rows = [];
+      for (var i = 0, k = Math.ceil(li.length / nr); i < li.length; i += k) rows.push(li.slice(i, i + k));
+    }
     var H = rows.length * h + (rows.length - 1) * G + A, up = p.top - O >= H + 16;
     m.setAttribute("data-side", up ? "top" : "bottom");
     var cx = p.left + p.width / 2, cy = p.top + p.height / 2;
