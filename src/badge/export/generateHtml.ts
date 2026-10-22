@@ -1,7 +1,7 @@
 import { bestOn, contrastRatio } from '../contrast'
 import { SOCIALS, type BadgeConfig, type BadgeSize, type Palette, type SocialNetwork } from '../schema'
 import { CHANNELS, channelLabel, isValidUrl } from '../channels'
-import { CSS_SPRINGS, TOOLTIP_DELAY, type CssSpringName } from '../springs-css'
+import { BUBBLE_STAGGER_MS, CSS_SPRINGS, TOOLTIP_DELAY, type CssSpringName } from '../springs-css'
 import { badgeRuntime } from './runtime'
 
 /** §7.1 — badge metrics per size, in px. */
@@ -372,16 +372,29 @@ function socialRules(
     `color:var(${v}ic)`,
     'outline:none',
     '-webkit-tap-highlight-color:transparent',
-    `transition:${transition(ctx, 'transform', 'fast')}${soft ? `,${transition(ctx, 'box-shadow', 'fast')}` : ''}`,
+    // Hidden until the badge is hovered or focused.
+    'opacity:0',
+    'transform:translateX(-6px) scale(.8)',
+    'pointer-events:none',
+    `transition:${transition(ctx, 'transform', 'slowExit')},${transition(ctx, 'opacity', 'slowExit')}`,
   ]
   if (anyBlur) so.push(`-webkit-backdrop-filter:blur(var(${v}blur))`, `backdrop-filter:blur(var(${v}blur))`)
   const icon = Math.round(size.height * 0.44)
+  const shown = `.${c}:hover .${c}__so,.${c}:focus-within .${c}__so`
+  const reveal = [transition(ctx, 'transform', 'slow', 'var(--d)'), transition(ctx, 'opacity', 'slow', 'var(--d)')]
+  if (soft) reveal.push(transition(ctx, 'box-shadow', 'fast'))
   const rules = [
+    // Out of the flow, right of the pill: the badge keeps its size and place.
+    `.${c}__sos{position:absolute;left:100%;top:0;bottom:0;display:flex;align-items:center;gap:6px;padding-left:6px;pointer-events:none}`,
+    `.${c}:hover .${c}__sos,.${c}:focus-within .${c}__sos{pointer-events:auto}`,
     `.${c}__so{${so.join(';')}}`,
     `.${c}__so svg{display:block;width:${icon}px;height:${icon}px}`,
-    `.${c}__so:hover{transform:scale(1.06)${soft ? `;box-shadow:${shadow(SOFT_SHADOW_HOVER)}` : ''}}`,
+    `${shown}{opacity:1;transform:none;pointer-events:auto;transition:${reveal.join(',')}}`,
+    `.${c}:hover .${c}__so:hover{transform:scale(1.06);transition-delay:0s${soft ? `;box-shadow:${shadow(SOFT_SHADOW_HOVER)}` : ''}}`,
     `.${c}__so:focus-visible{outline:2px solid var(${v}tb);outline-offset:2px}`,
-    `@media (prefers-reduced-motion:reduce){.${c}__so,.${c}__so:hover{transform:none;transition:none}}`,
+    // Touch screens have no hover: always shown.
+    `@media (hover:none){.${c}__so{opacity:1;transform:none;pointer-events:auto}.${c}__sos{pointer-events:auto}}`,
+    `@media (prefers-reduced-motion:reduce){.${c} .${c}__so,.${c}:hover .${c}__so,.${c}:hover .${c}__so:hover{transform:none;transition-property:opacity;transition-delay:0s}}`,
   ]
   // Keep 44 px touch targets on small badges.
   if (size.height < 44) rules.push(`.${c}__so{position:relative}.${c}__so::before{content:"";position:absolute;inset:-${(44 - size.height) / 2}px}`)
@@ -390,15 +403,15 @@ function socialRules(
 
 function socialsHtml(c: string, config: BadgeConfig): string {
   const newTab = config.click.link.newTab
-  return activeSocials(config)
-    .map(({ network, url }) => {
-      const name = CHANNELS[network].label
-      const attrs = [`class="${c}__so"`, `href="${escapeHtml(url)}"`]
-      if (newTab) attrs.push('target="_blank"', 'rel="noopener noreferrer"')
-      attrs.push(`aria-label="${escapeHtml(newTab ? `${name}, opens in a new tab` : name)}"`)
-      return `\n  <a ${attrs.join(' ')}>${channelIconSvg(network)}</a>`
-    })
-    .join('')
+  const links = activeSocials(config).map(({ network, url }, i) => {
+    const name = CHANNELS[network].label
+    const attrs = [`class="${c}__so"`, `href="${escapeHtml(url)}"`]
+    if (newTab) attrs.push('target="_blank"', 'rel="noopener noreferrer"')
+    attrs.push(`aria-label="${escapeHtml(newTab ? `${name}, opens in a new tab` : name)}"`)
+    // --d staggers the reveal, left to right.
+    return `\n    <a ${attrs.join(' ')} style="--d:${i * BUBBLE_STAGGER_MS}ms">${channelIconSvg(network)}</a>`
+  })
+  return links.length ? `\n  <span class="${c}__sos">${links.join('')}\n  </span>` : ''
 }
 
 /** §8 — the bubble menu. Only emitted in Bubbles mode. */

@@ -167,7 +167,7 @@ export function generatePrompt(config: BadgeConfig, options: GeneratePromptOptio
     out.push(
       `- Social links: ${socials.length} round icon link${socials.length > 1 ? 's' : ''} right of the badge, 6px apart, in this order:`,
       ...socials.map(({ network, url }, i) => `  ${i + 1}. ${CHANNELS[network].label}: ${url}`),
-      `  Each is a ${SIZES[config.text.size].height}px square with the badge's background, border, shadow and corner radius, the network logo in the icon color; hover scales to 1.06 (fast spring). Accessible name "{Network}${config.click.link.newTab ? ', opens in a new tab' : ''}".`,
+      `  Each is a ${SIZES[config.text.size].height}px square with the badge's background, border, shadow and corner radius, the network logo in the icon color. They sit outside the layout (absolutely positioned right of the badge) and stay hidden until the badge is hovered or focused: then they slide in from 6px left and scale 0.8 → 1 with a fade (slow spring), ${BUBBLE_STAGGER_MS}ms apart, left to right, and leave together (slow exit). Always visible on touch screens (hover: none). Hovering one scales it to 1.06 (fast spring). Accessible name "{Network}${config.click.link.newTab ? ', opens in a new tab' : ''}".`,
     )
   }
   const { entrance, hover } = config.motion
