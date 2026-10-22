@@ -40,11 +40,19 @@ type EditorContextValue = {
   /** Start over with a fresh default badge. */
   reset: () => void
 
+  /** Replays the appear animation in the preview (it doesn't replay on edits). */
+  replayEntrance: () => void
+  /** Changes on each replay, to re-mount the preview. */
+  entranceKey: number
+
   errors: EditorErrors
   contrastIssues: ContrastIssue[]
   /** What the preview renders (scheme forced to the preview background). */
   preview: GeneratedBadge
 }
+
+/** Long enough for the slowest appear animation (Shine: 0.2 s delay + 0.9 s). Not an animation timing. */
+const ENTRANCE_WINDOW_MS = 1500
 
 const EditorContext = createContext<EditorContextValue | null>(null)
 
@@ -134,14 +142,38 @@ export function EditorProvider({
     [editingPalette, previewBackground, config.text.normal, config.text.bold, config.shape.showIcon, config.shape.borderWidth],
   )
 
+  // The appear animation plays on load, on Replay and when it is changed;
+  // edits re-render the preview without it, so the badge doesn't shake on
+  // every keystroke.
+  const [entranceLive, setEntranceLive] = useState(true)
+  const [entranceKey, setEntranceKey] = useState(0)
+  const replayEntrance = useCallback(() => {
+    setEntranceLive(true)
+    setEntranceKey((k) => k + 1)
+  }, [])
+  useEffect(() => {
+    if (!entranceLive) return
+    const t = window.setTimeout(() => setEntranceLive(false), ENTRANCE_WINDOW_MS)
+    return () => window.clearTimeout(t)
+  }, [entranceLive, entranceKey])
+  const firstEntrance = useRef(true)
+  useEffect(() => {
+    if (firstEntrance.current) {
+      firstEntrance.current = false
+      return
+    }
+    replayEntrance()
+  }, [config.motion.entrance, replayEntrance])
+
   const preview = useMemo(
     () =>
       generateBadge(config, {
         uploadDataUrl,
         avatarFailed,
         previewScheme: config.theme.adaptToSite ? previewBackground : undefined,
+        skipEntrance: !entranceLive,
       }),
-    [config, uploadDataUrl, avatarFailed, previewBackground],
+    [config, uploadDataUrl, avatarFailed, previewBackground, entranceLive],
   )
 
   const value: EditorContextValue = {
@@ -161,6 +193,8 @@ export function EditorProvider({
     notice,
     dismissNotice: () => setNotice(null),
     reset,
+    replayEntrance,
+    entranceKey,
     errors,
     contrastIssues,
     preview,
