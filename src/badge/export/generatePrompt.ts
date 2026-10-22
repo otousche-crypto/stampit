@@ -1,4 +1,4 @@
-import { channelLabel } from '../channels'
+import { CHANNELS, channelLabel } from '../channels'
 import type { BadgeConfig, Palette } from '../schema'
 import { BUBBLE_STAGGER_MS, CSS_SPRINGS, TOOLTIP_DELAY } from '../springs-css'
 import {
@@ -6,6 +6,7 @@ import {
   SIZES,
   SOFT_SHADOW,
   SOFT_SHADOW_HOVER,
+  activeSocials,
   badgeText,
   deriveInitials,
   generateHtml,
@@ -159,6 +160,14 @@ export function generatePrompt(config: BadgeConfig, options: GeneratePromptOptio
       `- Opening: each bubble travels from the badge center to its place, scale 0.6 → 1, opacity 0 → 1 (slow spring), staggered ${BUBBLE_STAGGER_MS}ms from the center outwards. Closing: all together, back into the badge with a fade (slow exit). Bubble hover: scale 1.08 (fast).`,
       '- Use the native popover API (<ul popover="auto"> + popovertarget on the button) so the menu renders in the top layer: never clipped by overflow: hidden or a transform. Fall back to a class toggle + outside click + Escape where popover is unsupported. Without JS the popover opens centered and stays usable.',
       '- Hide the menu when printing.',
+    )
+  }
+  const socials = activeSocials(config)
+  if (socials.length) {
+    out.push(
+      `- Social links: ${socials.length} round icon link${socials.length > 1 ? 's' : ''} right of the badge, 6px apart, in this order:`,
+      ...socials.map(({ network, url }, i) => `  ${i + 1}. ${CHANNELS[network].label}: ${url}`),
+      `  Each is a ${SIZES[config.text.size].height}px square with the badge's background, border, shadow and corner radius, the network logo in the icon color; hover scales to 1.06 (fast spring). Accessible name "{Network}${config.click.link.newTab ? ', opens in a new tab' : ''}".`,
     )
   }
   const { entrance, hover } = config.motion

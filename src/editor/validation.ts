@@ -1,16 +1,17 @@
 import { isValidUrl, MIN_CHANNELS } from '@/badge/channels'
-import type { BadgeConfig } from '@/badge/schema'
+import { SOCIALS, type BadgeConfig, type SocialNetwork } from '@/badge/schema'
 
 export type EditorErrors = {
   text?: string
   linkUrl?: string
   channels?: string
   channel: Record<string, string>
+  social: Partial<Record<SocialNetwork, string>>
 }
 
 /** Blocking problems: while any exists, export is disabled (§6.3, §6.5). */
 export function validate(config: BadgeConfig): EditorErrors {
-  const errors: EditorErrors = { channel: {} }
+  const errors: EditorErrors = { channel: {}, social: {} }
   if (!config.text.normal.trim() && !config.text.bold.trim()) {
     errors.text = 'Add at least one line of text.'
   }
@@ -29,11 +30,17 @@ export function validate(config: BadgeConfig): EditorErrors {
       }
     }
   }
+  for (const network of SOCIALS) {
+    const url = config.socials[network].trim()
+    if (url && !isValidUrl(url)) errors.social[network] = "This address doesn't look right."
+  }
   return errors
 }
 
 export function hasBlockingErrors(errors: EditorErrors): boolean {
-  return Boolean(errors.text || errors.linkUrl || errors.channels || Object.keys(errors.channel).length)
+  return Boolean(
+    errors.text || errors.linkUrl || errors.channels || Object.keys(errors.channel).length || Object.keys(errors.social).length,
+  )
 }
 
 /** One short sentence for the export column. */
@@ -42,5 +49,6 @@ export function blockingSummary(errors: EditorErrors): string | null {
   if (errors.linkUrl) return 'Add a valid link in “On click” first.'
   if (errors.channels) return 'Add at least two channels in “On click” first.'
   if (Object.keys(errors.channel).length) return 'Fix the channel links in “On click” first.'
+  if (Object.keys(errors.social).length) return 'Fix the social links first.'
   return null
 }
