@@ -2,10 +2,11 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import { checkPalette, type ContrastIssue } from '@/badge/contrast'
 import { generateBadge, type GeneratedBadge } from '@/badge/export/generateHtml'
 import { activePaletteKey } from '@/badge/presets'
-import type { BadgeConfig, Palette, PaletteKey } from '@/badge/schema'
+import { createDefaultConfig, type BadgeConfig, type Palette, type PaletteKey } from '@/badge/schema'
 import { validate, type EditorErrors } from './validation'
 
 export type PreviewBackground = 'light' | 'dark'
+export type EditorNotice = 'invalid-link' | 'missing-photo'
 
 /** Preview backdrops: Décadi's panel grey, and a matching night. */
 export const PREVIEW_BACKDROPS: Record<PreviewBackground, string> = {
@@ -33,6 +34,12 @@ type EditorContextValue = {
   avatarFailed: boolean
   setAvatarFailed: (failed: boolean) => void
 
+  /** Non-blocking notice from loading (bad link, photo not in the link). */
+  notice: EditorNotice | null
+  dismissNotice: () => void
+  /** Start over with a fresh default badge. */
+  reset: () => void
+
   errors: EditorErrors
   contrastIssues: ContrastIssue[]
   /** What the preview renders (scheme forced to the preview background). */
@@ -50,17 +57,27 @@ export function useEditor(): EditorContextValue {
 type EditorProviderProps = {
   initialConfig: BadgeConfig
   initialUpload?: string | null
+  initialNotice?: EditorNotice | null
   onChange?: (config: BadgeConfig) => void
+  onUploadChange?: (id: string, dataUrl: string | null) => void
   children: ReactNode
 }
 
-export function EditorProvider({ initialConfig, initialUpload = null, onChange, children }: EditorProviderProps) {
+export function EditorProvider({
+  initialConfig,
+  initialUpload = null,
+  initialNotice = null,
+  onChange,
+  onUploadChange,
+  children,
+}: EditorProviderProps) {
   const [config, setConfig] = useState(initialConfig)
+  const [notice, setNotice] = useState<EditorNotice | null>(initialNotice)
   const [previewBackground, setPreviewBackground] = useState<PreviewBackground>(
     initialConfig.theme.adaptToSite ? 'light' : initialConfig.theme.base,
   )
   const [zoom, setZoom] = useState<1 | 2>(2)
-  const [uploadDataUrl, setUploadDataUrl] = useState<string | null>(initialUpload)
+  const [uploadDataUrl, setUploadState] = useState<string | null>(initialUpload)
   const [avatarFailed, setAvatarFailed] = useState(false)
 
   const update = useCallback((updater: (config: BadgeConfig) => BadgeConfig) => {
@@ -68,6 +85,24 @@ export function EditorProvider({ initialConfig, initialUpload = null, onChange, 
   }, [])
 
   const replace = useCallback((next: BadgeConfig) => setConfig(next), [])
+
+  const setUploadDataUrl = useCallback(
+    (dataUrl: string | null) => {
+      setUploadState(dataUrl)
+      onUploadChange?.(config.id, dataUrl)
+      if (dataUrl) setNotice((n) => (n === 'missing-photo' ? null : n))
+    },
+    [config.id, onUploadChange],
+  )
+
+  const reset = useCallback(() => {
+    onUploadChange?.(config.id, null)
+    setUploadState(null)
+    setAvatarFailed(false)
+    setNotice(null)
+    setPreviewBackground('light')
+    setConfig(createDefaultConfig())
+  }, [config.id, onUploadChange])
 
   // Report changes (persistence), skipping the initial config.
   const onChangeRef = useRef(onChange)
@@ -120,6 +155,9 @@ export function EditorProvider({ initialConfig, initialUpload = null, onChange, 
     setUploadDataUrl,
     avatarFailed,
     setAvatarFailed,
+    notice,
+    dismissNotice: () => setNotice(null),
+    reset,
     errors,
     contrastIssues,
     preview,
