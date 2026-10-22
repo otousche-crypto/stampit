@@ -5,6 +5,7 @@ import { spring } from '@/lib/springs'
 import { fontWeights } from '@/lib/font-weight'
 import { typeClass } from '@/lib/type-scale'
 import { cn } from '@/lib/utils'
+import { WELL } from './controls'
 
 export async function copyText(text: string): Promise<boolean> {
   try {
@@ -57,7 +58,7 @@ export function CopyField({ value, children, label, disabled = false, className 
 
   return (
     <div className={cn(// A recessed well: darker than the card, inner ring and shadow, so it reads as a field.
-      'relative flex min-h-0 flex-col overflow-hidden rounded-lg bg-black/[0.05] shadow-[inset_0_1px_2px_rgba(0,0,0,0.04)] ring-1 ring-inset ring-black/[0.06] dark:bg-black/25 dark:ring-white/[0.06]', className)}>
+      'relative flex min-h-0 flex-col overflow-hidden rounded-lg', WELL, className)}>
       <div
         role="region"
         aria-label={label}

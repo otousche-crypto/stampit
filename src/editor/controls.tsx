@@ -11,6 +11,20 @@ import { fontWeights } from '@/lib/font-weight'
 import { cn } from '@/lib/utils'
 import { spring } from '@/lib/springs'
 
+/**
+ * The recessed "well" look shared by the prompt/code box and the text fields:
+ * a faint fill, inner shadow and hairline ring.
+ */
+export const WELL =
+  'bg-black/[0.05] shadow-[inset_0_1px_2px_rgba(0,0,0,0.04)] ring-1 ring-inset ring-black/[0.06] dark:bg-black/25 dark:ring-white/[0.06]'
+
+/**
+ * The same well on a Fluid InputField's box (its first div), at rest too.
+ * Applied from outside so the installed component stays untouched.
+ */
+export const WELL_FIELD =
+  '[&>div:first-of-type]:bg-black/[0.05] [&>div:first-of-type]:shadow-[inset_0_1px_2px_rgba(0,0,0,0.04)] [&>div:first-of-type]:ring-black/[0.06] dark:[&>div:first-of-type]:bg-black/25 dark:[&>div:first-of-type]:ring-white/[0.06] [&>div:first-of-type]:focus-within:ring-black/15 dark:[&>div:first-of-type]:focus-within:ring-white/20'
+
 /** CSS transition length of Fluid's fast tier, for hand-written hover states. */
 export const FAST_CSS = { transitionDuration: `${spring.fast.duration}s` } as const
 
