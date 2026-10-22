@@ -1,4 +1,4 @@
-import { lazy, Suspense, useRef, type ReactNode } from 'react'
+import { lazy, Suspense, useRef, useSyncExternalStore, type ReactNode } from 'react'
 import { ArrowDown } from 'lucide-react'
 import type { IconComponentProps } from '@/lib/icon-context'
 import { CHANNELS } from '@/badge/channels'
@@ -45,6 +45,17 @@ function GithubIcon({ size = 16, className }: IconComponentProps) {
   )
 }
 
+function useWindowWidth(): number {
+  return useSyncExternalStore(
+    (cb) => {
+      window.addEventListener('resize', cb)
+      return () => window.removeEventListener('resize', cb)
+    },
+    () => window.innerWidth,
+    () => 1024,
+  )
+}
+
 /** Same grey as the editor's preview. */
 const PAGE_BACKGROUND = 'bg-[#F2F2F7] dark:bg-background'
 
@@ -62,13 +73,21 @@ function Bone({ className }: { className?: string }) {
  * above Safari's bottom bar.
  */
 function PhoneBottom({ children }: { children: ReactNode }) {
+  // Narrower than the phone (a real phone visiting): scale it down to fit.
+  const width = useWindowWidth()
+  const scale = Math.min(1, (width - 32) / (IPHONE_17.width + 2 * IPHONE_17.bezel))
   return (
     // Wider than the phone so its rim and shadow are never clipped; only the
     // top fades out.
     <div className="relative -mb-16 h-[min(580px,60dvh)] w-[min(582px,100vw)] overflow-hidden [mask-image:linear-gradient(to_bottom,transparent,#000_88px)]">
       <div
-        className="absolute bottom-[104px] left-1/2 -translate-x-1/2 rounded-[62px] bg-[#1a1a1c] shadow-[0_0_0_2px_#c7c7cc,0_0_0_3px_rgba(0,0,0,0.1),0_40px_80px_-24px_rgba(0,0,0,0.45)] dark:shadow-[0_0_0_2px_#48484d,0_0_0_3px_rgba(255,255,255,0.06),0_40px_80px_-24px_rgba(0,0,0,0.8)]"
-        style={{ width: IPHONE_17.width + 2 * IPHONE_17.bezel, padding: IPHONE_17.bezel }}
+        className="absolute bottom-[104px] left-1/2 rounded-[62px] bg-[#1a1a1c] shadow-[0_0_0_2px_#c7c7cc,0_0_0_3px_rgba(0,0,0,0.1),0_40px_80px_-24px_rgba(0,0,0,0.45)] dark:shadow-[0_0_0_2px_#48484d,0_0_0_3px_rgba(255,255,255,0.06),0_40px_80px_-24px_rgba(0,0,0,0.8)]"
+        style={{
+          width: IPHONE_17.width + 2 * IPHONE_17.bezel,
+          padding: IPHONE_17.bezel,
+          transform: `translateX(-50%) scale(${scale})`,
+          transformOrigin: 'bottom center',
+        }}
       >
         <div className="flex flex-col overflow-hidden rounded-[52px] bg-[#F2F2F7] dark:bg-[#1C1C1E]" style={{ height: IPHONE_17.height }}>
           {/* Skeleton page: kept to a hint */}
@@ -107,7 +126,8 @@ export function Home() {
           </span>
           <Button asChild variant="ghost" size="compact" leadingIcon={GithubIcon}>
             <a href={GITHUB_URL} target="_blank" rel="noopener noreferrer">
-              View on GitHub
+              {/* Icon only on phones, where the Light / Dark switch takes the middle. */}
+              <span className="max-sm:sr-only">View on GitHub</span>
             </a>
           </Button>
         </header>

@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { Link } from 'react-router'
 import { Elevated } from '@/lib/elevated'
 import { typeClass } from '@/lib/type-scale'
@@ -42,21 +42,31 @@ export function EditorLayout({ autoFocus = true }: { autoFocus?: boolean }) {
   const desktop = useMediaQuery('(min-width: 1024px)')
   const tablet = useMediaQuery('(min-width: 768px)')
   const backdrop = useBackdropStyle()
+  const rootRef = useRef<HTMLDivElement>(null)
+  const [inView, setInView] = useState(true)
+  useEffect(() => {
+    const el = rootRef.current
+    if (!el) return
+    const io = new IntersectionObserver(([entry]) => setInView(entry.isIntersecting), { threshold: 0.3 })
+    io.observe(el)
+    return () => io.disconnect()
+  }, [tablet])
 
   if (!tablet) {
     return (
-      <div className="flex h-dvh flex-col bg-background">
+      <div ref={rootRef} className="flex h-dvh flex-col bg-background">
         <header className="flex h-12 shrink-0 items-center justify-between border-b border-border px-3">
           <Brand />
           <ResetButton />
         </header>
-        <div className="flex h-[35dvh] min-h-44 shrink-0 flex-col border-b border-border" style={backdrop}>
+        <div className="flex h-[35dvh] min-h-44 shrink-0 flex-col overflow-hidden border-b border-border" style={backdrop}>
           <PreviewStage showHint={false} className="flex-1" />
         </div>
         <div aria-label="Settings" role="region" className="min-h-0 flex-1 overflow-y-auto">
           <SettingsPanel autoFocus={autoFocus} />
         </div>
-        <ExportSheet />
+        {/* Only while the editor is on screen (it sits under the home page). */}
+        {inView && <ExportSheet />}
       </div>
     )
   }

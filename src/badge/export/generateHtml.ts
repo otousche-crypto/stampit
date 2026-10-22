@@ -438,8 +438,9 @@ function socialRules(
     `${shown}{opacity:1;transform:none;pointer-events:auto;transition:${reveal.join(',')}}`,
     `.${c}:hover .${c}__so:hover{transform:scale(1.06);transition-delay:0s${soft ? `;box-shadow:${shadow(SOFT_SHADOW_HOVER)}` : ''}}`,
     `.${c}__so:focus-visible{outline:2px solid var(${v}tb);outline-offset:2px}`,
-    // Touch screens have no hover: always shown.
-    `@media (hover:none){.${c}__so{opacity:1;transform:none;pointer-events:auto}.${c}__sos{pointer-events:auto}}`,
+    // Touch screens have no hover: always shown, in the flow, so the badge
+    // and its links centre together.
+    `@media (hover:none){.${c}__so{opacity:1;transform:none;pointer-events:auto}.${c}__sos{position:static;padding-left:0;pointer-events:auto}}`,
     `@media (prefers-reduced-motion:reduce){.${c} .${c}__so,.${c}:hover .${c}__so,.${c}:hover .${c}__so:hover{transform:none;transition-property:opacity;transition-delay:0s}}`,
   ]
   // Keep 44 px touch targets on small badges.
