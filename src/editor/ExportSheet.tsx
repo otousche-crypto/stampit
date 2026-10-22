@@ -88,7 +88,7 @@ export function ExportSheet() {
                   </DialogPrimitive.Close>
                 </div>
                 <SurfaceProvider value={6}>
-                  <ExportPanel />
+                  <ExportPanel className="h-[70dvh]" />
                 </SurfaceProvider>
               </motion.div>
             </DialogPrimitive.Content>

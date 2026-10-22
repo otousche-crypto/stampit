@@ -58,14 +58,14 @@ export function EditorLayout() {
             <PreviewPanel />
           </div>
           {!desktop && (
-            <div className="max-h-[45%] overflow-y-auto border-t border-border">
-              <ExportPanel />
+            <div className="flex h-[45%] min-h-0 flex-col border-t border-border">
+              <ExportPanel className="flex-1" />
             </div>
           )}
         </main>
         {desktop && (
-          <div className="min-h-0 overflow-y-auto border-l border-border">
-            <ExportPanel />
+          <div className="flex min-h-0 flex-col border-l border-border">
+            <ExportPanel className="flex-1" />
           </div>
         )}
       </div>
