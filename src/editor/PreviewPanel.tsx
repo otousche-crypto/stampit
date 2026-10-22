@@ -4,47 +4,55 @@ import { typeClass } from '@/lib/type-scale'
 import { cn } from '@/lib/utils'
 import { PREVIEW_BACKDROPS, useEditor } from './EditorProvider'
 
-export function PreviewPanel({ compact = false }: { compact?: boolean }) {
-  const { preview, previewBackground, setPreviewBackground, zoom, setZoom } = useEditor()
-  const dark = previewBackground === 'dark'
-
+/** Light / Dark backdrop and 1× / 2× zoom. */
+export function PreviewControls({ className }: { className?: string }) {
+  const { previewBackground, setPreviewBackground, zoom, setZoom } = useEditor()
   return (
-    <section aria-label="Preview" className="flex h-full min-h-0 flex-col">
-      <div className={cn('flex items-center justify-between gap-2 px-3', compact ? 'py-1.5' : 'py-2')}>
-        <TabsSubtle
-          aria-label="Preview background"
-          size="compact"
-          selectedIndex={dark ? 1 : 0}
-          onSelect={(i) => setPreviewBackground(i === 0 ? 'light' : 'dark')}
-        >
-          <TabsSubtleItem index={0} label="Light" />
-          <TabsSubtleItem index={1} label="Dark" />
-        </TabsSubtle>
-        <TabsSubtle aria-label="Zoom" size="compact" selectedIndex={zoom === 1 ? 0 : 1} onSelect={(i) => setZoom(i === 0 ? 1 : 2)}>
-          <TabsSubtleItem index={0} label="1×" />
-          <TabsSubtleItem index={1} label="2×" />
-        </TabsSubtle>
-      </div>
-      <div
-        className={cn(
-          'relative mx-3 flex flex-1 min-h-0 items-center justify-center overflow-hidden rounded-xl',
-          compact ? 'mb-2' : 'mb-3',
-          dark ? 'ring-1 ring-white/10' : 'ring-1 ring-black/5',
-        )}
-        style={{ background: PREVIEW_BACKDROPS[previewBackground], colorScheme: dark ? 'dark' : 'light' }}
+    <div className={cn('flex items-center gap-2', className)}>
+      <TabsSubtle
+        aria-label="Preview background"
+        size="compact"
+        selectedIndex={previewBackground === 'dark' ? 1 : 0}
+        onSelect={(i) => setPreviewBackground(i === 0 ? 'light' : 'dark')}
       >
-        <BadgePreview code={preview.code} interceptLinks scale={zoom} />
+        <TabsSubtleItem index={0} label="Light" />
+        <TabsSubtleItem index={1} label="Dark" />
+      </TabsSubtle>
+      <TabsSubtle aria-label="Zoom" size="compact" selectedIndex={zoom === 1 ? 0 : 1} onSelect={(i) => setZoom(i === 0 ? 1 : 2)}>
+        <TabsSubtleItem index={0} label="1×" />
+        <TabsSubtleItem index={1} label="2×" />
+      </TabsSubtle>
+    </div>
+  )
+}
+
+/** The badge itself, centred on the preview backdrop (which the layout paints). */
+export function PreviewStage({ showHint = true, className }: { showHint?: boolean; className?: string }) {
+  const { preview, previewBackground, zoom } = useEditor()
+  const dark = previewBackground === 'dark'
+  return (
+    <section aria-label="Preview" className={cn('relative flex min-h-0 items-center justify-center', className)}>
+      <BadgePreview code={preview.code} interceptLinks scale={zoom} />
+      {showHint && (
         <p
           className={cn(
-            'pointer-events-none absolute bottom-2 left-0 right-0 text-center',
-            compact && 'hidden',
+            'pointer-events-none absolute bottom-3 left-0 right-0 text-center',
             typeClass('caption'),
-            dark ? 'text-white/50' : 'text-black/45',
+            dark ? 'text-white/60' : 'text-black/55',
           )}
         >
           Links are disabled in the preview.
         </p>
-      </div>
+      )}
     </section>
   )
+}
+
+/** Backdrop style for whatever area shows the preview. */
+export function useBackdropStyle() {
+  const { previewBackground } = useEditor()
+  return {
+    background: PREVIEW_BACKDROPS[previewBackground],
+    colorScheme: previewBackground === 'dark' ? 'dark' : 'light',
+  } as const
 }
