@@ -9,27 +9,29 @@ import { fontWeights } from '@/lib/font-weight'
 import { typeClass } from '@/lib/type-scale'
 import { cn } from '@/lib/utils'
 import { DEMO_HTML_DARK, DEMO_HTML_LIGHT } from '../demo.generated'
-import { useTypewriter } from '../useTypewriter'
-import { useNameRoulette } from '../useNameRoulette'
+import { useDemoCycle } from '../useDemoCycle'
 import { useAppearance } from '../appearance'
 
 /** First words the demo badge cycles through. */
 const DEMO_WORDS = ['Crafted', 'Shipped', 'Built']
 
-/** Names the demo badge spins through (it starts on John Doe). */
+/**
+ * Names the demo badge spins through, John Doe first. Short and close in
+ * width, so the fixed name slot never looks half empty.
+ */
 const DEMO_NAMES = [
   'John Doe',
   'Ada Park',
-  'Lena Moreau',
-  'Sam Rivera',
-  'Yuki Tanaka',
-  'Noah Becker',
-  'Maya Singh',
-  'Leo Martin',
-  'Chloé Dubois',
-  'Omar Haddad',
-  'Iris Nguyen',
-  'Theo Rossi',
+  'Mia Ross',
+  'Leo Hart',
+  'Zoe Lane',
+  'Max Bell',
+  'Eva Cruz',
+  'Tom Reed',
+  'Ana Diaz',
+  'Ben Ford',
+  'Ivy Chen',
+  'Noa Kato',
 ]
 
 // The editor lives right under the landing; it carries most of the UI kit.
@@ -93,8 +95,7 @@ function PhoneBottom({ children }: { children: ReactNode }) {
 export function Home() {
   const editorRef = useRef<HTMLElement>(null)
   const demoRef = useRef<HTMLDivElement>(null)
-  useTypewriter(demoRef, DEMO_WORDS)
-  useNameRoulette(demoRef, DEMO_NAMES, 'John Doe')
+  useDemoCycle(demoRef, DEMO_WORDS, DEMO_NAMES)
   // The demo follows the site's Light / Dark.
   const demoHtml = useAppearance() === 'dark' ? DEMO_HTML_DARK : DEMO_HTML_LIGHT
   return (
