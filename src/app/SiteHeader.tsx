@@ -25,8 +25,8 @@ export function SiteHeader() {
   return (
     <header
       className={cn(
-        // Frosted, in the page grey, so content scrolling underneath stays out of the way.
-        'fixed inset-x-0 top-0 z-40 grid grid-cols-[1fr_auto_1fr] items-center bg-[#F2F2F7]/80 px-4 backdrop-blur-md sm:px-6 dark:bg-background/80',
+        // Fully transparent; the bar itself lets clicks through, only its items catch them.
+        'pointer-events-none fixed inset-x-0 top-0 z-40 grid grid-cols-[1fr_auto_1fr] items-center px-4 sm:px-6',
         HEADER_HEIGHT,
       )}
     >
