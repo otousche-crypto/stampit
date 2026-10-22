@@ -1,10 +1,7 @@
 import { lazy, Suspense, useRef, useSyncExternalStore, type ReactNode } from 'react'
 import { ArrowDown } from 'lucide-react'
-import type { IconComponentProps } from '@/lib/icon-context'
-import { CHANNELS } from '@/badge/channels'
 import { Button } from '@/components/ui/button'
 import { BadgePreview } from '@/badge/render/BadgePreview'
-import { GITHUB_URL } from '@/config/site'
 import { fontWeights } from '@/lib/font-weight'
 import { typeClass } from '@/lib/type-scale'
 import { cn } from '@/lib/utils'
@@ -37,13 +34,6 @@ const DEMO_NAMES = [
 // The editor lives right under the landing; it carries most of the UI kit.
 const Create = lazy(() => import('@/app/routes/Create').then((m) => ({ default: m.Create })))
 
-function GithubIcon({ size = 16, className }: IconComponentProps) {
-  return (
-    <svg viewBox="0 0 24 24" width={size} height={size} fill="currentColor" aria-hidden="true" className={className}>
-      <path d={CHANNELS.github.icon.d} />
-    </svg>
-  )
-}
 
 function useWindowWidth(): number {
   return useSyncExternalStore(
@@ -120,19 +110,8 @@ export function Home() {
   return (
     <>
       <div className={cn('flex min-h-dvh flex-col', PAGE_BACKGROUND)}>
-        <header className="flex h-14 shrink-0 items-center justify-between px-4 sm:px-6">
-          <span className={cn('text-foreground', typeClass('title'))} style={{ fontVariationSettings: fontWeights.semibold }}>
-            Stampit
-          </span>
-          <Button asChild variant="ghost" size="compact" leadingIcon={GithubIcon}>
-            <a href={GITHUB_URL} target="_blank" rel="noopener noreferrer">
-              {/* Icon only on phones, where the Light / Dark switch takes the middle. */}
-              <span className="max-sm:sr-only">View on GitHub</span>
-            </a>
-          </Button>
-        </header>
 
-        <main className="flex flex-1 flex-col items-center justify-center gap-8 px-4 pb-10">
+        <main className="flex flex-1 flex-col items-center justify-center gap-8 px-4 pb-10 pt-16">
           <div className="flex max-w-xl flex-col items-center gap-3 text-center">
             <h1 className={cn('text-foreground', typeClass('display'))} style={{ fontVariationSettings: fontWeights.bold }}>
               Stamp everything you ship.
