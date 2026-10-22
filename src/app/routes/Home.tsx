@@ -45,8 +45,8 @@ function useWindowWidth(): number {
   )
 }
 
-/** Same grey as the editor's preview. */
-const PAGE_BACKGROUND = 'bg-[#F2F2F7] dark:bg-background'
+/** Same colours as the editor preview (light and dark), so home and editor run on as one surface. */
+const PAGE_BACKGROUND = 'bg-[#F2F2F7] dark:bg-[#1C1C1E]'
 
 /** iPhone 17: 402 × 874 pt screen. */
 const IPHONE_17 = { width: 402, height: 874, bezel: 10 }
