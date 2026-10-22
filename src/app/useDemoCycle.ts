@@ -57,10 +57,12 @@ export function useDemoCycle(
     }
 
     const writeVerb = (text: string) => {
+      if (cancelled) return // a stopped loop must never touch a fresh snippet
       const el = find('[class$="__n"]')
       if (el) el.textContent = text
     }
     const showName = (name: string, flick: boolean) => {
+      if (cancelled) return
       const bold = find('[class$="__b"]')
       const avatar = find('[class$="__av"]')
       if (bold) {
