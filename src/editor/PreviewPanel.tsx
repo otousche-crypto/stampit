@@ -3,8 +3,7 @@ import { Monitor, RotateCcw, Smartphone } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { TabsSubtle, TabsSubtleItem } from '@/components/ui/tabs-subtle'
 import { BadgePreview } from '@/badge/render/BadgePreview'
-import { PhonePreview } from '@/badge/render/PhonePreview'
-import { LaptopFrame } from '@/badge/render/LaptopFrame'
+import { DevicePreview } from '@/badge/render/DevicePreview'
 import { typeClass } from '@/lib/type-scale'
 import { cn } from '@/lib/utils'
 import { PREVIEW_BACKDROPS, useEditor } from './EditorProvider'
@@ -33,13 +32,10 @@ export function PreviewControls({ className }: { className?: string }) {
         <TabsSubtleItem index={0} label="Light" />
         <TabsSubtleItem index={1} label="Dark" />
       </TabsSubtle>
-      {/* A phone shows the badge at its real size: no zoom there. */}
-      {device === 'desktop' && (
-        <TabsSubtle aria-label="Zoom" size="compact" selectedIndex={zoom === 1 ? 0 : 1} onSelect={(i) => setZoom(i === 0 ? 1 : 2)}>
-          <TabsSubtleItem index={0} label="1×" />
-          <TabsSubtleItem index={1} label="2×" />
-        </TabsSubtle>
-      )}
+      <TabsSubtle aria-label="Zoom" size="compact" selectedIndex={zoom === 1 ? 0 : 1} onSelect={(i) => setZoom(i === 0 ? 1 : 2)}>
+        <TabsSubtleItem index={0} label="1×" />
+        <TabsSubtleItem index={1} label="2×" />
+      </TabsSubtle>
     </div>
   )
 }
@@ -64,12 +60,15 @@ export function PreviewStage({
     <section aria-label="Preview" className={cn('relative flex min-h-0 items-center justify-center', className)}>
       {!framed ? (
         <BadgePreview key={replays} code={preview.code} interceptLinks scale={zoom} />
-      ) : device === 'mobile' ? (
-        <PhonePreview key={phoneReplays} code={preview.code} backdrop={PREVIEW_BACKDROPS[previewBackground]} dark={dark} />
       ) : (
-        <LaptopFrame backdrop={PREVIEW_BACKDROPS[previewBackground]} dark={dark}>
-          <BadgePreview key={replays} code={preview.code} interceptLinks scale={zoom} />
-        </LaptopFrame>
+        <DevicePreview
+          key={`${device}-${phoneReplays}`}
+          device={device}
+          code={preview.code}
+          backdrop={PREVIEW_BACKDROPS[previewBackground]}
+          dark={dark}
+          zoom={zoom}
+        />
       )}
       {config.motion.entrance !== 'none' && (
         <Button
@@ -77,12 +76,12 @@ export function PreviewStage({
           size="compact"
           leadingIcon={RotateCcw}
           className="absolute right-3 top-3"
-          onClick={() => (device === 'mobile' ? setPhoneReplays : setReplays)((n) => n + 1)}
+          onClick={() => (framed ? setPhoneReplays : setReplays)((n) => n + 1)}
         >
           Replay
         </Button>
       )}
-      {showHint && device === 'desktop' && (
+      {showHint && !framed && (
         <p
           className={cn(
             'pointer-events-none absolute bottom-3 left-0 right-0 text-center',
