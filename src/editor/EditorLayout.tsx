@@ -29,7 +29,8 @@ export function EditorLayout({ autoFocus = true }: { autoFocus?: boolean }) {
   const tablet = useMediaQuery('(min-width: 768px)')
   const backdrop = useBackdropStyle()
   const rootRef = useRef<HTMLDivElement>(null)
-  const [inView, setInView] = useState(true)
+  // Hidden until the observer says the editor is on screen (no flash on the home page).
+  const [inView, setInView] = useState(false)
   useEffect(() => {
     const el = rootRef.current
     if (!el) return

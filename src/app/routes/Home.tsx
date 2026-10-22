@@ -65,7 +65,8 @@ function Bone({ className }: { className?: string }) {
 function PhoneBottom({ children }: { children: ReactNode }) {
   // Narrower than the phone (a real phone visiting): scale it down to fit.
   const width = useWindowWidth()
-  const scale = Math.min(1, (width - 32) / (IPHONE_17.width + 2 * IPHONE_17.bezel))
+  // 40 px of air on each side on phones.
+  const scale = Math.min(1, (width - 80) / (IPHONE_17.width + 2 * IPHONE_17.bezel))
   return (
     // Wider than the phone so its rim and shadow are never clipped; only the
     // top fades out.
