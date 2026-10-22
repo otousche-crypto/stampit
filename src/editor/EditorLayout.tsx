@@ -41,11 +41,12 @@ export function EditorLayout({ autoFocus = true }: { autoFocus?: boolean }) {
 
   if (!tablet) {
     return (
-      <div ref={rootRef} className="flex h-dvh flex-col bg-background pt-14">
+      // The room left for the transparent header takes the preview grey, not white.
+      <div ref={rootRef} className="flex h-dvh flex-col pt-14" style={backdrop}>
         <div className="flex h-[35dvh] min-h-44 shrink-0 flex-col overflow-hidden border-b border-border" style={backdrop}>
           <PreviewStage showHint={false} className="flex-1" />
         </div>
-        <div aria-label="Settings" role="region" className="min-h-0 flex-1 overflow-y-auto">
+        <div aria-label="Settings" role="region" className="min-h-0 flex-1 overflow-y-auto bg-background">
           <SettingsPanel autoFocus={autoFocus} />
           <div className="flex justify-center px-3 pb-24 pt-2">
             <ResetButton />
