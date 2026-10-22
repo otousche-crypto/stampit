@@ -118,3 +118,15 @@ describe('animations', () => {
     expect(css).toContain('.sp-test1234__pill:hover{transform:translateY(-2px)}')
   })
 })
+
+describe('icon styles', () => {
+  it('draws the chosen icon and its hover nudge', () => {
+    const tri = generateBadge(mergeDeep(FIXTURES['link-initials'], { shape: { iconStyle: 'triangle' } }))
+    expect(tri.html).toContain('<path d="M9 7l6 5-6 5z" fill="currentColor"/>')
+    expect(tri.css).toContain('{transform:translateX(2px)}')
+    const link = generateBadge(mergeDeep(FIXTURES['link-initials'], { shape: { iconStyle: 'link' } }))
+    expect(link.html).toContain('M10 13a5 5 0 0 0 7.5.5')
+    const none = generateBadge(mergeDeep(FIXTURES['link-initials'], { shape: { showIcon: false } }))
+    expect(none.html).not.toContain('<svg')
+  })
+})
