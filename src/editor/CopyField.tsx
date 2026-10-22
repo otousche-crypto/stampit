@@ -56,13 +56,15 @@ export function CopyField({ value, children, label, disabled = false, className 
   }, [copied])
 
   return (
-    <div className={cn('relative flex min-h-0 flex-col overflow-hidden rounded-lg bg-muted', className)}>
+    <div className={cn(// A recessed well: darker than the card, inner ring and shadow, so it reads as a field.
+      'relative flex min-h-0 flex-col overflow-hidden rounded-lg bg-black/[0.09] shadow-[inset_0_1px_3px_rgba(0,0,0,0.08)] ring-1 ring-inset ring-black/10 dark:bg-black/40 dark:ring-white/10', className)}>
       <div
         role="region"
         aria-label={label}
         tabIndex={0}
         className={cn(
-          'min-h-0 flex-1 overflow-auto p-3 pt-10 text-[11px] leading-[16px] outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-[color:var(--focus-ring)] [&_pre]:whitespace-pre-wrap [&_pre]:break-words',
+          // pb-12 lets the last lines scroll clear of the bottom fade.
+          'min-h-0 flex-1 overflow-auto p-3 pt-10 pb-12 text-[11px] leading-[16px] outline-none [mask-image:linear-gradient(to_bottom,#000_calc(100%-48px),transparent)] focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-[color:var(--focus-ring)] [&_pre]:whitespace-pre-wrap [&_pre]:break-words',
           disabled && 'opacity-50',
         )}
       >

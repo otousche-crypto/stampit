@@ -96,7 +96,7 @@ export function EditorLayout() {
         {desktop ? (
           <>
             {center}
-            <Card label="Get your badge" className="h-[60%] self-start">
+            <Card label="Get your badge" className="h-[42%] self-start">
               <ExportPanel className="flex-1" />
             </Card>
           </>
