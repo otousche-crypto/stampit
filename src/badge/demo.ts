@@ -1,7 +1,7 @@
 import type { BadgeConfig } from './schema'
 
 /**
- * §9.3 — Olivier Tousche's badge, as on Décadi ("Made by" instead of "Par").
+ * §9.3 — Olivier Tousche's badge, as on Décadi ("Crafted by" instead of "Par").
  * Link mode to LinkedIn; switch to Bubbles (LinkedIn first) once a second
  * channel is known.
  */
@@ -10,7 +10,7 @@ export const DEMO_CONFIG: BadgeConfig = {
   id: 'olivierT',
   updatedAt: '2026-10-22T12:00:00Z',
   preset: 'light',
-  text: { normal: 'Made by', bold: 'Olivier Tousche', order: 'normal-first', boldWeight: 500, size: 'm', font: 'sans' },
+  text: { normal: 'Crafted by', bold: 'Olivier Tousche', order: 'normal-first', boldWeight: 500, size: 'm', font: 'sans' },
   avatar: { source: 'url', initials: null, url: '/olivier-avatar.png', background: '#FF6B35' },
   theme: {
     adaptToSite: false,

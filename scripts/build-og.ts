@@ -13,7 +13,7 @@ const avatar = readFileSync(root + 'public/olivier-avatar.png').toString('base64
 // the server-side fallback font (wider than SF Pro).
 const s = 3
 const h = 36 * s
-const w = 246 * s
+const w = 268 * s
 const x = (1200 - w) / 2
 const y = 360
 const font = `-apple-system, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif`
@@ -30,7 +30,7 @@ const svg = `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.
   <rect x="${x + 0.5 * s}" y="${y + 0.5 * s}" width="${w - s}" height="${h - s}" rx="${h / 2 - 0.5 * s}" fill="none" stroke="#000" stroke-opacity="0.05" stroke-width="${s}"/>
   <circle cx="${x + 18 * s}" cy="${y + h / 2}" r="${14 * s}" fill="#FF6B35"/>
   <image x="${x + 4 * s}" y="${y + 4 * s}" width="${28 * s}" height="${28 * s}" clip-path="url(#av)" xlink:href="data:image/png;base64,${avatar}"/>
-  <text x="${x + 40 * s}" y="${y + h / 2 + 5.4 * s}" font-family="${font}" font-size="${15 * s}" xml:space="preserve"><tspan fill="#6E6E73">Made by </tspan><tspan fill="#000" font-weight="500">Olivier Tousche</tspan></text>
+  <text x="${x + 40 * s}" y="${y + h / 2 + 5.4 * s}" font-family="${font}" font-size="${15 * s}" xml:space="preserve"><tspan fill="#6E6E73">Crafted by </tspan><tspan fill="#000" font-weight="500">Olivier Tousche</tspan></text>
   <g transform="translate(${x + w - 12 * s - 14 * s} ${y + h / 2 - 7 * s}) scale(${(14 * s) / 24})" fill="none" stroke="#6E6E73" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
     <line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/>
   </g>
