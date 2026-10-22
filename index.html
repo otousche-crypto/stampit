@@ -5,16 +5,12 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <script>
-      // Site theme follows the system (Fluid tokens switch on .dark).
+      // Light / Dark before first paint: the visitor's choice, else the system (see src/app/appearance.ts).
       ;(function () {
-        var m = window.matchMedia('(prefers-color-scheme: dark)')
-        // The editor pins the theme to its preview background (data-theme-lock).
-        var apply = function () {
-          if (document.documentElement.hasAttribute('data-theme-lock')) return
-          document.documentElement.classList.toggle('dark', m.matches)
-        }
-        apply()
-        m.addEventListener('change', apply)
+        var t = null
+        try { t = localStorage.getItem('stampit:appearance') } catch (e) {}
+        var dark = t ? t === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches
+        document.documentElement.classList.toggle('dark', dark)
       })()
     </script>
     <title>Stampit — Make your own badge</title>
