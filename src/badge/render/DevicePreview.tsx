@@ -27,7 +27,11 @@ type DevicePreviewProps = {
 export function DevicePreview({ device, code, backdrop, dark, zoom }: DevicePreviewProps) {
   const wrapRef = useRef<HTMLDivElement>(null)
   const frameRef = useRef<HTMLIFrameElement>(null)
+  const deviceRef = useRef<HTMLDivElement>(null)
   const [fit, setFit] = useState(0.3)
+  const [stage, setStage] = useState({ width: 0, height: 0 })
+  /** Centre of the badge, in device px (unscaled); null until measured. */
+  const [badge, setBadge] = useState<{ x: number; y: number } | null>(null)
   const [tip, setTip] = useState<string | null>(null)
 
   const mac = device === 'desktop'
@@ -40,15 +44,36 @@ export function DevicePreview({ device, code, backdrop, dark, zoom }: DevicePrev
   useLayoutEffect(() => {
     const el = wrapRef.current
     if (!el) return
-    const measure = () =>
+    const measure = () => {
+      setStage({ width: el.clientWidth, height: el.clientHeight })
       setFit(Math.min((el.clientWidth - 32) / outer.width, (el.clientHeight - 48) / outer.height))
+    }
     measure()
     const ro = new ResizeObserver(measure)
     ro.observe(el)
     return () => ro.disconnect()
   }, [outer.width, outer.height])
 
+  /** Where the badge sits on the device: iframe offset + badge centre inside the page. */
+  const locateBadge = () => {
+    const frame = frameRef.current
+    const device = deviceRef.current
+    const el = frame?.contentDocument?.querySelector<HTMLElement>('footer [class^="sp-"]')
+    if (!frame || !device || !el) return
+    let x = 0
+    let y = 0
+    let node: HTMLElement | null = frame
+    while (node && node !== device) {
+      x += node.offsetLeft
+      y += node.offsetTop
+      node = node.offsetParent as HTMLElement | null
+    }
+    const r = el.getBoundingClientRect()
+    setBadge({ x: x + r.left + r.width / 2, y: y + r.top + r.height / 2 })
+  }
+
   const onLoad = () => {
+    locateBadge()
     frameRef.current?.contentDocument?.addEventListener(
       'click',
       (e) => {
@@ -69,6 +94,9 @@ export function DevicePreview({ device, code, backdrop, dark, zoom }: DevicePrev
   }, [tip])
 
   const scale = fit * zoom
+  // Keep the badge in the middle of the stage, at any zoom.
+  const left = badge ? stage.width / 2 - badge.x * scale : (stage.width - outer.width * scale) / 2
+  const top = badge ? stage.height / 2 - badge.y * scale : (stage.height - outer.height * scale) / 2
   const chrome = dark
     ? { menu: '#1b1b1d', menuText: 'rgba(255,255,255,.85)', bar: '#2a2a2d', field: '#1c1c1e', text: 'rgba(255,255,255,.55)', line: 'rgba(255,255,255,.08)' }
     : { menu: '#f6f6f8', menuText: 'rgba(0,0,0,.85)', bar: '#ececef', field: '#ffffff', text: 'rgba(0,0,0,.5)', line: 'rgba(0,0,0,.08)' }
@@ -87,10 +115,11 @@ export function DevicePreview({ device, code, backdrop, dark, zoom }: DevicePrev
 
   return (
     <div ref={wrapRef} className="relative h-full w-full overflow-hidden">
-      {/* Zoom anchors on the footer: bottom centre of the device. */}
+      {/* The device is placed so the badge lands in the centre of the stage. */}
       <div
-        className="absolute bottom-10 left-1/2"
-        style={{ width: outer.width, height: outer.height, transform: `translateX(-50%) scale(${scale})`, transformOrigin: 'bottom center' }}
+        ref={deviceRef}
+        className="absolute"
+        style={{ left, top, width: outer.width, height: outer.height, transform: `scale(${scale})`, transformOrigin: '0 0' }}
       >
         {mac ? (
           <div
