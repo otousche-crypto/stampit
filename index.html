@@ -8,7 +8,11 @@
       // Site theme follows the system (Fluid tokens switch on .dark).
       ;(function () {
         var m = window.matchMedia('(prefers-color-scheme: dark)')
-        var apply = function () { document.documentElement.classList.toggle('dark', m.matches) }
+        // The editor pins the theme to its preview background (data-theme-lock).
+        var apply = function () {
+          if (document.documentElement.hasAttribute('data-theme-lock')) return
+          document.documentElement.classList.toggle('dark', m.matches)
+        }
         apply()
         m.addEventListener('change', apply)
       })()
