@@ -13,9 +13,10 @@ export function TextSection({ autoFocusBold }: { autoFocusBold?: boolean }) {
   const set = (patch: Partial<Text>) => update((c) => ({ ...c, text: { ...c.text, ...patch } }))
 
   return (
-    <div className="flex flex-col gap-4">
-      <InputGroup size="compact" className="w-full gap-2">
-        <div>
+    <div className="flex flex-col gap-1">
+      {/* Side by side: one InputGroup each, so each keeps its own vertical hover scope. */}
+      <div className="grid grid-cols-2 gap-2">
+        <InputGroup size="compact" className="w-full">
           <InputField
             index={0}
             label="Normal text"
@@ -24,19 +25,21 @@ export function TextSection({ autoFocusBold }: { autoFocusBold?: boolean }) {
             maxLength={24}
             onChange={(normal) => set({ normal })}
           />
-          <Suggestions label="Suggestions" items={NORMAL_SUGGESTIONS} onPick={(normal) => set({ normal })} />
-        </div>
-        <InputField
-          index={1}
-          label="Bold text"
-          placeholder="Your Name"
-          value={text.bold}
-          maxLength={32}
-          autoFocus={autoFocusBold}
-          error={errors.text}
-          onChange={(bold) => set({ bold })}
-        />
-      </InputGroup>
+        </InputGroup>
+        <InputGroup size="compact" className="w-full">
+          <InputField
+            index={0}
+            label="Bold text"
+            placeholder="Your Name"
+            value={text.bold}
+            maxLength={32}
+            autoFocus={autoFocusBold}
+            error={errors.text}
+            onChange={(bold) => set({ bold })}
+          />
+        </InputGroup>
+      </div>
+      <Suggestions label="Suggestions" items={NORMAL_SUGGESTIONS} onPick={(normal) => set({ normal })} />
     </div>
   )
 }
