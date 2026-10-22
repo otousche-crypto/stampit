@@ -67,7 +67,7 @@ export function EditorLayout() {
   }
 
   const settings = (
-    <Card label="Settings" className="h-[60%] self-start">
+    <Card label="Settings" className="h-full">
       <div className="flex h-12 shrink-0 items-center justify-between border-b border-border px-3">
         <Brand />
         <ResetButton />
@@ -96,7 +96,7 @@ export function EditorLayout() {
         {desktop ? (
           <>
             {center}
-            <Card label="Get your badge" className="h-full">
+            <Card label="Get your badge" className="h-[60%] self-start">
               <ExportPanel className="flex-1" />
             </Card>
           </>
