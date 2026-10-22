@@ -1,6 +1,7 @@
-import type { ReactNode } from 'react'
-import { Link } from 'react-router'
-import { ArrowRight } from 'lucide-react'
+import { lazy, Suspense, useRef, type ReactNode } from 'react'
+import { ArrowDown } from 'lucide-react'
+import type { IconComponentProps } from '@/lib/icon-context'
+import { CHANNELS } from '@/badge/channels'
 import { Button } from '@/components/ui/button'
 import { BadgePreview } from '@/badge/render/BadgePreview'
 import { GITHUB_URL } from '@/config/site'
@@ -8,6 +9,17 @@ import { fontWeights } from '@/lib/font-weight'
 import { typeClass } from '@/lib/type-scale'
 import { cn } from '@/lib/utils'
 import { DEMO_HTML } from '../demo.generated'
+
+// The editor lives right under the landing; it carries most of the UI kit.
+const Create = lazy(() => import('@/app/routes/Create').then((m) => ({ default: m.Create })))
+
+function GithubIcon({ size = 16, className }: IconComponentProps) {
+  return (
+    <svg viewBox="0 0 24 24" width={size} height={size} fill="currentColor" aria-hidden="true" className={className}>
+      <path d={CHANNELS.github.icon.d} />
+    </svg>
+  )
+}
 
 /** Same grey as the editor's preview. */
 const PAGE_BACKGROUND = 'bg-[#F2F2F7] dark:bg-background'
@@ -69,39 +81,57 @@ function PhoneBottom({ children }: { children: ReactNode }) {
 }
 
 export function Home() {
+  const editorRef = useRef<HTMLElement>(null)
   return (
-    <div className={cn('flex min-h-dvh flex-col', PAGE_BACKGROUND)}>
-      <header className="flex h-14 shrink-0 items-center justify-between px-4 sm:px-6">
-        <span className={cn('text-foreground', typeClass('title'))} style={{ fontVariationSettings: fontWeights.semibold }}>
-          Stampit
-        </span>
-        <Button asChild variant="ghost" size="compact">
-          <a href={GITHUB_URL} target="_blank" rel="noopener noreferrer">
-            View on GitHub
-          </a>
-        </Button>
-      </header>
+    <>
+      <div className={cn('flex min-h-dvh flex-col', PAGE_BACKGROUND)}>
+        <header className="flex h-14 shrink-0 items-center justify-between px-4 sm:px-6">
+          <span className={cn('text-foreground', typeClass('title'))} style={{ fontVariationSettings: fontWeights.semibold }}>
+            Stampit
+          </span>
+          <Button asChild variant="ghost" size="compact" leadingIcon={GithubIcon}>
+            <a href={GITHUB_URL} target="_blank" rel="noopener noreferrer">
+              View on GitHub
+            </a>
+          </Button>
+        </header>
 
-      <main className="flex flex-1 flex-col items-center justify-center gap-8 px-4 pb-10">
-        <div className="flex max-w-xl flex-col items-center gap-3 text-center">
-          <h1 className={cn('text-foreground', typeClass('display'))} style={{ fontVariationSettings: fontWeights.bold }}>
-            Stamp everything you ship.
-          </h1>
-          <p className={cn('max-w-md text-muted-foreground', typeClass('subtitle'))}>
-            A tiny, customizable badge for your footer. Style it, add your links, paste one snippet. No account, no
-            dependency.
-          </p>
-        </div>
+        <main className="flex flex-1 flex-col items-center justify-center gap-8 px-4 pb-10">
+          <div className="flex max-w-xl flex-col items-center gap-3 text-center">
+            <h1 className={cn('text-foreground', typeClass('display'))} style={{ fontVariationSettings: fontWeights.bold }}>
+              Stamp everything you ship.
+            </h1>
+            <p className={cn('max-w-md text-muted-foreground', typeClass('subtitle'))}>
+              A tiny, customizable badge for your footer. Style it, add your links, paste one snippet. No account, no
+              dependency.
+            </p>
+          </div>
 
-        <PhoneBottom>
-          {/* 1.25× fits the phone's width. */}
-          <BadgePreview code={DEMO_HTML} scale={1.25} />
-        </PhoneBottom>
+          <PhoneBottom>
+            {/* 1.25× fits the phone's width. */}
+            <BadgePreview code={DEMO_HTML} scale={1.25} />
+          </PhoneBottom>
 
-        <Button asChild variant="primary" trailingIcon={ArrowRight}>
-          <Link to="/create">Create yours</Link>
-        </Button>
-      </main>
-    </div>
+          {/* Scrolls down to the editor, right below. */}
+          <Button
+            variant="primary"
+            trailingIcon={ArrowDown}
+            onClick={() =>
+              editorRef.current?.scrollIntoView({
+                behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+                block: 'start',
+              })
+            }
+          >
+            Create yours
+          </Button>
+        </main>
+      </div>
+      <section ref={editorRef} id="create" aria-label="Badge editor" className="h-dvh">
+        <Suspense fallback={<div className="h-dvh bg-background" aria-busy="true" />}>
+          <Create embedded />
+        </Suspense>
+      </section>
+    </>
   )
 }
