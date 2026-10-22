@@ -48,7 +48,8 @@ export function useDemoCycle(
       let widest = 0
       for (const n of [first, ...names]) {
         bold.textContent = n
-        widest = Math.max(widest, bold.getBoundingClientRect().width / zoomOf(bold))
+        // offsetWidth: layout px, unaffected by the phone's scale transform.
+        widest = Math.max(widest, bold.offsetWidth)
       }
       bold.textContent = keep
       bold.style.width = `${Math.ceil(widest)}px`
@@ -131,9 +132,4 @@ export function useDemoCycle(
       cancelled = true
     }
   }, [host, verbs, first, names, suffix])
-}
-
-/** The preview scales the badge with CSS zoom: measure in the badge's own px. */
-function zoomOf(el: HTMLElement): number {
-  return (el as HTMLElement & { currentCSSZoom?: number }).currentCSSZoom ?? 1
 }
