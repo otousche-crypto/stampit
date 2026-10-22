@@ -23,12 +23,23 @@ export function FieldLabel({ children, id, htmlFor }: { children: ReactNode; id?
   )
 }
 
-export function Hint({ children, id, tone = 'muted' }: { children: ReactNode; id?: string; tone?: 'muted' | 'error' }) {
+export function Hint({
+  children,
+  id,
+  tone = 'muted',
+  className,
+}: {
+  children: ReactNode
+  id?: string
+  tone?: 'muted' | 'error'
+  className?: string
+}) {
   return (
     <p
       id={id}
       className={cn(
         'px-2 pt-1',
+        className,
         typeClass('caption'),
         tone === 'error' ? 'text-destructive' : 'text-muted-foreground',
       )}
