@@ -200,7 +200,10 @@ export function SelectRow<T extends string>({
           aria-labelledby={id}
           icon={current?.icon}
           placeholder={placeholder}
-          className="w-auto min-w-0"
+          // Fixed width: the trigger never resizes with the chosen label, so the
+          // list (aligned on it, as wide as it) always opens in the same place.
+          // The value stays right-aligned next to the chevron.
+          className="w-[152px] min-w-0 shrink-0 [&>span]:justify-end [&>span>span:last-child]:flex-none"
         />
         <SelectContent>
           {options.map((o, i) => (
