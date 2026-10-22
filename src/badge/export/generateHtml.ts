@@ -283,7 +283,7 @@ function buildCss(config: BadgeConfig, avatar: ResolvedAvatar, previewScheme?: '
   // Reduced motion: nothing travels, rotates or scales; state changes are instant or fade.
   const reduced = [`.${c}__ic{transition:none}`]
   if (config.motion.entrance !== 'none' || config.motion.hover !== 'none') {
-    reduced.push(`.${c},.${c} .${c}__pill,.${c} .${c}__pill:hover{animation:none;transform:none}`)
+    reduced.push(`.${c},.${c} .${c}__pill,.${c} .${c}__pill:hover{animation:none;transform:none}.${c} .${c}__pill::after{animation:none;opacity:0}`)
   }
   if (!bubbles) {
     reduced.push(`.${c} .${c}__pill:hover .${c}__ic,.${c} .${c}__pill:focus-visible .${c}__ic{transform:none}`)
@@ -305,12 +305,9 @@ function buildCss(config: BadgeConfig, avatar: ResolvedAvatar, previewScheme?: '
   return rules.join('')
 }
 
-const ENTRANCE_FRAMES: Record<Exclude<BadgeConfig['motion']['entrance'], 'none'>, { frames: string; tier: CssSpringName }> = {
-  fade: { frames: 'from{opacity:0}', tier: 'moderate' },
-  grow: { frames: 'from{opacity:0;transform:scale(.6)}', tier: 'slow' },
-  slide: { frames: 'from{opacity:0;transform:translateY(8px)}', tier: 'slow' },
-  pulse: { frames: '0%{opacity:0;transform:scale(.9)}50%{opacity:1;transform:scale(1.06)}100%{transform:none}', tier: 'attention' },
+const ENTRANCE_FRAMES: Record<'shake' | 'bump', { frames: string; tier: CssSpringName }> = {
   shake: { frames: '0%,100%{transform:none}20%,60%{transform:translateX(-3px)}40%,80%{transform:translateX(3px)}', tier: 'attention' },
+  bump: { frames: '0%,100%{transform:none}35%{transform:scale(1.08)}65%{transform:scale(.97)}', tier: 'attention' },
 }
 
 /**
@@ -321,10 +318,18 @@ function motionRules(ctx: CssContext): string[] {
   const { c, config } = ctx
   const { entrance, hover } = config.motion
   const rules: string[] = []
-  if (entrance !== 'none') {
+  if (entrance === 'shake' || entrance === 'bump') {
     const { frames, tier } = ENTRANCE_FRAMES[entrance]
     rules.push(`@keyframes ${c}-in{${frames}}`)
     rules.push(`.${c}{animation:${c}-in ${CSS_SPRINGS[tier].duration} ${springVar(ctx, tier)} backwards}`)
+  }
+  if (entrance === 'shine') {
+    // A light band sweeps once across the pill, clipped to its shape.
+    rules.push(`@keyframes ${c}-in{from{transform:translateX(-110%)}to{transform:translateX(110%)}}`)
+    rules.push(`.${c}__pill{position:relative;overflow:hidden}`)
+    rules.push(
+      `.${c}__pill::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;background:linear-gradient(105deg,transparent 30%,rgba(255,255,255,.55) 50%,transparent 70%);transform:translateX(110%);animation:${c}-in ${CSS_SPRINGS.shine.duration} ${springVar(ctx, 'shine')} .2s backwards}`,
+    )
   }
   switch (hover) {
     case 'grow':

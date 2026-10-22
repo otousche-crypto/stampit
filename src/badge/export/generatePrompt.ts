@@ -172,11 +172,9 @@ export function generatePrompt(config: BadgeConfig, options: GeneratePromptOptio
   }
   const { entrance, hover } = config.motion
   const ENTRANCE_TEXT = {
-    fade: 'fades in (moderate spring)',
-    grow: 'grows from 60% to full size while fading in (slow spring)',
-    slide: 'slides up 8px while fading in (slow spring)',
-    pulse: 'fades in with a single pulse: scale 0.9 → 1.06 → 1',
     shake: 'gives a short horizontal shake (±3px)',
+    bump: 'gives a small bump: scale 1 → 1.08 → 0.97 → 1',
+    shine: 'shows a light sheen sweeping once from left to right across it (a gradient band on a clipped ::after, 0.2s after load)',
   } as const
   const HOVER_TEXT = {
     grow: 'scales to 1.04 (fast spring)',
