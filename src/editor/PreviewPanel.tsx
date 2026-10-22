@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import { TabsSubtle, TabsSubtleItem } from '@/components/ui/tabs-subtle'
 import { BadgePreview } from '@/badge/render/BadgePreview'
 import { PhonePreview } from '@/badge/render/PhonePreview'
+import { LaptopFrame } from '@/badge/render/LaptopFrame'
 import { typeClass } from '@/lib/type-scale'
 import { cn } from '@/lib/utils'
 import { PREVIEW_BACKDROPS, useEditor } from './EditorProvider'
@@ -44,7 +45,16 @@ export function PreviewControls({ className }: { className?: string }) {
 }
 
 /** The badge itself, centred on the preview backdrop (which the layout paints). */
-export function PreviewStage({ showHint = true, className }: { showHint?: boolean; className?: string }) {
+export function PreviewStage({
+  showHint = true,
+  framed = true,
+  className,
+}: {
+  showHint?: boolean
+  /** Device frames (MacBook / iPhone). Off on the phone-sized editor. */
+  framed?: boolean
+  className?: string
+}) {
   const { preview, previewBackground, zoom, config, device } = useEditor()
   const dark = previewBackground === 'dark'
   const [phoneReplays, setPhoneReplays] = useState(0)
@@ -52,10 +62,14 @@ export function PreviewStage({ showHint = true, className }: { showHint?: boolea
   const [replays, setReplays] = useState(0)
   return (
     <section aria-label="Preview" className={cn('relative flex min-h-0 items-center justify-center', className)}>
-      {device === 'mobile' ? (
+      {!framed ? (
+        <BadgePreview key={replays} code={preview.code} interceptLinks scale={zoom} />
+      ) : device === 'mobile' ? (
         <PhonePreview key={phoneReplays} code={preview.code} backdrop={PREVIEW_BACKDROPS[previewBackground]} dark={dark} />
       ) : (
-        <BadgePreview key={replays} code={preview.code} interceptLinks scale={zoom} />
+        <LaptopFrame backdrop={PREVIEW_BACKDROPS[previewBackground]} dark={dark}>
+          <BadgePreview key={replays} code={preview.code} interceptLinks scale={zoom} />
+        </LaptopFrame>
       )}
       {config.motion.entrance !== 'none' && (
         <Button
