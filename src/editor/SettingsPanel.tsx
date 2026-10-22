@@ -2,12 +2,14 @@ import { useState } from 'react'
 import { AccordionContent, AccordionGroup, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 import { PresetSection } from './sections/PresetSection'
 import { TextSection } from './sections/TextSection'
+import { AvatarSection } from './sections/AvatarSection'
 import { ColorsSection } from './sections/ColorsSection'
 import { ShapeSection } from './sections/ShapeSection'
 import { ClickSection } from './sections/ClickSection'
 
 const SECTIONS = [
   { value: 'text', label: 'Text', Component: TextSection },
+  { value: 'avatar', label: 'Avatar', Component: AvatarSection },
   { value: 'colors', label: 'Colors', Component: ColorsSection },
   { value: 'shape', label: 'Shape', Component: ShapeSection },
   { value: 'click', label: 'On click', Component: ClickSection },
