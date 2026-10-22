@@ -1,6 +1,6 @@
 import { InputField, InputGroup } from '@/components/ui/input-group'
 import type { BadgeConfig } from '@/badge/schema'
-import { Choice, Suggestions } from '../controls'
+import { Suggestions } from '../controls'
 import { useEditor } from '../EditorProvider'
 
 const NORMAL_SUGGESTIONS = ['Made by', 'Launched by', 'Built by', 'Designed by', 'Crafted by']
@@ -37,38 +37,6 @@ export function TextSection({ autoFocusBold }: { autoFocusBold?: boolean }) {
           onChange={(bold) => set({ bold })}
         />
       </InputGroup>
-      <div className="grid grid-cols-3 gap-1">
-        <Choice
-          label="Bold weight"
-          value={String(text.boldWeight) as '400' | '500' | '600'}
-          onChange={(w) => set({ boldWeight: Number(w) as Text['boldWeight'] })}
-          options={[
-            { value: '400', label: 'Regular' },
-            { value: '500', label: 'Medium' },
-            { value: '600', label: 'Semibold' },
-          ]}
-        />
-        <Choice
-          label="Size"
-          value={text.size}
-          onChange={(size) => set({ size })}
-          options={[
-            { value: 's', label: 'S' },
-            { value: 'm', label: 'M' },
-            { value: 'l', label: 'L' },
-          ]}
-        />
-        <Choice
-          label="Font"
-          value={text.font}
-          onChange={(font) => set({ font })}
-          options={[
-            { value: 'sans', label: 'Sans' },
-            { value: 'serif', label: 'Serif' },
-            { value: 'mono', label: 'Mono' },
-          ]}
-        />
-      </div>
     </div>
   )
 }
