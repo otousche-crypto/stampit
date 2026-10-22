@@ -1,8 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
-import { Link } from 'react-router'
 import { Elevated } from '@/lib/elevated'
-import { typeClass } from '@/lib/type-scale'
-import { fontWeights } from '@/lib/font-weight'
 import { cn } from '@/lib/utils'
 import { useMediaQuery } from '@/hooks/use-media-query'
 import { SettingsPanel } from './SettingsPanel'
@@ -11,17 +8,6 @@ import { ExportPanel } from './ExportPanel'
 import { ExportSheet } from './ExportSheet'
 import { ResetButton } from './ResetButton'
 
-function Brand() {
-  return (
-    <Link
-      to="/"
-      className={cn('rounded-md px-1 text-foreground', typeClass('title'))}
-      style={{ fontVariationSettings: fontWeights.semibold }}
-    >
-      Stampit
-    </Link>
-  )
-}
 
 /** A floating panel over the full-screen preview backdrop. */
 function Card({ children, className, label }: { children: ReactNode; className?: string; label: string }) {
@@ -54,16 +40,15 @@ export function EditorLayout({ autoFocus = true }: { autoFocus?: boolean }) {
 
   if (!tablet) {
     return (
-      <div ref={rootRef} className="flex h-dvh flex-col bg-background">
-        <header className="flex h-12 shrink-0 items-center justify-between border-b border-border px-3">
-          <Brand />
-          <ResetButton />
-        </header>
+      <div ref={rootRef} className="flex h-dvh flex-col bg-background pt-14">
         <div className="flex h-[35dvh] min-h-44 shrink-0 flex-col overflow-hidden border-b border-border" style={backdrop}>
           <PreviewStage showHint={false} className="flex-1" />
         </div>
         <div aria-label="Settings" role="region" className="min-h-0 flex-1 overflow-y-auto">
           <SettingsPanel autoFocus={autoFocus} />
+          <div className="flex justify-center px-3 pb-24 pt-2">
+            <ResetButton />
+          </div>
         </div>
         {/* Only while the editor is on screen (it sits under the home page). */}
         {inView && <ExportSheet />}
@@ -73,12 +58,11 @@ export function EditorLayout({ autoFocus = true }: { autoFocus?: boolean }) {
 
   const settings = (
     <Card label="Settings" className="h-full">
-      <div className="flex h-12 shrink-0 items-center justify-between border-b border-border px-3">
-        <Brand />
-        <ResetButton />
-      </div>
       <div className="min-h-0 flex-1 overflow-y-auto">
         <SettingsPanel autoFocus={autoFocus} />
+      </div>
+      <div className="flex shrink-0 justify-center border-t border-border px-3 py-2">
+        <ResetButton />
       </div>
     </Card>
   )
@@ -90,8 +74,8 @@ export function EditorLayout({ autoFocus = true }: { autoFocus?: boolean }) {
   )
 
   return (
-    <div className="h-dvh overflow-hidden" style={backdrop}>
-      <div className="grid h-full grid-cols-[minmax(300px,360px)_1fr] gap-4 p-4 lg:grid-cols-[360px_1fr_300px]">
+    <div ref={rootRef} className="h-dvh overflow-hidden" style={backdrop}>
+      <div className="grid h-full grid-cols-[minmax(300px,360px)_1fr] gap-4 px-4 pb-4 pt-16 lg:grid-cols-[360px_1fr_300px]">
         {settings}
         {desktop ? (
           <>
