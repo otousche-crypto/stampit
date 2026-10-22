@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import { AccordionContent, AccordionGroup, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
+import { Banner, BannerTitle } from '@/components/ui/banner'
+import { useEditor } from './EditorProvider'
 import { PresetSection } from './sections/PresetSection'
 import { TextSection } from './sections/TextSection'
 import { AvatarSection } from './sections/AvatarSection'
@@ -15,15 +17,28 @@ const SECTIONS = [
   { value: 'click', label: 'On click', Component: ClickSection },
 ] as const
 
+const NOTICES = {
+  'invalid-link': "This link couldn't be read. We loaded a fresh badge.",
+  'missing-photo': "Your photo isn't stored in this link. Upload it again or use an image URL.",
+} as const
+
 const isDesktop = () => typeof window !== 'undefined' && window.matchMedia('(min-width: 1024px)').matches
 
 export function SettingsPanel() {
   // All sections open on desktop; only "Text" on smaller screens.
   const [open, setOpen] = useState<string[]>(() => (isDesktop() ? SECTIONS.map((s) => s.value) : ['text']))
   const [autoFocus] = useState(isDesktop)
+  const { notice, dismissNotice } = useEditor()
 
   return (
     <div className="flex flex-col pb-24 lg:pb-6">
+      {notice && (
+        <div className="px-3 pt-3">
+          <Banner status={notice === 'invalid-link' ? 'error' : 'warning'} size="compact" dismissible onDismiss={dismissNotice}>
+            <BannerTitle>{NOTICES[notice]}</BannerTitle>
+          </Banner>
+        </div>
+      )}
       <PresetSection />
       <AccordionGroup
         type="multiple"

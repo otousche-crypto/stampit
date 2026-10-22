@@ -1,11 +1,11 @@
 import { Link } from 'react-router'
-import { Button } from '@/components/ui/button'
 import { typeClass } from '@/lib/type-scale'
 import { fontWeights } from '@/lib/font-weight'
 import { cn } from '@/lib/utils'
 import { SettingsPanel } from './SettingsPanel'
 import { PreviewPanel } from './PreviewPanel'
 import { ExportPanel } from './ExportPanel'
+import { ResetButton } from './ResetButton'
 
 export function EditorLayout() {
   return (
@@ -18,9 +18,7 @@ export function EditorLayout() {
         >
           Stampit
         </Link>
-        <Button variant="ghost" size="compact">
-          Reset
-        </Button>
+        <ResetButton />
       </header>
       <div className="grid min-h-0 flex-1 grid-cols-1 md:grid-cols-[minmax(300px,360px)_1fr] lg:grid-cols-[360px_1fr_280px]">
         <aside aria-label="Settings" className="min-h-0 overflow-y-auto border-r border-border">
