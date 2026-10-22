@@ -84,3 +84,14 @@ describe('generateHtml', () => {
     expect(css).toContain('padding:0 10px 0 10px')
   })
 })
+
+describe('reduced motion', () => {
+  it('cancels every movement with selectors that win', () => {
+    const { css } = generateBadge(FIXTURES['bubbles-2'])
+    const media = css.slice(css.indexOf('@media (prefers-reduced-motion:reduce)'))
+    expect(media).toContain('.sp-test1234[data-js] .sp-test1234__menu[data-open] li{transform:none;transition-property:opacity;transition-delay:0s}')
+    expect(media).toContain('.sp-test1234__bub:hover{transform:none')
+    const link = generateBadge(FIXTURES['link-initials']).css
+    expect(link).toContain('.sp-test1234 .sp-test1234__pill:hover .sp-test1234__ic,.sp-test1234 .sp-test1234__pill:focus-visible .sp-test1234__ic{transform:none}')
+  })
+})

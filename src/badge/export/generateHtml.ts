@@ -176,7 +176,7 @@ function buildCss(config: BadgeConfig, avatar: ResolvedAvatar, previewScheme?: '
   const vars = [paletteVars(lightOrBase, v)]
   if (anyBlur) vars.push(`${v}blur:${lightOrBase.blur}px`)
   rules.push(
-    `.${c}{${vars.join(';')};display:inline-block;position:relative;vertical-align:middle;font-family:${FONT_STACKS[config.text.font]};font-size:${size.text}px;font-weight:400;line-height:1.2;text-align:left;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}`,
+    `.${c}{${vars.join(';')};display:inline-block;position:relative;vertical-align:middle;font-family:${FONT_STACKS[config.text.font]};font-size:${size.text}px;font-weight:400;font-style:normal;font-variant:normal;line-height:1.2;text-align:left;white-space:nowrap;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}`,
   )
 
   const pill = [
@@ -260,11 +260,15 @@ function buildCss(config: BadgeConfig, avatar: ResolvedAvatar, previewScheme?: '
     else if (previewScheme !== 'light') rules.push(`@media (prefers-color-scheme:dark){${darkRules}}`)
   }
 
-  const reduced = [`.${c}__ic{transition:none}.${c} .${c}__ic{transform:none}`]
-  if (bubbles) {
-    // Fades only: no travel, no stagger, no scale.
+  // Reduced motion: nothing travels, rotates or scales; state changes are instant or fade.
+  const reduced = [`.${c}__ic{transition:none}`]
+  if (!bubbles) {
+    reduced.push(`.${c} .${c}__pill:hover .${c}__ic,.${c} .${c}__pill:focus-visible .${c}__ic{transform:none}`)
+  } else {
     reduced.push(
-      `.${c} .${c}__menu li{transform:none;transition-property:opacity;transition-delay:0s}.${c}__bub,.${c}__bub:hover{transform:none}`,
+      `.${c} .${c}__pill[aria-expanded=false]:hover .${c}__ic{transform:none}`,
+      `.${c}[data-js] .${c}__menu li,.${c}[data-js] .${c}__menu[data-open] li{transform:none;transition-property:opacity;transition-delay:0s}`,
+      `.${c} .${c}__bub,.${c} .${c}__bub:hover{transform:none;transition:none}`,
     )
   }
   rules.push(`@media (prefers-reduced-motion:reduce){${reduced.join('')}}`)

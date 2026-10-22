@@ -1,7 +1,10 @@
+import { lazy, Suspense } from 'react'
 import { BrowserRouter, Route, Routes } from 'react-router'
 import { FluidProvider } from '@/lib/fluid-provider'
 import { Home } from '@/app/routes/Home'
-import { Create } from '@/app/routes/Create'
+
+// The editor carries most of the UI kit: load it only on /create.
+const Create = lazy(() => import('@/app/routes/Create').then((m) => ({ default: m.Create })))
 
 export function App() {
   return (
@@ -9,7 +12,14 @@ export function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/create" element={<Create />} />
+          <Route
+            path="/create"
+            element={
+              <Suspense fallback={<div className="h-dvh bg-background" aria-busy="true" />}>
+                <Create />
+              </Suspense>
+            }
+          />
           <Route path="*" element={<Home />} />
         </Routes>
       </BrowserRouter>
