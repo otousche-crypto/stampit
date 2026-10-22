@@ -48,6 +48,12 @@ function useWindowWidth(): number {
 /** Same colours as the editor preview (light and dark), so home and editor run on as one surface. */
 const PAGE_BACKGROUND = 'bg-[#F2F2F7] dark:bg-[#1C1C1E]'
 
+/**
+ * Dark hero: near black at the top, easing into the editor's grey at the
+ * bottom, so the page stays one continuous surface.
+ */
+const HERO_DARK = 'dark:bg-[linear-gradient(to_bottom,#070708_0%,#070708_55%,#1C1C1E_100%)]'
+
 /** iPhone 17: 402 × 874 pt screen. */
 const IPHONE_17 = { width: 402, height: 874, bezel: 10 }
 
@@ -69,9 +75,9 @@ function PhoneBottom({ children }: { children: ReactNode }) {
   return (
     // Wider than the phone so its rim and shadow are never clipped; only the
     // top fades out.
-    <div className="relative -mb-20 mt-2 h-[min(470px,50dvh)] w-[min(582px,100vw)] shrink-0 overflow-hidden [mask-image:linear-gradient(to_bottom,transparent,#000_80px)]">
+    <div className="relative -mb-20 mt-2 h-[min(470px,50dvh)] w-[min(822px,100vw)] shrink-0 overflow-hidden [mask-image:linear-gradient(to_bottom,transparent,#000_80px)]">
       <div
-        className="absolute bottom-[104px] left-1/2 rounded-[62px] bg-[#1a1a1c] shadow-[0_0_0_2px_#c7c7cc,0_0_0_3px_rgba(0,0,0,0.1),0_40px_80px_-24px_rgba(0,0,0,0.45)] dark:shadow-[0_0_0_2px_#48484d,0_0_0_3px_rgba(255,255,255,0.06),0_40px_80px_-24px_rgba(0,0,0,0.8)]"
+        className="absolute bottom-[104px] left-1/2 rounded-[62px] bg-[#1a1a1c] shadow-[0_0_0_2px_#c7c7cc,0_0_0_3px_rgba(0,0,0,0.1),0_40px_80px_-24px_rgba(0,0,0,0.45)] dark:shadow-[0_0_0_2px_#48484d,0_0_0_3px_rgba(255,255,255,0.06),0_40px_80px_-24px_rgba(0,0,0,0.9),0_0_160px_40px_rgba(0,0,0,0.85)]"
         style={{
           width: IPHONE_17.width + 2 * IPHONE_17.bezel,
           padding: IPHONE_17.bezel,
@@ -109,7 +115,7 @@ export function Home() {
   const demoHtml = useAppearance() === 'dark' ? DEMO_HTML_DARK : DEMO_HTML_LIGHT
   return (
     <>
-      <div className={cn('flex min-h-dvh flex-col', PAGE_BACKGROUND)}>
+      <div className={cn('flex min-h-dvh flex-col', PAGE_BACKGROUND, HERO_DARK)}>
 
         <main className="flex flex-1 flex-col items-center px-4 pb-16 pt-24 sm:pt-28">
           {/* Hero: a marketing headline, deliberately beyond the type scale. */}
