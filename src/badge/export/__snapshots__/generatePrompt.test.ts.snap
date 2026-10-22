@@ -1,0 +1,481 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`generatePrompt > snapshot: adaptive 1`] = `
+"# Add a "Made by" signature badge to this project
+
+## Goal
+
+Add this signature badge to the footer of the current project, using the project's own stack and conventions (components, styling approach, file structure). The badge reads "Built by Grace Hopper".
+Match the visual spec and behavior below exactly. The reference implementation at the end is the source of truth: adapt it to the project rather than pasting it as-is when a native approach fits better. Add no new dependency.
+
+## Visual spec
+
+- Layout: [avatar] · normal text · bold text · icon, in one row, vertically centered, no wrapping.
+- Order: normal text, then bold text. One regular space between them.
+- Normal text: "Built by", weight 400.
+- Bold text: "Grace Hopper", weight 500.
+- Font: system stack only, no web font: -apple-system,system-ui,"SF Pro Text","Helvetica Neue","Segoe UI",Roboto,sans-serif.
+- Size M: height 36px, font size 15px, padding 0 12px 0 4px, gap 8px.
+- Corner radius: 18px (a full capsule).
+- Border: 1px, drawn as an inner ring (box-shadow: inset 0 0 0 1px <border color>) so it never changes the size.
+- Shadow: 0 1px 6px rgba(0,0,0,.08); on hover 0 2px 12px rgba(0,0,0,.12).
+- Icon: an "arrow-up-right" (Lucide path: line 7,17 → 17,7 and polyline 7,7 17,7 17,17), 14px, 2px stroke, currentColor, in the icon color, aria-hidden.
+- Avatar: round, 28px, background #FF6B35, initials "GH" in #000000, weight 600, 11px.
+- Colors follow the site theme through prefers-color-scheme.
+- Light palette:
+  - Background: #FFFFFF
+  - Border: #0000000D
+  - Normal text: #6E6E73
+  - Bold text: #000000
+  - Icon: #6E6E73
+  - Backdrop blur: none
+- Dark palette:
+  - Background: #14141C
+  - Border: #2E2E3A
+  - Normal text: #8A8A99
+  - Bold text: #FFFFFF
+  - Icon: #8A8A99
+  - Backdrop blur: none
+- Scope every class with a unique prefix and reset box-sizing, margin, padding, font, line-height and list-style on the badge and its children, so the host page CSS cannot leak in.
+
+## Behavior
+
+- Motion uses springs, expressed in CSS as linear() easings (values in the reference): fast = 0.08s, no bounce; moderate = 0.16s, no bounce; slow = 0.24s, bounce 0.12; slow exit = 0.16s tween. Never hard-code other durations.
+- Mode: Link. The whole badge is one <a href="mailto:grace@example.com">.
+- Hover and keyboard focus: the arrow slides 2px up and 2px right (fast spring).
+- Hover: the shadow grows as specified (fast spring).
+- prefers-reduced-motion: reduce → no movement, rotation or scaling; state changes are instant or fade only.
+
+## Accessibility
+
+- The link's accessible name is "Built by Grace Hopper".
+- Visible focus: a 2px outline in the bold text color, offset 2px, on :focus-visible.
+- The avatar and icons are decorative (alt="" / aria-hidden).
+- Touch targets of at least 44 × 44px.
+
+## Reference implementation
+
+Standalone HTML/CSS, tested in Chrome, Safari and Firefox:
+
+\`\`\`html
+<!-- Stampit badge · edit: https://stampit.example/create#c=abc -->
+<style>.sp-test1234{--sp-test1234-fast:linear(0,.08,.24,.409,.558,.678,.77,.838,.887,.922,.947,.964,.976,.984,.989,.993,.995,.997,.998,.999,1)}.sp-test1234,.sp-test1234 *,.sp-test1234 *::before,.sp-test1234 *::after{box-sizing:border-box;margin:0;padding:0;border:0;font:inherit;line-height:inherit;letter-spacing:normal;text-transform:none;text-decoration:none;list-style:none;background:none;color:inherit;max-width:none;min-width:0;float:none}.sp-test1234{--sp-test1234-bg:#ffffff;--sp-test1234-bd:#0000000d;--sp-test1234-tn:#6e6e73;--sp-test1234-tb:#000000;--sp-test1234-ic:#6e6e73;display:inline-block;position:relative;vertical-align:middle;font-family:-apple-system,system-ui,"SF Pro Text","Helvetica Neue","Segoe UI",Roboto,sans-serif;font-size:15px;font-weight:400;line-height:1.2;text-align:left;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}.sp-test1234__pill{display:inline-flex;align-items:center;gap:8px;height:36px;padding:0 12px 0 4px;border-radius:18px;background:var(--sp-test1234-bg);box-shadow:inset 0 0 0 1px var(--sp-test1234-bd),0 1px 6px rgba(0,0,0,.08);color:var(--sp-test1234-tb);white-space:nowrap;cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent;outline:none;transition:box-shadow .08s var(--sp-test1234-fast)}.sp-test1234__pill:hover{box-shadow:inset 0 0 0 1px var(--sp-test1234-bd),0 2px 12px rgba(0,0,0,.12)}.sp-test1234__pill:focus-visible{outline:2px solid var(--sp-test1234-tb);outline-offset:2px}.sp-test1234__av{flex:none;display:grid;place-items:center;width:28px;height:28px;border-radius:50%;overflow:hidden;background:#ff6b35;color:#000000;font-size:11px;font-weight:600;line-height:1}.sp-test1234__n{color:var(--sp-test1234-tn)}.sp-test1234__b{color:var(--sp-test1234-tb);font-weight:500}.sp-test1234__ic{flex:none;display:block;color:var(--sp-test1234-ic);transition:transform .08s var(--sp-test1234-fast)}.sp-test1234__pill:hover .sp-test1234__ic,.sp-test1234__pill:focus-visible .sp-test1234__ic{transform:translate(2px,-2px)}@media (prefers-color-scheme:dark){.sp-test1234{--sp-test1234-bg:#14141c;--sp-test1234-bd:#2e2e3a;--sp-test1234-tn:#8a8a99;--sp-test1234-tb:#ffffff;--sp-test1234-ic:#8a8a99}}@media (prefers-reduced-motion:reduce){.sp-test1234__ic{transition:none}.sp-test1234 .sp-test1234__ic{transform:none}}</style>
+<div class="sp-test1234">
+  <a class="sp-test1234__pill" href="mailto:grace@example.com">
+    <span class="sp-test1234__av" aria-hidden="true">GH</span>
+    <span><span class="sp-test1234__n">Built by</span> <span class="sp-test1234__b">Grace Hopper</span></span>
+    <svg class="sp-test1234__ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>
+  </a>
+</div>
+\`\`\`
+
+## Acceptance criteria
+
+1. Rendering: the footer shows the badge at 36px high with the exact colors, radius, border and shadow above, in both light and dark site themes.
+2. Hover: the arrow slides 2px up-right and the shadow grows, with no layout shift.
+3. Click: the badge opens mailto:grace@example.com in a new tab.
+4. Keyboard: Tab reaches the badge, the focus ring is visible, Enter follows the link.
+5. Reduced motion: with prefers-reduced-motion enabled, nothing moves; changes are instant or fades.
+"
+`;
+
+exports[`generatePrompt > snapshot: bubbles-2 1`] = `
+"# Add a "Made by" signature badge to this project
+
+## Goal
+
+Add this signature badge to the footer of the current project, using the project's own stack and conventions (components, styling approach, file structure). The badge reads "Launched by Olivier Tousche".
+Match the visual spec and behavior below exactly. The reference implementation at the end is the source of truth: adapt it to the project rather than pasting it as-is when a native approach fits better. Add no new dependency.
+
+## Visual spec
+
+- Layout: [avatar] · normal text · bold text · icon, in one row, vertically centered, no wrapping.
+- Order: normal text, then bold text. One regular space between them.
+- Normal text: "Launched by", weight 400.
+- Bold text: "Olivier Tousche", weight 500.
+- Font: system stack only, no web font: -apple-system,system-ui,"SF Pro Text","Helvetica Neue","Segoe UI",Roboto,sans-serif.
+- Size M: height 36px, font size 15px, padding 0 12px 0 4px, gap 8px.
+- Corner radius: 18px (a full capsule).
+- Border: 1px, drawn as an inner ring (box-shadow: inset 0 0 0 1px <border color>) so it never changes the size.
+- Shadow: 0 1px 6px rgba(0,0,0,.08); on hover 0 2px 12px rgba(0,0,0,.12).
+- Icon: a "+" (two 2px strokes, round caps), 14px, in the icon color. It rotates 45° into "×" while the menu is open.
+- Avatar: round, 28px, image /olivier-avatar.png, object-fit: cover, background #FF6B35 behind transparent pixels. Decorative: alt="".
+- Colors:
+  - Background: #FFFFFF
+  - Border: #0000000D
+  - Normal text: #6E6E73
+  - Bold text: #000000
+  - Icon: #6E6E73
+  - Backdrop blur: none
+- Scope every class with a unique prefix and reset box-sizing, margin, padding, font, line-height and list-style on the badge and its children, so the host page CSS cannot leak in.
+
+## Behavior
+
+- Motion uses springs, expressed in CSS as linear() easings (values in the reference): fast = 0.08s, no bounce; moderate = 0.16s, no bounce; slow = 0.24s, bounce 0.12; slow exit = 0.16s tween. Never hard-code other durations.
+- Mode: Bubbles. Clicking the badge toggles a small menu of links ("bubbles"). Hovering does not open it.
+- Links, in this order:
+  1. LinkedIn: https://www.linkedin.com/in/olivier
+  2. Website: https://olivier.dev
+- Links open in a new tab, except email links (mailto:, never target="_blank").
+- Bubbles: circles of 40px; same background, border and shadow as the badge; corner radius scaled like the badge; inline SVG icon 18px in the icon color. Touch target at least 44 × 44px.
+- Icon only: a tooltip with the channel name appears after 0.3s of hover and at once on keyboard focus. On touch screens (hover: none), show the names under the bubbles at 11px instead.
+- Placement: one row centered on the badge, 12px above it, 8px between bubbles, in a gentle arc (the middle sits 8px higher than the ends).
+- If there is less room above than the menu height + 16px, open below with the arc inverted.
+- Keep the row at least 8px from the viewport edges. If it is wider than the viewport minus 16px, use 2 rows, the longer one nearest the badge.
+- Reposition on scroll and resize (requestAnimationFrame); close if the badge leaves the viewport.
+- Opening: each bubble travels from the badge center to its place, scale 0.6 → 1, opacity 0 → 1 (slow spring), staggered 30ms from the center outwards. Closing: all together, back into the badge with a fade (slow exit). Bubble hover: scale 1.08 (fast).
+- Use the native popover API (<ul popover="auto"> + popovertarget on the button) so the menu renders in the top layer: never clipped by overflow: hidden or a transform. Fall back to a class toggle + outside click + Escape where popover is unsupported. Without JS the popover opens centered and stays usable.
+- Hide the menu when printing.
+- prefers-reduced-motion: reduce → no movement, rotation or scaling; state changes are instant or fade only.
+
+## Accessibility
+
+- Disclosure pattern, not role="menu": the badge is a <button> named "Launched by Olivier Tousche, show links" with aria-expanded and aria-controls; the bubbles are a <ul> of <a>.
+- Each bubble is named "{Channel}, opens in a new tab" (email: "Email {bold text}").
+- Keyboard: Tab reaches the badge; Enter/Space opens and focuses the first bubble; arrow keys move between bubbles and wrap; Home/End jump to the first/last; Enter follows the link; Escape closes and returns focus to the badge; Tab from a bubble closes the menu and continues the tab order.
+- Touch: tap to open, tap a bubble to navigate, tap outside to close.
+- Visible focus: a 2px outline in the bold text color, offset 2px, on :focus-visible.
+- The avatar and icons are decorative (alt="" / aria-hidden).
+- Touch targets of at least 44 × 44px.
+
+## Reference implementation
+
+Standalone HTML/CSS/JS, tested in Chrome, Safari and Firefox:
+
+\`\`\`html
+<!-- Stampit badge · edit: https://stampit.example/create#c=abc -->
+<style>.sp-test1234{--sp-test1234-fast:linear(0,.08,.24,.409,.558,.678,.77,.838,.887,.922,.947,.964,.976,.984,.989,.993,.995,.997,.998,.999,1);--sp-test1234-moderate:linear(0,.08,.238,.406,.554,.674,.767,.835,.885,.921,.946,.963,.975,.983,.989,.993,.995,.997,.998,.999,1);--sp-test1234-slow-exit:cubic-bezier(.4,0,1,1);--sp-test1234-slow:linear(0,.072,.224,.394,.551,.682,.784,.86,.913,.949,.973,.987,.996,1,1.002,1.003,1.003,1.003,1.002,1.002,1)}.sp-test1234,.sp-test1234 *,.sp-test1234 *::before,.sp-test1234 *::after{box-sizing:border-box;margin:0;padding:0;border:0;font:inherit;line-height:inherit;letter-spacing:normal;text-transform:none;text-decoration:none;list-style:none;background:none;color:inherit;max-width:none;min-width:0;float:none}.sp-test1234{--sp-test1234-bg:#ffffff;--sp-test1234-bd:#0000000d;--sp-test1234-tn:#6e6e73;--sp-test1234-tb:#000000;--sp-test1234-ic:#6e6e73;display:inline-block;position:relative;vertical-align:middle;font-family:-apple-system,system-ui,"SF Pro Text","Helvetica Neue","Segoe UI",Roboto,sans-serif;font-size:15px;font-weight:400;line-height:1.2;text-align:left;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}.sp-test1234__pill{display:inline-flex;align-items:center;gap:8px;height:36px;padding:0 12px 0 4px;border-radius:18px;background:var(--sp-test1234-bg);box-shadow:inset 0 0 0 1px var(--sp-test1234-bd),0 1px 6px rgba(0,0,0,.08);color:var(--sp-test1234-tb);white-space:nowrap;cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent;outline:none;transition:box-shadow .08s var(--sp-test1234-fast)}.sp-test1234__pill:hover{box-shadow:inset 0 0 0 1px var(--sp-test1234-bd),0 2px 12px rgba(0,0,0,.12)}.sp-test1234__pill:focus-visible{outline:2px solid var(--sp-test1234-tb);outline-offset:2px}.sp-test1234__pill{-webkit-appearance:none;appearance:none;text-align:left}.sp-test1234__av{flex:none;display:grid;place-items:center;width:28px;height:28px;border-radius:50%;overflow:hidden;background:#ff6b35}.sp-test1234__av img{display:block;width:100%;height:100%;object-fit:cover}.sp-test1234__n{color:var(--sp-test1234-tn)}.sp-test1234__b{color:var(--sp-test1234-tb);font-weight:500}.sp-test1234__ic{flex:none;display:block;color:var(--sp-test1234-ic);transition:transform .16s var(--sp-test1234-moderate)}.sp-test1234__pill:hover .sp-test1234__ic{transform:rotate(15deg)}.sp-test1234__pill[aria-expanded=true] .sp-test1234__ic{transform:rotate(45deg)}.sp-test1234__menu{display:none;position:fixed;inset:0;width:fit-content;height:fit-content;max-width:calc(100vw - 16px);margin:auto;padding:8px;overflow:visible;background:none;border:0;color:inherit;flex-wrap:wrap;justify-content:center;gap:8px;transition:display .16s allow-discrete,overlay .16s allow-discrete}.sp-test1234__menu:popover-open{display:flex}.sp-test1234__menu.is-open{display:flex}.sp-test1234__menu li{position:relative;display:flex;flex-direction:column;align-items:center}.sp-test1234[data-js] .sp-test1234__menu{width:auto;height:auto;max-width:none;margin:0;padding:0;pointer-events:none}.sp-test1234[data-js] .sp-test1234__menu li{position:absolute;pointer-events:auto;opacity:0;transform:translate(var(--dx,0),var(--dy,0)) scale(.6);transition:transform .16s var(--sp-test1234-slow-exit),opacity .16s var(--sp-test1234-slow-exit)}.sp-test1234[data-js] .sp-test1234__menu[data-open] li{opacity:1;transform:none;transition:transform .24s var(--sp-test1234-slow) var(--d,0s),opacity .24s var(--sp-test1234-slow) var(--d,0s)}.sp-test1234__bub{position:relative;display:flex;align-items:center;justify-content:center;gap:6px;min-width:40px;height:40px;padding:0;border-radius:20px;background:var(--sp-test1234-bg);box-shadow:inset 0 0 0 1px var(--sp-test1234-bd),0 1px 6px rgba(0,0,0,.08);color:var(--sp-test1234-ic);white-space:nowrap;outline:none;-webkit-tap-highlight-color:transparent;transition:transform .08s var(--sp-test1234-fast)}.sp-test1234__bub::before{content:"";position:absolute;inset:-2px}.sp-test1234__bub:hover{transform:scale(1.08)}.sp-test1234__bub:focus-visible{outline:2px solid var(--sp-test1234-tb);outline-offset:2px}.sp-test1234__bub svg{display:block;flex:none;width:18px;height:18px}.sp-test1234__tip{position:absolute;left:50%;bottom:calc(100% + 6px);transform:translateX(-50%);padding:4px 8px;border-radius:6px;background:rgba(0,0,0,.85);color:#fff;font-size:12px;line-height:16px;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .08s var(--sp-test1234-fast)}.sp-test1234__menu[data-side=bottom] .sp-test1234__tip{bottom:auto;top:calc(100% + 6px)}.sp-test1234__bub:hover+.sp-test1234__tip{opacity:1;transition-delay:.3s}.sp-test1234__bub:focus-visible+.sp-test1234__tip{opacity:1;transition-delay:0s}@media (hover:none){.sp-test1234__tip,.sp-test1234__menu[data-side=bottom] .sp-test1234__tip{position:static;transform:none;margin-top:4px;padding:0;background:none;color:var(--sp-test1234-tb);font-size:11px;line-height:14px;opacity:1}}@media (prefers-reduced-motion:reduce){.sp-test1234__ic{transition:none}.sp-test1234 .sp-test1234__ic{transform:none}.sp-test1234 .sp-test1234__menu li{transform:none;transition-property:opacity;transition-delay:0s}.sp-test1234__bub,.sp-test1234__bub:hover{transform:none}}@media print{.sp-test1234__menu{display:none}}</style>
+<div class="sp-test1234">
+  <button type="button" class="sp-test1234__pill" popovertarget="sp-test1234-menu" aria-expanded="false" aria-controls="sp-test1234-menu" aria-label="Launched by Olivier Tousche, show links">
+    <span class="sp-test1234__av" aria-hidden="true"><img src="/olivier-avatar.png" alt="" width="28" height="28" decoding="async"></span>
+    <span><span class="sp-test1234__n">Launched by</span> <span class="sp-test1234__b">Olivier Tousche</span></span>
+    <svg class="sp-test1234__ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+  </button>
+  <ul id="sp-test1234-menu" popover="auto" class="sp-test1234__menu">
+    <li><a class="sp-test1234__bub" href="https://www.linkedin.com/in/olivier" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn, opens in a new tab"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true" focusable="false"><path d="M20.4 20.5h-3.6v-5.6c0-1.3 0-3-1.9-3-1.9 0-2.1 1.4-2.1 2.9v5.7H9.4V9h3.4v1.6h0c.5-.9 1.6-1.8 3.4-1.8 3.6 0 4.3 2.4 4.3 5.5v6.3zM5.3 7.4c-1.1 0-2.1-.9-2.1-2.1 0-1.1.9-2.1 2.1-2.1 1.1 0 2.1.9 2.1 2.1 0 1.1-.9 2.1-2.1 2.1zm1.8 13H3.6V9h3.6v11.5zM22.2 0H1.8C.8 0 0 .8 0 1.7v20.5C0 23.2.8 24 1.8 24h20.5C23.2 24 24 23.2 24 22.3V1.7C24 .8 23.2 0 22.2 0h0z"/></svg></a><span class="sp-test1234__tip" aria-hidden="true">LinkedIn</span></li>
+    <li><a class="sp-test1234__bub" href="https://olivier.dev" target="_blank" rel="noopener noreferrer" aria-label="Website, opens in a new tab"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 1 0 0-20M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></a><span class="sp-test1234__tip" aria-hidden="true">Website</span></li>
+  </ul>
+</div>
+<script>!function(){var e=document.currentScript,t=e&&e.previousElementSibling;if(t&&t.classList.contains("sp-test1234")||(t=document.querySelector(".sp-test1234")),t){var n=t.querySelector(".sp-test1234__pill"),r=t.querySelector(".sp-test1234__menu");if(n&&r&&!t.hasAttribute("data-js")){var o=r.id,i=document.querySelectorAll('[id="'+o+'"]').length;i>1&&(o+="-"+i,r.id=o,n.setAttribute("popovertarget",o),n.setAttribute("aria-controls",o)),t.setAttribute("data-js","");var a=[].slice.call(r.querySelectorAll("a")),s=HTMLElement.prototype.hasOwnProperty("popover"),c=0,l=!1,u=30;a.forEach(function(e){e.tabIndex=-1}),s?(r.addEventListener("beforetoggle",function(e){"closed"===e.newState&&m()}),r.addEventListener("toggle",function(e){"open"!==e.newState||l||h()})):(n.addEventListener("click",function(){l?f():(r.classList.add("is-open"),h())}),document.addEventListener("pointerdown",function(e){l&&!t.contains(e.target)&&f()})),r.addEventListener("keydown",function(e){var t=a.indexOf(document.activeElement),r=e.key,o=a.length,i=-1;if("ArrowRight"===r||"ArrowDown"===r)i=(t+1)%o;else if("ArrowLeft"===r||"ArrowUp"===r)i=(t-1+o)%o;else if("Home"===r)i=0;else if("End"===r)i=o-1;else{if("Escape"===r)return e.preventDefault(),f(),void n.focus();if("Tab"===r)return f(),n.focus(),void(e.shiftKey&&e.preventDefault())}i>=0&&(e.preventDefault(),a[i].focus())}),s||t.addEventListener("keydown",function(e){"Escape"===e.key&&l&&(f(),n.focus())}),r.addEventListener("click",function(e){e.target.closest&&e.target.closest("a")&&setTimeout(f,0)})}}function d(){return s?r.matches(":popover-open"):l}function f(){if(d())if(s)try{r.hidePopover()}catch(e){}else r.classList.remove("is-open"),m()}function p(){if(c=0,d()){var e=r.currentCSSZoom||1,t=n.getBoundingClientRect(),o=document.documentElement.clientWidth,i=innerHeight;if(t.bottom<0||t.top>i||t.right<0||t.left>o)f();else{var a=[].slice.call(r.children),s=a.length?a[0].offsetHeight*e:0,l=function(t){return t.offsetWidth*e},p=function(e){return e.reduce(function(e,t){return e+l(t)},0)+8*(e.length-1)},v=Math.ceil(a.length/2),h=p(a)>o-16&&a.length>1?[a.slice(0,v),a.slice(v)]:[a],m=h.length*s+8*(h.length-1)+8,g=t.top-12>=m+16;r.setAttribute("data-side",g?"top":"bottom");var _=t.left+t.width/2,E=t.top+t.height/2;h.forEach(function(n,r){var i=Math.max(8,Math.min(_-p(n)/2,o-8-p(n))),a=(n.length-1)/2,c=g?t.top-12-s-r*(s+8):t.bottom+12+r*(s+8);n.forEach(function(t,n){var o=l(t),d=a?(n-a)/a:0,f=c+8*(g?-1:1)*(1-d*d);t.style.left=i/e+"px",t.style.top=f/e+"px",t.style.setProperty("--dx",(_-i-o/2)/e+"px"),t.style.setProperty("--dy",(E-f-s/2)/e+"px"),t.style.setProperty("--d",(Math.floor(Math.abs(n-a))+r)*u+"ms"),i+=o+8})})}}}function v(){c||(c=requestAnimationFrame(p))}function h(){l=!0,n.setAttribute("aria-expanded","true"),a.forEach(function(e){e.removeAttribute("tabindex")}),p(),r.offsetWidth,r.setAttribute("data-open",""),a[0]&&a[0].focus({preventScroll:!0}),addEventListener("scroll",v,!0),addEventListener("resize",v)}function m(){l=!1,r.removeAttribute("data-open"),n.setAttribute("aria-expanded","false"),a.forEach(function(e){e.tabIndex=-1}),removeEventListener("scroll",v,!0),removeEventListener("resize",v)}}();</script>
+\`\`\`
+
+## Acceptance criteria
+
+1. Rendering: the footer shows the badge at 36px high with the exact colors, radius, border and shadow above, in the page.
+2. Hover: the "+" nudges and the shadow grows; the menu does not open on hover, with no layout shift.
+3. Open/close: a click opens the bubbles above the badge (below near the top of the screen), inside the viewport; outside click, Escape and a second click close them.
+4. Keyboard: Tab, Enter/Space, arrows, Home/End and Escape work as specified, focus returns to the badge, and the focus ring is visible.
+5. Reduced motion: with prefers-reduced-motion enabled, nothing moves; changes are instant or fades.
+"
+`;
+
+exports[`generatePrompt > snapshot: bubbles-8 1`] = `
+"# Add a "Made by" signature badge to this project
+
+## Goal
+
+Add this signature badge to the footer of the current project, using the project's own stack and conventions (components, styling approach, file structure). The badge reads "Made by Eight Links".
+Match the visual spec and behavior below exactly. The reference implementation at the end is the source of truth: adapt it to the project rather than pasting it as-is when a native approach fits better. Add no new dependency.
+
+## Visual spec
+
+- Layout: [avatar] · normal text · bold text · icon, in one row, vertically centered, no wrapping.
+- Order: normal text, then bold text. One regular space between them.
+- Normal text: "Made by", weight 400.
+- Bold text: "Eight Links", weight 500.
+- Font: system stack only, no web font: -apple-system,system-ui,"SF Pro Text","Helvetica Neue","Segoe UI",Roboto,sans-serif.
+- Size S: height 30px, font size 13px, padding 0 10px 0 4px, gap 6px.
+- Corner radius: 4.5px.
+- Border: 1px, drawn as an inner ring (box-shadow: inset 0 0 0 1px <border color>) so it never changes the size.
+- Shadow: none.
+- Icon: a "+" (two 2px strokes, round caps), 12px, in the icon color. It rotates 45° into "×" while the menu is open.
+- Avatar: round, 22px, background #FF6B35, initials "EL" in #000000, weight 600, 9px.
+- Colors:
+  - Background: #14141C
+  - Border: #2E2E3A
+  - Normal text: #8A8A99
+  - Bold text: #FFFFFF
+  - Icon: #8A8A99
+  - Backdrop blur: none
+- Scope every class with a unique prefix and reset box-sizing, margin, padding, font, line-height and list-style on the badge and its children, so the host page CSS cannot leak in.
+
+## Behavior
+
+- Motion uses springs, expressed in CSS as linear() easings (values in the reference): fast = 0.08s, no bounce; moderate = 0.16s, no bounce; slow = 0.24s, bounce 0.12; slow exit = 0.16s tween. Never hard-code other durations.
+- Mode: Bubbles. Clicking the badge toggles a small menu of links ("bubbles"). Hovering does not open it.
+- Links, in this order:
+  1. X: https://x.com/eight
+  2. GitHub: https://github.com/eight
+  3. LinkedIn: https://linkedin.com/in/eight
+  4. Dribbble: https://dribbble.com/eight
+  5. YouTube: https://youtube.com/@eight
+  6. Bluesky: https://bsky.app/profile/eight
+  7. Email: mailto:eight@example.com
+  8. Portfolio: https://eight.example
+- Links open in the same tab.
+- Bubbles: circles of 36px that become capsules with icon + label (label in the bold text color); same background, border and shadow as the badge; corner radius scaled like the badge; inline SVG icon 18px in the icon color. Touch target at least 44 × 44px.
+- Labels are always visible.
+- Placement: one row centered on the badge, 12px above it, 8px between bubbles, in a gentle arc (the middle sits 8px higher than the ends).
+- If there is less room above than the menu height + 16px, open below with the arc inverted.
+- Keep the row at least 8px from the viewport edges. If it is wider than the viewport minus 16px, use 2 rows, the longer one nearest the badge.
+- Reposition on scroll and resize (requestAnimationFrame); close if the badge leaves the viewport.
+- Opening: each bubble travels from the badge center to its place, scale 0.6 → 1, opacity 0 → 1 (slow spring), staggered 30ms from the center outwards. Closing: all together, back into the badge with a fade (slow exit). Bubble hover: scale 1.08 (fast).
+- Use the native popover API (<ul popover="auto"> + popovertarget on the button) so the menu renders in the top layer: never clipped by overflow: hidden or a transform. Fall back to a class toggle + outside click + Escape where popover is unsupported. Without JS the popover opens centered and stays usable.
+- Hide the menu when printing.
+- prefers-reduced-motion: reduce → no movement, rotation or scaling; state changes are instant or fade only.
+
+## Accessibility
+
+- Disclosure pattern, not role="menu": the badge is a <button> named "Made by Eight Links, show links" with aria-expanded and aria-controls; the bubbles are a <ul> of <a>.
+- Each bubble is named "{Channel}, opens in a new tab" (email: "Email {bold text}").
+- Keyboard: Tab reaches the badge; Enter/Space opens and focuses the first bubble; arrow keys move between bubbles and wrap; Home/End jump to the first/last; Enter follows the link; Escape closes and returns focus to the badge; Tab from a bubble closes the menu and continues the tab order.
+- Touch: tap to open, tap a bubble to navigate, tap outside to close.
+- Visible focus: a 2px outline in the bold text color, offset 2px, on :focus-visible.
+- The avatar and icons are decorative (alt="" / aria-hidden).
+- Touch targets of at least 44 × 44px.
+
+## Reference implementation
+
+Standalone HTML/CSS/JS, tested in Chrome, Safari and Firefox:
+
+\`\`\`html
+<!-- Stampit badge · edit: https://stampit.example/create#c=abc -->
+<style>.sp-test1234{--sp-test1234-moderate:linear(0,.08,.238,.406,.554,.674,.767,.835,.885,.921,.946,.963,.975,.983,.989,.993,.995,.997,.998,.999,1);--sp-test1234-slow-exit:cubic-bezier(.4,0,1,1);--sp-test1234-slow:linear(0,.072,.224,.394,.551,.682,.784,.86,.913,.949,.973,.987,.996,1,1.002,1.003,1.003,1.003,1.002,1.002,1);--sp-test1234-fast:linear(0,.08,.24,.409,.558,.678,.77,.838,.887,.922,.947,.964,.976,.984,.989,.993,.995,.997,.998,.999,1)}.sp-test1234,.sp-test1234 *,.sp-test1234 *::before,.sp-test1234 *::after{box-sizing:border-box;margin:0;padding:0;border:0;font:inherit;line-height:inherit;letter-spacing:normal;text-transform:none;text-decoration:none;list-style:none;background:none;color:inherit;max-width:none;min-width:0;float:none}.sp-test1234{--sp-test1234-bg:#14141c;--sp-test1234-bd:#2e2e3a;--sp-test1234-tn:#8a8a99;--sp-test1234-tb:#ffffff;--sp-test1234-ic:#8a8a99;display:inline-block;position:relative;vertical-align:middle;font-family:-apple-system,system-ui,"SF Pro Text","Helvetica Neue","Segoe UI",Roboto,sans-serif;font-size:13px;font-weight:400;line-height:1.2;text-align:left;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}.sp-test1234__pill{display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 10px 0 4px;border-radius:4.5px;background:var(--sp-test1234-bg);box-shadow:inset 0 0 0 1px var(--sp-test1234-bd);color:var(--sp-test1234-tb);white-space:nowrap;cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent;outline:none}.sp-test1234__pill:focus-visible{outline:2px solid var(--sp-test1234-tb);outline-offset:2px}.sp-test1234__pill{-webkit-appearance:none;appearance:none;text-align:left}.sp-test1234__av{flex:none;display:grid;place-items:center;width:22px;height:22px;border-radius:0.5px;overflow:hidden;background:#ff6b35;color:#000000;font-size:9px;font-weight:600;line-height:1}.sp-test1234__n{color:var(--sp-test1234-tn)}.sp-test1234__b{color:var(--sp-test1234-tb);font-weight:500}.sp-test1234__ic{flex:none;display:block;color:var(--sp-test1234-ic);transition:transform .16s var(--sp-test1234-moderate)}.sp-test1234__pill:hover .sp-test1234__ic{transform:rotate(15deg)}.sp-test1234__pill[aria-expanded=true] .sp-test1234__ic{transform:rotate(45deg)}.sp-test1234__menu{display:none;position:fixed;inset:0;width:fit-content;height:fit-content;max-width:calc(100vw - 16px);margin:auto;padding:8px;overflow:visible;background:none;border:0;color:inherit;flex-wrap:wrap;justify-content:center;gap:8px;transition:display .16s allow-discrete,overlay .16s allow-discrete}.sp-test1234__menu:popover-open{display:flex}.sp-test1234__menu.is-open{display:flex}.sp-test1234__menu li{position:relative;display:flex;flex-direction:column;align-items:center}.sp-test1234[data-js] .sp-test1234__menu{width:auto;height:auto;max-width:none;margin:0;padding:0;pointer-events:none}.sp-test1234[data-js] .sp-test1234__menu li{position:absolute;pointer-events:auto;opacity:0;transform:translate(var(--dx,0),var(--dy,0)) scale(.6);transition:transform .16s var(--sp-test1234-slow-exit),opacity .16s var(--sp-test1234-slow-exit)}.sp-test1234[data-js] .sp-test1234__menu[data-open] li{opacity:1;transform:none;transition:transform .24s var(--sp-test1234-slow) var(--d,0s),opacity .24s var(--sp-test1234-slow) var(--d,0s)}.sp-test1234__bub{position:relative;display:flex;align-items:center;justify-content:center;gap:4px;min-width:36px;height:36px;padding:0 12px 0 10px;border-radius:5.4px;background:var(--sp-test1234-bg);box-shadow:inset 0 0 0 1px var(--sp-test1234-bd);color:var(--sp-test1234-ic);white-space:nowrap;outline:none;-webkit-tap-highlight-color:transparent;transition:transform .08s var(--sp-test1234-fast)}.sp-test1234__bub::before{content:"";position:absolute;inset:-4px}.sp-test1234__bub:hover{transform:scale(1.08)}.sp-test1234__bub:focus-visible{outline:2px solid var(--sp-test1234-tb);outline-offset:2px}.sp-test1234__bub svg{display:block;flex:none;width:18px;height:18px}.sp-test1234__lb{color:var(--sp-test1234-tb);font-size:12px}@media (prefers-reduced-motion:reduce){.sp-test1234__ic{transition:none}.sp-test1234 .sp-test1234__ic{transform:none}.sp-test1234 .sp-test1234__menu li{transform:none;transition-property:opacity;transition-delay:0s}.sp-test1234__bub,.sp-test1234__bub:hover{transform:none}}@media print{.sp-test1234__menu{display:none}}</style>
+<div class="sp-test1234">
+  <button type="button" class="sp-test1234__pill" popovertarget="sp-test1234-menu" aria-expanded="false" aria-controls="sp-test1234-menu" aria-label="Made by Eight Links, show links">
+    <span class="sp-test1234__av" aria-hidden="true">EL</span>
+    <span><span class="sp-test1234__n">Made by</span> <span class="sp-test1234__b">Eight Links</span></span>
+    <svg class="sp-test1234__ic" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+  </button>
+  <ul id="sp-test1234-menu" popover="auto" class="sp-test1234__menu">
+    <li><a class="sp-test1234__bub" href="https://x.com/eight" aria-label="X"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true" focusable="false"><path d="M14.2 10.2 23 0h-2.1l-7.6 8.8L7.3 0H.3l9.2 13.3L.3 24H2.3l8-9.3L16.7 24h7zm-2.8 3.3-.9-1.3L3.1 1.6h3.2l6 8.5.9 1.3 7.8 11.1h-3.2z"/></svg><span class="sp-test1234__lb">X</span></a></li>
+    <li><a class="sp-test1234__bub" href="https://github.com/eight" aria-label="GitHub"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true" focusable="false"><path d="M12 .3c-6.6 0-12 5.4-12 12 0 5.3 3.4 9.8 8.2 11.4.6.1.8-.3.8-.6 0-.3 0-1 0-2-3.3.7-4-1.6-4-1.6C4.4 18.1 3.6 17.7 3.6 17.7c-1.1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1.1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.8-1.6-2.7-.3-5.5-1.3-5.5-5.9 0-1.3.5-2.4 1.2-3.2-.1-.3-.5-1.5.1-3.2 0 0 1-.3 3.3 1.2 1-.3 2-.4 3-.4 1 0 2 .1 3 .4 2.3-1.6 3.3-1.2 3.3-1.2.6 1.7.2 2.9.1 3.2.8.8 1.2 1.9 1.2 3.2 0 4.6-2.8 5.6-5.5 5.9.4.4.8 1.1.8 2.2 0 1.6 0 2.9 0 3.3 0 .3.2.7.8.6C20.6 22.1 24 17.6 24 12.3c0-6.6-5.4-12-12-12"/></svg><span class="sp-test1234__lb">GitHub</span></a></li>
+    <li><a class="sp-test1234__bub" href="https://linkedin.com/in/eight" aria-label="LinkedIn"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true" focusable="false"><path d="M20.4 20.5h-3.6v-5.6c0-1.3 0-3-1.9-3-1.9 0-2.1 1.4-2.1 2.9v5.7H9.4V9h3.4v1.6h0c.5-.9 1.6-1.8 3.4-1.8 3.6 0 4.3 2.4 4.3 5.5v6.3zM5.3 7.4c-1.1 0-2.1-.9-2.1-2.1 0-1.1.9-2.1 2.1-2.1 1.1 0 2.1.9 2.1 2.1 0 1.1-.9 2.1-2.1 2.1zm1.8 13H3.6V9h3.6v11.5zM22.2 0H1.8C.8 0 0 .8 0 1.7v20.5C0 23.2.8 24 1.8 24h20.5C23.2 24 24 23.2 24 22.3V1.7C24 .8 23.2 0 22.2 0h0z"/></svg><span class="sp-test1234__lb">LinkedIn</span></a></li>
+    <li><a class="sp-test1234__bub" href="https://dribbble.com/eight" aria-label="Dribbble"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true" focusable="false"><path d="M12 24C5.4 24 0 18.6 0 12S5.4 0 12 0s12 5.4 12 12-5.4 12-12 12zm10.1-10.4c-.3-.1-3.2-1-6.4-.4 1.3 3.7 1.9 6.7 2 7.3 2.3-1.6 3.9-4 4.4-6.9zm-6.1 7.8c-.2-.9-.7-4-2.2-7.8l-.1 0c-5.8 2-7.9 6-8 6.4 1.7 1.4 3.9 2.2 6.3 2.2 1.4 0 2.8-.3 4-.8zm-11.6-2.6c.2-.4 3-5.1 8.3-6.8.1 0 .3-.1.4-.1-.3-.6-.5-1.2-.8-1.7C7.2 11.8 2.2 11.7 1.8 11.7l0 .3c0 2.6 1 5 2.6 6.9zm-2.4-9c.5 0 4.7 0 9.5-1.2-1.7-3-3.5-5.6-3.8-5.9-2.9 1.4-5 4-5.7 7.2zM9.6 2.1c.3.4 2.1 2.9 3.8 6 3.6-1.4 5.2-3.4 5.4-3.7-1.8-1.6-4.2-2.6-6.8-2.6-.8 0-1.6.1-2.4.3zm10.3 3.5c-.2.3-1.9 2.5-5.7 4 .2.5.5 1 .7 1.5.1.2.2.4.2.5 3.4-.4 6.8.3 7.1.3 0-2.4-.9-4.6-2.3-6.4z"/></svg><span class="sp-test1234__lb">Dribbble</span></a></li>
+    <li><a class="sp-test1234__bub" href="https://youtube.com/@eight" aria-label="YouTube"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true" focusable="false"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2C0 8.1 0 12 0 12s0 3.9.5 5.8a3 3 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1C24 15.9 24 12 24 12s0-3.9-.5-5.8zM9.5 15.6V8.4L15.8 12l-6.3 3.6z"/></svg><span class="sp-test1234__lb">YouTube</span></a></li>
+    <li><a class="sp-test1234__bub" href="https://bsky.app/profile/eight" aria-label="Bluesky"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true" focusable="false"><path d="M5.2 2.9C8 4.9 10.9 9.1 12 11.4c1.1-2.2 4-6.4 6.8-8.5C20.8 1.4 24 .2 24 3.9c0 .7-.4 6.2-.7 7-.9 3.1-4 3.8-6.8 3.4 4.9.8 6.1 3.6 3.4 6.3-5.1 5.2-7.3-1.3-7.8-3-.1-.3-.2-.4-.2-.3 0-.1 0 0-.2.3-.6 1.7-2.8 8.2-7.8 3-2.7-2.7-1.4-5.5 3.4-6.3-2.8.5-5.9-.3-6.8-3.4C.4 10 0 4.6 0 3.9c0-3.7 3.2-2.5 5.2-1"/></svg><span class="sp-test1234__lb">Bluesky</span></a></li>
+    <li><a class="sp-test1234__bub" href="mailto:eight@example.com" aria-label="Email Eight Links"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zm18 3-10 6L2 7"/></svg><span class="sp-test1234__lb">Email</span></a></li>
+    <li><a class="sp-test1234__bub" href="https://eight.example" aria-label="Portfolio"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg><span class="sp-test1234__lb">Portfolio</span></a></li>
+  </ul>
+</div>
+<script>!function(){var e=document.currentScript,t=e&&e.previousElementSibling;if(t&&t.classList.contains("sp-test1234")||(t=document.querySelector(".sp-test1234")),t){var n=t.querySelector(".sp-test1234__pill"),r=t.querySelector(".sp-test1234__menu");if(n&&r&&!t.hasAttribute("data-js")){var o=r.id,i=document.querySelectorAll('[id="'+o+'"]').length;i>1&&(o+="-"+i,r.id=o,n.setAttribute("popovertarget",o),n.setAttribute("aria-controls",o)),t.setAttribute("data-js","");var a=[].slice.call(r.querySelectorAll("a")),s=HTMLElement.prototype.hasOwnProperty("popover"),c=0,l=!1,u=30;a.forEach(function(e){e.tabIndex=-1}),s?(r.addEventListener("beforetoggle",function(e){"closed"===e.newState&&m()}),r.addEventListener("toggle",function(e){"open"!==e.newState||l||h()})):(n.addEventListener("click",function(){l?f():(r.classList.add("is-open"),h())}),document.addEventListener("pointerdown",function(e){l&&!t.contains(e.target)&&f()})),r.addEventListener("keydown",function(e){var t=a.indexOf(document.activeElement),r=e.key,o=a.length,i=-1;if("ArrowRight"===r||"ArrowDown"===r)i=(t+1)%o;else if("ArrowLeft"===r||"ArrowUp"===r)i=(t-1+o)%o;else if("Home"===r)i=0;else if("End"===r)i=o-1;else{if("Escape"===r)return e.preventDefault(),f(),void n.focus();if("Tab"===r)return f(),n.focus(),void(e.shiftKey&&e.preventDefault())}i>=0&&(e.preventDefault(),a[i].focus())}),s||t.addEventListener("keydown",function(e){"Escape"===e.key&&l&&(f(),n.focus())}),r.addEventListener("click",function(e){e.target.closest&&e.target.closest("a")&&setTimeout(f,0)})}}function d(){return s?r.matches(":popover-open"):l}function f(){if(d())if(s)try{r.hidePopover()}catch(e){}else r.classList.remove("is-open"),m()}function p(){if(c=0,d()){var e=r.currentCSSZoom||1,t=n.getBoundingClientRect(),o=document.documentElement.clientWidth,i=innerHeight;if(t.bottom<0||t.top>i||t.right<0||t.left>o)f();else{var a=[].slice.call(r.children),s=a.length?a[0].offsetHeight*e:0,l=function(t){return t.offsetWidth*e},p=function(e){return e.reduce(function(e,t){return e+l(t)},0)+8*(e.length-1)},v=Math.ceil(a.length/2),h=p(a)>o-16&&a.length>1?[a.slice(0,v),a.slice(v)]:[a],m=h.length*s+8*(h.length-1)+8,g=t.top-12>=m+16;r.setAttribute("data-side",g?"top":"bottom");var _=t.left+t.width/2,E=t.top+t.height/2;h.forEach(function(n,r){var i=Math.max(8,Math.min(_-p(n)/2,o-8-p(n))),a=(n.length-1)/2,c=g?t.top-12-s-r*(s+8):t.bottom+12+r*(s+8);n.forEach(function(t,n){var o=l(t),d=a?(n-a)/a:0,f=c+8*(g?-1:1)*(1-d*d);t.style.left=i/e+"px",t.style.top=f/e+"px",t.style.setProperty("--dx",(_-i-o/2)/e+"px"),t.style.setProperty("--dy",(E-f-s/2)/e+"px"),t.style.setProperty("--d",(Math.floor(Math.abs(n-a))+r)*u+"ms"),i+=o+8})})}}}function v(){c||(c=requestAnimationFrame(p))}function h(){l=!0,n.setAttribute("aria-expanded","true"),a.forEach(function(e){e.removeAttribute("tabindex")}),p(),r.offsetWidth,r.setAttribute("data-open",""),a[0]&&a[0].focus({preventScroll:!0}),addEventListener("scroll",v,!0),addEventListener("resize",v)}function m(){l=!1,r.removeAttribute("data-open"),n.setAttribute("aria-expanded","false"),a.forEach(function(e){e.tabIndex=-1}),removeEventListener("scroll",v,!0),removeEventListener("resize",v)}}();</script>
+\`\`\`
+
+## Acceptance criteria
+
+1. Rendering: the footer shows the badge at 30px high with the exact colors, radius, border and shadow above, in the page.
+2. Hover: the "+" nudges and the shadow grows; the menu does not open on hover, with no layout shift.
+3. Open/close: a click opens the bubbles above the badge (below near the top of the screen), inside the viewport; outside click, Escape and a second click close them.
+4. Keyboard: Tab, Enter/Space, arrows, Home/End and Escape work as specified, focus returns to the badge, and the focus ring is visible.
+5. Reduced motion: with prefers-reduced-motion enabled, nothing moves; changes are instant or fades.
+"
+`;
+
+exports[`generatePrompt > snapshot: glass 1`] = `
+"# Add a "Made by" signature badge to this project
+
+## Goal
+
+Add this signature badge to the footer of the current project, using the project's own stack and conventions (components, styling approach, file structure). The badge reads "Glassworks".
+Match the visual spec and behavior below exactly. The reference implementation at the end is the source of truth: adapt it to the project rather than pasting it as-is when a native approach fits better. Add no new dependency.
+
+## Visual spec
+
+- Layout: [avatar] · normal text · bold text · icon, in one row, vertically centered, no wrapping.
+- Order: bold text, then normal text. One regular space between them.
+- Normal text: "(none)", weight 400.
+- Bold text: "Glassworks", weight 500.
+- Font: system stack only, no web font: ui-monospace,"SF Mono",Menlo,Consolas,monospace.
+- Size S: height 30px, font size 13px, padding 0 10px 0 10px, gap 6px.
+- Corner radius: 15px (a full capsule).
+- Border: 1px, drawn as an inner ring (box-shadow: inset 0 0 0 1px <border color>) so it never changes the size.
+- Shadow: none.
+- Icon: an "arrow-up-right" (Lucide path: line 7,17 → 17,7 and polyline 7,7 17,7 17,17), 12px, 2px stroke, currentColor, in the icon color, aria-hidden.
+- Avatar: none. Left and right padding are equal.
+- Colors:
+  - Background: #FFFFFF14
+  - Border: #FFFFFF29
+  - Normal text: #FFFFFF99
+  - Bold text: #FFFFFF
+  - Icon: #FFFFFF99
+  - Backdrop blur: 12px (backdrop-filter, with -webkit- prefix)
+- Scope every class with a unique prefix and reset box-sizing, margin, padding, font, line-height and list-style on the badge and its children, so the host page CSS cannot leak in.
+
+## Behavior
+
+- Motion uses springs, expressed in CSS as linear() easings (values in the reference): fast = 0.08s, no bounce; moderate = 0.16s, no bounce; slow = 0.24s, bounce 0.12; slow exit = 0.16s tween. Never hard-code other durations.
+- Mode: Link. The whole badge is one <a href="https://glass.example"> opening in a new tab (target="_blank" rel="noopener noreferrer").
+- Hover and keyboard focus: the arrow slides 2px up and 2px right (fast spring).
+- prefers-reduced-motion: reduce → no movement, rotation or scaling; state changes are instant or fade only.
+
+## Accessibility
+
+- The link's accessible name is "Glassworks, opens in a new tab".
+- Visible focus: a 2px outline in the bold text color, offset 2px, on :focus-visible.
+- The avatar and icons are decorative (alt="" / aria-hidden).
+- Touch targets of at least 44 × 44px.
+
+## Reference implementation
+
+Standalone HTML/CSS, tested in Chrome, Safari and Firefox:
+
+\`\`\`html
+<!-- Stampit badge · edit: https://stampit.example/create#c=abc -->
+<style>.sp-test1234{--sp-test1234-fast:linear(0,.08,.24,.409,.558,.678,.77,.838,.887,.922,.947,.964,.976,.984,.989,.993,.995,.997,.998,.999,1)}.sp-test1234,.sp-test1234 *,.sp-test1234 *::before,.sp-test1234 *::after{box-sizing:border-box;margin:0;padding:0;border:0;font:inherit;line-height:inherit;letter-spacing:normal;text-transform:none;text-decoration:none;list-style:none;background:none;color:inherit;max-width:none;min-width:0;float:none}.sp-test1234{--sp-test1234-bg:#ffffff14;--sp-test1234-bd:#ffffff29;--sp-test1234-tn:#ffffff99;--sp-test1234-tb:#ffffff;--sp-test1234-ic:#ffffff99;--sp-test1234-blur:12px;display:inline-block;position:relative;vertical-align:middle;font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:13px;font-weight:400;line-height:1.2;text-align:left;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}.sp-test1234__pill{display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 10px 0 10px;border-radius:15px;background:var(--sp-test1234-bg);box-shadow:inset 0 0 0 1px var(--sp-test1234-bd);color:var(--sp-test1234-tb);white-space:nowrap;cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent;outline:none;-webkit-backdrop-filter:blur(var(--sp-test1234-blur));backdrop-filter:blur(var(--sp-test1234-blur))}.sp-test1234__pill:focus-visible{outline:2px solid var(--sp-test1234-tb);outline-offset:2px}.sp-test1234__n{color:var(--sp-test1234-tn)}.sp-test1234__b{color:var(--sp-test1234-tb);font-weight:500}.sp-test1234__ic{flex:none;display:block;color:var(--sp-test1234-ic);transition:transform .08s var(--sp-test1234-fast)}.sp-test1234__pill:hover .sp-test1234__ic,.sp-test1234__pill:focus-visible .sp-test1234__ic{transform:translate(2px,-2px)}@media (prefers-reduced-motion:reduce){.sp-test1234__ic{transition:none}.sp-test1234 .sp-test1234__ic{transform:none}}</style>
+<div class="sp-test1234">
+  <a class="sp-test1234__pill" href="https://glass.example" target="_blank" rel="noopener noreferrer" aria-label="Glassworks, opens in a new tab">
+    <span><span class="sp-test1234__b">Glassworks</span></span>
+    <svg class="sp-test1234__ic" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>
+  </a>
+</div>
+\`\`\`
+
+## Acceptance criteria
+
+1. Rendering: the footer shows the badge at 30px high with the exact colors, radius, border and shadow above, in the page.
+2. Hover: the arrow slides 2px up-right and the shadow grows, with no layout shift.
+3. Click: the badge opens https://glass.example in a new tab.
+4. Keyboard: Tab reaches the badge, the focus ring is visible, Enter follows the link.
+5. Reduced motion: with prefers-reduced-motion enabled, nothing moves; changes are instant or fades.
+"
+`;
+
+exports[`generatePrompt > snapshot: link-initials 1`] = `
+"# Add a "Made by" signature badge to this project
+
+## Goal
+
+Add this signature badge to the footer of the current project, using the project's own stack and conventions (components, styling approach, file structure). The badge reads "Made by Ada Lovelace".
+Match the visual spec and behavior below exactly. The reference implementation at the end is the source of truth: adapt it to the project rather than pasting it as-is when a native approach fits better. Add no new dependency.
+
+## Visual spec
+
+- Layout: [avatar] · normal text · bold text · icon, in one row, vertically centered, no wrapping.
+- Order: normal text, then bold text. One regular space between them.
+- Normal text: "Made by", weight 400.
+- Bold text: "Ada Lovelace", weight 500.
+- Font: system stack only, no web font: -apple-system,system-ui,"SF Pro Text","Helvetica Neue","Segoe UI",Roboto,sans-serif.
+- Size M: height 36px, font size 15px, padding 0 12px 0 4px, gap 8px.
+- Corner radius: 18px (a full capsule).
+- Border: 1px, drawn as an inner ring (box-shadow: inset 0 0 0 1px <border color>) so it never changes the size.
+- Shadow: 0 1px 6px rgba(0,0,0,.08); on hover 0 2px 12px rgba(0,0,0,.12).
+- Icon: an "arrow-up-right" (Lucide path: line 7,17 → 17,7 and polyline 7,7 17,7 17,17), 14px, 2px stroke, currentColor, in the icon color, aria-hidden.
+- Avatar: round, 28px, background #FF6B35, initials "AL" in #000000, weight 600, 11px.
+- Colors:
+  - Background: #FFFFFF
+  - Border: #0000000D
+  - Normal text: #6E6E73
+  - Bold text: #000000
+  - Icon: #6E6E73
+  - Backdrop blur: none
+- Scope every class with a unique prefix and reset box-sizing, margin, padding, font, line-height and list-style on the badge and its children, so the host page CSS cannot leak in.
+
+## Behavior
+
+- Motion uses springs, expressed in CSS as linear() easings (values in the reference): fast = 0.08s, no bounce; moderate = 0.16s, no bounce; slow = 0.24s, bounce 0.12; slow exit = 0.16s tween. Never hard-code other durations.
+- Mode: Link. The whole badge is one <a href="https://ada.dev"> opening in a new tab (target="_blank" rel="noopener noreferrer").
+- Hover and keyboard focus: the arrow slides 2px up and 2px right (fast spring).
+- Hover: the shadow grows as specified (fast spring).
+- prefers-reduced-motion: reduce → no movement, rotation or scaling; state changes are instant or fade only.
+
+## Accessibility
+
+- The link's accessible name is "Made by Ada Lovelace, opens in a new tab".
+- Visible focus: a 2px outline in the bold text color, offset 2px, on :focus-visible.
+- The avatar and icons are decorative (alt="" / aria-hidden).
+- Touch targets of at least 44 × 44px.
+
+## Reference implementation
+
+Standalone HTML/CSS, tested in Chrome, Safari and Firefox:
+
+\`\`\`html
+<!-- Stampit badge · edit: https://stampit.example/create#c=abc -->
+<style>.sp-test1234{--sp-test1234-fast:linear(0,.08,.24,.409,.558,.678,.77,.838,.887,.922,.947,.964,.976,.984,.989,.993,.995,.997,.998,.999,1)}.sp-test1234,.sp-test1234 *,.sp-test1234 *::before,.sp-test1234 *::after{box-sizing:border-box;margin:0;padding:0;border:0;font:inherit;line-height:inherit;letter-spacing:normal;text-transform:none;text-decoration:none;list-style:none;background:none;color:inherit;max-width:none;min-width:0;float:none}.sp-test1234{--sp-test1234-bg:#ffffff;--sp-test1234-bd:#0000000d;--sp-test1234-tn:#6e6e73;--sp-test1234-tb:#000000;--sp-test1234-ic:#6e6e73;display:inline-block;position:relative;vertical-align:middle;font-family:-apple-system,system-ui,"SF Pro Text","Helvetica Neue","Segoe UI",Roboto,sans-serif;font-size:15px;font-weight:400;line-height:1.2;text-align:left;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}.sp-test1234__pill{display:inline-flex;align-items:center;gap:8px;height:36px;padding:0 12px 0 4px;border-radius:18px;background:var(--sp-test1234-bg);box-shadow:inset 0 0 0 1px var(--sp-test1234-bd),0 1px 6px rgba(0,0,0,.08);color:var(--sp-test1234-tb);white-space:nowrap;cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent;outline:none;transition:box-shadow .08s var(--sp-test1234-fast)}.sp-test1234__pill:hover{box-shadow:inset 0 0 0 1px var(--sp-test1234-bd),0 2px 12px rgba(0,0,0,.12)}.sp-test1234__pill:focus-visible{outline:2px solid var(--sp-test1234-tb);outline-offset:2px}.sp-test1234__av{flex:none;display:grid;place-items:center;width:28px;height:28px;border-radius:50%;overflow:hidden;background:#ff6b35;color:#000000;font-size:11px;font-weight:600;line-height:1}.sp-test1234__n{color:var(--sp-test1234-tn)}.sp-test1234__b{color:var(--sp-test1234-tb);font-weight:500}.sp-test1234__ic{flex:none;display:block;color:var(--sp-test1234-ic);transition:transform .08s var(--sp-test1234-fast)}.sp-test1234__pill:hover .sp-test1234__ic,.sp-test1234__pill:focus-visible .sp-test1234__ic{transform:translate(2px,-2px)}@media (prefers-reduced-motion:reduce){.sp-test1234__ic{transition:none}.sp-test1234 .sp-test1234__ic{transform:none}}</style>
+<div class="sp-test1234">
+  <a class="sp-test1234__pill" href="https://ada.dev" target="_blank" rel="noopener noreferrer" aria-label="Made by Ada Lovelace, opens in a new tab">
+    <span class="sp-test1234__av" aria-hidden="true">AL</span>
+    <span><span class="sp-test1234__n">Made by</span> <span class="sp-test1234__b">Ada Lovelace</span></span>
+    <svg class="sp-test1234__ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>
+  </a>
+</div>
+\`\`\`
+
+## Acceptance criteria
+
+1. Rendering: the footer shows the badge at 36px high with the exact colors, radius, border and shadow above, in the page.
+2. Hover: the arrow slides 2px up-right and the shadow grows, with no layout shift.
+3. Click: the badge opens https://ada.dev in a new tab.
+4. Keyboard: Tab reaches the badge, the focus ring is visible, Enter follows the link.
+5. Reduced motion: with prefers-reduced-motion enabled, nothing moves; changes are instant or fades.
+"
+`;
+
+exports[`generatePrompt > snapshot: link-photo 1`] = `
+"# Add a "Made by" signature badge to this project
+
+## Goal
+
+Add this signature badge to the footer of the current project, using the project's own stack and conventions (components, styling approach, file structure). The badge reads "Launched by Olivier Tousche".
+Match the visual spec and behavior below exactly. The reference implementation at the end is the source of truth: adapt it to the project rather than pasting it as-is when a native approach fits better. Add no new dependency.
+
+## Visual spec
+
+- Layout: [avatar] · normal text · bold text · icon, in one row, vertically centered, no wrapping.
+- Order: normal text, then bold text. One regular space between them.
+- Normal text: "Launched by", weight 400.
+- Bold text: "Olivier Tousche", weight 600.
+- Font: system stack only, no web font: ui-serif,Georgia,"Times New Roman",serif.
+- Size L: height 44px, font size 17px, padding 0 14px 0 4px, gap 10px.
+- Corner radius: 11px.
+- Border: 2px, drawn as an inner ring (box-shadow: inset 0 0 0 2px <border color>) so it never changes the size.
+- Shadow: 0 1px 6px rgba(0,0,0,.08); on hover 0 2px 12px rgba(0,0,0,.12).
+- Icon: none.
+- Avatar: round, 36px, image https://example.com/avatar.png, object-fit: cover, background #FF6B35 behind transparent pixels. Decorative: alt="".
+- Colors:
+  - Background: #FFFFFF
+  - Border: #0000000D
+  - Normal text: #6E6E73
+  - Bold text: #000000
+  - Icon: #6E6E73
+  - Backdrop blur: none
+- Scope every class with a unique prefix and reset box-sizing, margin, padding, font, line-height and list-style on the badge and its children, so the host page CSS cannot leak in.
+
+## Behavior
+
+- Motion uses springs, expressed in CSS as linear() easings (values in the reference): fast = 0.08s, no bounce; moderate = 0.16s, no bounce; slow = 0.24s, bounce 0.12; slow exit = 0.16s tween. Never hard-code other durations.
+- Mode: Link. The whole badge is one <a href="https://example.com">.
+- Hover: the shadow grows as specified (fast spring).
+- prefers-reduced-motion: reduce → no movement, rotation or scaling; state changes are instant or fade only.
+
+## Accessibility
+
+- The link's accessible name is "Launched by Olivier Tousche".
+- Visible focus: a 2px outline in the bold text color, offset 2px, on :focus-visible.
+- The avatar and icons are decorative (alt="" / aria-hidden).
+- Touch targets of at least 44 × 44px.
+
+## Reference implementation
+
+Standalone HTML/CSS, tested in Chrome, Safari and Firefox:
+
+\`\`\`html
+<!-- Stampit badge · edit: https://stampit.example/create#c=abc -->
+<style>.sp-test1234{--sp-test1234-fast:linear(0,.08,.24,.409,.558,.678,.77,.838,.887,.922,.947,.964,.976,.984,.989,.993,.995,.997,.998,.999,1)}.sp-test1234,.sp-test1234 *,.sp-test1234 *::before,.sp-test1234 *::after{box-sizing:border-box;margin:0;padding:0;border:0;font:inherit;line-height:inherit;letter-spacing:normal;text-transform:none;text-decoration:none;list-style:none;background:none;color:inherit;max-width:none;min-width:0;float:none}.sp-test1234{--sp-test1234-bg:#ffffff;--sp-test1234-bd:#0000000d;--sp-test1234-tn:#6e6e73;--sp-test1234-tb:#000000;--sp-test1234-ic:#6e6e73;display:inline-block;position:relative;vertical-align:middle;font-family:ui-serif,Georgia,"Times New Roman",serif;font-size:17px;font-weight:400;line-height:1.2;text-align:left;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}.sp-test1234__pill{display:inline-flex;align-items:center;gap:10px;height:44px;padding:0 14px 0 4px;border-radius:11px;background:var(--sp-test1234-bg);box-shadow:inset 0 0 0 2px var(--sp-test1234-bd),0 1px 6px rgba(0,0,0,.08);color:var(--sp-test1234-tb);white-space:nowrap;cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent;outline:none;transition:box-shadow .08s var(--sp-test1234-fast)}.sp-test1234__pill:hover{box-shadow:inset 0 0 0 2px var(--sp-test1234-bd),0 2px 12px rgba(0,0,0,.12)}.sp-test1234__pill:focus-visible{outline:2px solid var(--sp-test1234-tb);outline-offset:2px}.sp-test1234__av{flex:none;display:grid;place-items:center;width:36px;height:36px;border-radius:7px;overflow:hidden;background:#ff6b35}.sp-test1234__av img{display:block;width:100%;height:100%;object-fit:cover}.sp-test1234__n{color:var(--sp-test1234-tn)}.sp-test1234__b{color:var(--sp-test1234-tb);font-weight:600}@media (prefers-reduced-motion:reduce){.sp-test1234__ic{transition:none}.sp-test1234 .sp-test1234__ic{transform:none}}</style>
+<div class="sp-test1234">
+  <a class="sp-test1234__pill" href="https://example.com">
+    <span class="sp-test1234__av" aria-hidden="true"><img src="https://example.com/avatar.png" alt="" width="36" height="36" decoding="async"></span>
+    <span><span class="sp-test1234__n">Launched by</span> <span class="sp-test1234__b">Olivier Tousche</span></span>
+  </a>
+</div>
+\`\`\`
+
+## Acceptance criteria
+
+1. Rendering: the footer shows the badge at 44px high with the exact colors, radius, border and shadow above, in the page.
+2. Hover: the arrow slides 2px up-right and the shadow grows, with no layout shift.
+3. Click: the badge opens https://example.com.
+4. Keyboard: Tab reaches the badge, the focus ring is visible, Enter follows the link.
+5. Reduced motion: with prefers-reduced-motion enabled, nothing moves; changes are instant or fades.
+"
+`;

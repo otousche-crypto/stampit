@@ -418,3 +418,13 @@
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
 }
+/* Shiki (Show code): dual theme driven by the site theme. */
+.stampit-code .shiki,
+.stampit-code .shiki span {
+  color: var(--shiki-light);
+  background-color: transparent;
+}
+.dark .stampit-code .shiki,
+.dark .stampit-code .shiki span {
+  color: var(--shiki-dark);
+}
