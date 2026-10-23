@@ -1,6 +1,6 @@
 import { ArrowUpRight, Ban, Circle, Link, Play, Square } from 'lucide-react'
 import type { BadgeConfig } from '@/badge/schema'
-import { SelectRow } from '../controls'
+import { RowList, SelectRow } from '../controls'
 import { useEditor } from '../EditorProvider'
 
 type Shape = BadgeConfig['shape']
@@ -17,7 +17,7 @@ export function ShapeSection() {
   const icon = config.layout !== 'stamp'
 
   return (
-    <div className="flex flex-col">
+    <RowList>
       {corners && (
         <SelectRow
           label="Radius"
@@ -61,6 +61,6 @@ export function ShapeSection() {
           ]}
         />
       )}
-    </div>
+    </RowList>
   )
 }

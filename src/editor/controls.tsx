@@ -1,4 +1,7 @@
-import { useId, type ReactNode } from 'react'
+import { createContext, useContext, useId, useLayoutEffect, useRef, type ReactNode } from 'react'
+import { useFluidHover } from '@/hooks/use-fluid-hover'
+import { FluidHoverHighlight } from '@/components/fluid-hover-highlight'
+import { useShape } from '@/lib/shape-context'
 import { RadioGroup, RadioItem } from '@/components/ui/radio-group'
 import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
@@ -185,6 +188,50 @@ export function Suggestions({
   )
 }
 
+/** Marks a row's control as an item of the surrounding RowList. */
+const ROW_ITEM_ATTR = 'data-row-hover-item'
+
+/** True inside a RowList: the rows leave their hover to the list's highlight. */
+const RowListContext = createContext(false)
+
+/**
+ * A run of settings rows sharing one Fluid hover: a single highlight glides
+ * from one row's select to the next instead of each lighting on its own.
+ * Items are the rows' triggers, indexed in DOM order, so rows that come and
+ * go (Radius, Icon) need no index of their own.
+ */
+export function RowList({ children }: { children: ReactNode }) {
+  const containerRef = useRef<HTMLDivElement>(null)
+  const items = useRef<HTMLElement[]>([])
+  // gapClick off: Radix opens its trigger on pointerdown, so a routed click
+  // would not open it reliably, and a click beside a row should stay inert.
+  const hover = useFluidHover(containerRef, { gapClick: false })
+  const { registerItem } = hover
+  const shape = useShape()
+
+  // After every render: register the triggers now in the list, in order.
+  useLayoutEffect(() => {
+    const container = containerRef.current
+    if (!container) return
+    const next = [...container.querySelectorAll<HTMLElement>(`[${ROW_ITEM_ATTR}]`)]
+    const prev = items.current
+    prev.forEach((el, i) => {
+      if (next[i] !== el) registerItem(i, null)
+    })
+    next.forEach((el, i) => {
+      if (prev[i] !== el) registerItem(i, el)
+    })
+    items.current = next
+  })
+
+  return (
+    <div ref={containerRef} className="relative flex flex-col" {...hover.handlers}>
+      <FluidHoverHighlight hover={hover} className={shape.input} />
+      <RowListContext.Provider value={true}>{children}</RowListContext.Provider>
+    </div>
+  )
+}
+
 export type SelectRowOption<T extends string> = { value: T; label: string; icon?: IconComponent }
 
 /** Settings row: muted label on the left, a borderless select on the right. */
@@ -203,6 +250,7 @@ export function SelectRow<T extends string>({
 }) {
   const id = useId()
   const current = options.find((o) => o.value === value)
+  const inList = useContext(RowListContext)
   return (
     <div className="flex min-h-9 items-center justify-between gap-2 pl-2">
       <span id={id} className={cn('text-muted-foreground', typeClass('body'))}>
@@ -217,7 +265,14 @@ export function SelectRow<T extends string>({
           // Fixed width: the trigger never resizes with the chosen label, so the
           // list (aligned on it, as wide as it) always opens in the same place.
           // The value stays right-aligned next to the chevron.
-          className="w-[152px] min-w-0 shrink-0 [&>span]:justify-end [&>span>span:last-child]:flex-none"
+          // In a RowList the list's highlight is the hover: the trigger's own
+          // fill stays off and its icons brighten when the list lights it.
+          className={cn(
+            'w-[152px] min-w-0 shrink-0 [&>span]:justify-end [&>span>span:last-child]:flex-none',
+            inList &&
+              'relative hover:bg-transparent [&[data-fluid-hover-active]_svg]:text-foreground [&[data-fluid-hover-active]_svg]:stroke-[2]',
+          )}
+          {...(inList && { [ROW_ITEM_ATTR]: '' })}
         />
         <SelectContent>
           {options.map((o, i) => (
