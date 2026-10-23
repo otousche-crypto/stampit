@@ -1,6 +1,6 @@
 import { Activity, ArrowUp, Ban, Maximize2, Sparkles, Vibrate } from 'lucide-react'
 import type { BadgeConfig, Entrance, HoverEffect } from '@/badge/schema'
-import { SelectRow } from '../controls'
+import { RowList, SelectRow } from '../controls'
 import { useEditor } from '../EditorProvider'
 
 type Motion = BadgeConfig['motion']
@@ -24,10 +24,10 @@ export function AnimationSection() {
   const { config, update } = useEditor()
   const set = (patch: Partial<Motion>) => update((c) => ({ ...c, motion: { ...c.motion, ...patch } }))
   return (
-    <div className="flex flex-col">
+    <RowList>
       <SelectRow label="On appear" value={config.motion.entrance} onChange={(entrance) => set({ entrance })} options={ENTRANCE_OPTIONS} />
       <SelectRow label="On delay" value={config.motion.repeat} onChange={(repeat) => set({ repeat })} options={ENTRANCE_OPTIONS} />
       <SelectRow label="On hover" value={config.motion.hover} onChange={(hover) => set({ hover })} options={HOVER_OPTIONS} />
-    </div>
+    </RowList>
   )
 }
