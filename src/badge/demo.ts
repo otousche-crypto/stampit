@@ -21,8 +21,8 @@ export const DEMO_CONFIG: BadgeConfig = {
     role: 'Product designer',
   },
   team: [],
-  // Olivier's photo first; the home page swaps in initials when the name spins.
-  avatar: { source: 'url', initials: null, url: '/olivier-avatar.png', background: '#FF6B35' },
+  // 3D avatar like the other demo people (Fluent Emoji, MIT), on the same soft grey.
+  avatar: { source: 'url', initials: null, url: '/avatars/olivier.png', background: '#E9E9EE' },
   theme: {
     // Light and dark palettes: the home page shows the one matching the site.
     adaptToSite: true,

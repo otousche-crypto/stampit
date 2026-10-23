@@ -12,7 +12,7 @@ import { useAppearance } from '../appearance'
 const DEMO_WORDS = ['Designed', 'Crafted', 'Shipped', 'Built']
 
 /**
- * The demo starts on "Designed by Olivier Tousche" (his photo), then spins
+ * The demo starts on "Designed by Olivier Tousche", then spins
  * through these people (never back to Olivier). Names are all about as wide
  * as his, so the fixed name slot never looks half empty. Avatars: Microsoft
  * Fluent Emoji 3D (MIT), designers, developers and builders.
