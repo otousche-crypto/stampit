@@ -1,9 +1,16 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Download } from 'lucide-react'
+import { ClipboardCopy, Code2, Download } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { TabsSubtle, TabsSubtleItem, TabsSubtlePanel } from '@/components/ui/tabs-subtle'
 import { generateBadge } from '@/badge/export/generateHtml'
-import { generatePrompt } from '@/badge/export/generatePrompt'
+import { PROMPT_AGENTS, PROMPT_AGENT_LABELS, generatePrompt, type PromptAgent } from '@/badge/export/generatePrompt'
+import {
+  CODE_LANGUAGES,
+  CODE_LANGUAGE_GRAMMAR,
+  CODE_LANGUAGE_LABELS,
+  toFramework,
+  type CodeLanguage,
+} from '@/badge/export/frameworks'
 import { editorBaseUrl } from '@/config/site'
 import { encodeConfig } from '@/storage/url'
 import { typeClass } from '@/lib/type-scale'
@@ -11,7 +18,11 @@ import { cn } from '@/lib/utils'
 import { CopyField } from './CopyField'
 import { blockingSummary, hasBlockingErrors } from './validation'
 import { useEditor } from './EditorProvider'
-import { highlightHtml } from './highlight'
+import { highlightCode } from './highlight'
+import { SplitCopyButton } from './SplitCopyButton'
+
+const AGENT_OPTIONS = PROMPT_AGENTS.map((value) => ({ value, label: PROMPT_AGENT_LABELS[value] }))
+const LANGUAGE_OPTIONS = CODE_LANGUAGES.map((value) => ({ value, label: CODE_LANGUAGE_LABELS[value] }))
 
 export function formatWeight(bytes: number): string {
   return `~${Math.max(1, Math.round(bytes / 1024))} KB · zero dependency`
@@ -24,6 +35,8 @@ export function ExportPanel({ className }: { className?: string }) {
   const [tab, setTab] = useState(0)
   const [editUrl, setEditUrl] = useState<string | undefined>(undefined)
   const [highlighted, setHighlighted] = useState<string | null>(null)
+  const [agent, setAgent] = useState<PromptAgent | null>(null)
+  const [language, setLanguage] = useState<CodeLanguage>('html')
 
   // The edit link goes in the snippet's header comment.
   useEffect(() => {
@@ -36,24 +49,27 @@ export function ExportPanel({ className }: { className?: string }) {
     }
   }, [config])
 
-  const code = useMemo(
-    () => generateBadge(config, { editUrl, uploadDataUrl, avatarFailed }).code,
+  const badge = useMemo(
+    () => generateBadge(config, { editUrl, uploadDataUrl, avatarFailed }),
     [config, editUrl, uploadDataUrl, avatarFailed],
   )
-  const prompt = useMemo(() => generatePrompt(config, { editUrl, avatarFailed }), [config, editUrl, avatarFailed])
-  const bytes = useMemo(() => new Blob([code]).size, [code])
+  const promptFor = (a: PromptAgent | null) => generatePrompt(config, { editUrl, avatarFailed, agent: a ?? undefined })
+  const codeFor = (lang: CodeLanguage | null) => toFramework(badge, lang ?? 'html')
+  const prompt = useMemo(() => generatePrompt(config, { editUrl, avatarFailed, agent: agent ?? undefined }), [config, editUrl, avatarFailed, agent])
+  const code = useMemo(() => toFramework(badge, language), [badge, language])
+  const bytes = useMemo(() => new Blob([badge.code]).size, [badge.code])
 
   // Shiki loads only once the Code tab is shown.
   useEffect(() => {
     if (tab !== 1) return
     let cancelled = false
-    highlightHtml(code)
+    highlightCode(code, CODE_LANGUAGE_GRAMMAR[language])
       .then((html) => !cancelled && setHighlighted(html))
       .catch(() => !cancelled && setHighlighted(null))
     return () => {
       cancelled = true
     }
-  }, [tab, code])
+  }, [tab, code, language])
 
   const isUpload = config.avatar.source === 'upload'
 
@@ -65,17 +81,38 @@ export function ExportPanel({ className }: { className?: string }) {
       </TabsSubtle>
 
       <TabsSubtlePanel idPrefix="export" index={0} selectedIndex={tab} className="flex min-h-0 flex-1 flex-col gap-1.5">
+        <SplitCopyButton
+          label="Copy prompt"
+          icon={ClipboardCopy}
+          menuLabel="Optimized for"
+          options={AGENT_OPTIONS}
+          selected={agent}
+          onSelect={setAgent}
+          valueFor={promptFor}
+          disabled={blocked}
+        />
         <p className={cn('px-1 text-muted-foreground', typeClass('caption'))}>
           Paste into your AI coding agent. It adds the badge with your project's stack.
         </p>
-        <CopyField label="Prompt" value={prompt} disabled={blocked} className="min-h-40 flex-1" />
+        <CopyField label="Prompt" value={prompt} disabled={blocked} copyButton={false} className="min-h-40 flex-1" />
       </TabsSubtlePanel>
 
       <TabsSubtlePanel idPrefix="export" index={1} selectedIndex={tab} className="flex min-h-0 flex-1 flex-col gap-1.5">
+        <SplitCopyButton
+          label={`Copy ${CODE_LANGUAGE_LABELS[language]}`}
+          icon={Code2}
+          menuLabel="Language"
+          options={LANGUAGE_OPTIONS}
+          selected={language}
+          onSelect={setLanguage}
+          valueFor={codeFor}
+          disabled={blocked}
+        />
         <p className={cn('px-1 text-muted-foreground tabular-nums', typeClass('caption'))}>
-          Plain HTML/CSS{config.click.mode === 'bubbles' ? '/JS' : ''}. {formatWeight(bytes)}.
+          {language === 'html' ? `Plain HTML/CSS${badge.js ? '/JS' : ''}` : `${CODE_LANGUAGE_LABELS[language]} component`}.{' '}
+          {formatWeight(bytes)}.
         </p>
-        <CopyField label="Code" value={code} disabled={blocked} className="min-h-40 flex-1">
+        <CopyField label="Code" value={code} disabled={blocked} copyButton={false} className="min-h-40 flex-1">
           {highlighted ? <div className="stampit-code" dangerouslySetInnerHTML={{ __html: highlighted }} /> : undefined}
         </CopyField>
       </TabsSubtlePanel>
