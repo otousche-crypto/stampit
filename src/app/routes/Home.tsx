@@ -57,6 +57,8 @@ const HERO_DARK = 'dark:bg-[linear-gradient(to_bottom,#070708_0%,#070708_55%,#1C
 
 /** iPhone 17: 402 × 874 pt screen. */
 const IPHONE_17 = { width: 402, height: 874, bezel: 10 }
+/** The phone is drawn 10 % larger than life on wide screens. */
+const PHONE_SCALE = 1.1
 
 /** Placeholder block of the skeleton page and browser. */
 function Bone({ className }: { className?: string }) {
@@ -71,8 +73,8 @@ function Bone({ className }: { className?: string }) {
 function PhoneBottom({ children }: { children: ReactNode }) {
   // Narrower than the phone (a real phone visiting): scale it down to fit.
   const width = useWindowWidth()
-  // 40 px of air on each side on phones.
-  const scale = Math.min(1, (width - 80) / (IPHONE_17.width + 2 * IPHONE_17.bezel))
+  // A touch larger than life where there is room; 40 px of air on each side on phones.
+  const scale = Math.min(PHONE_SCALE, (width - 80) / (IPHONE_17.width + 2 * IPHONE_17.bezel))
   return (
     // Wider than the phone so its rim and shadow are never clipped; only the
     // top fades out.
@@ -142,9 +144,11 @@ export function Home() {
 
           <div className="flex flex-wrap items-center justify-center gap-3 pt-7">
             {/* Scrolls down to the editor, right below. */}
+            {/* The page's one call to action: a step above the control ladder. */}
             <Button
               variant="primary"
               trailingIcon={ArrowDown}
+              className="h-12 gap-2 pl-6 pr-5 text-[16px] leading-6 [&_svg]:size-[18px]"
               onClick={() =>
                 editorRef.current?.scrollIntoView({
                   behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
