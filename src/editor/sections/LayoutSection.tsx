@@ -1,9 +1,12 @@
-import type { ReactNode } from 'react'
+import { useEffect, useRef, useState, type KeyboardEvent, type ReactNode } from 'react'
+import { AnimatePresence, motion } from 'motion/react'
 import type { Layout } from '@/badge/schema'
+import { useFluidHover } from '@/hooks/use-fluid-hover'
+import { useShape } from '@/lib/shape-context'
+import { spring } from '@/lib/springs'
 import { typeClass } from '@/lib/type-scale'
 import { fontWeights } from '@/lib/font-weight'
 import { cn } from '@/lib/utils'
-import { FAST_CSS } from '../controls'
 import { useEditor } from '../EditorProvider'
 
 /** Thumbnail primitives: a surface, an avatar dot and text lines, in the current text color. */
@@ -17,10 +20,10 @@ const Line = ({ className }: { className?: string }) => <span className={cn('h-[
 
 const THUMBS: Record<Layout, ReactNode> = {
   pill: (
-    <Surface className="h-4 gap-1 rounded-full pl-0.5 pr-1.5">
+    <Surface className="h-4 gap-[3px] rounded-full pl-0.5 pr-1.5">
       <Dot />
-      <Line className="w-4 opacity-40" />
-      <Line className="w-5" />
+      <Line className="w-2.5 opacity-40" />
+      <Line className="w-3.5" />
     </Surface>
   ),
   stamp: (
@@ -30,11 +33,11 @@ const THUMBS: Record<Layout, ReactNode> = {
   ),
   split: (
     <span className="flex h-4 overflow-hidden rounded-full shadow-[0_0_0_1px_rgba(0,0,0,0.08)]">
-      <span className="flex items-center bg-background px-1.5 dark:bg-white/10">
-        <Line className="w-3 opacity-40" />
+      <span className="flex items-center bg-background px-1 dark:bg-white/10">
+        <Line className="w-2.5 opacity-40" />
       </span>
-      <span className="flex items-center bg-foreground px-1.5">
-        <Line className="w-4 text-background" />
+      <span className="flex items-center bg-foreground px-1">
+        <Line className="w-3.5 text-background" />
       </span>
     </span>
   ),
@@ -54,7 +57,7 @@ const THUMBS: Record<Layout, ReactNode> = {
         <Dot className="-ml-1 bg-[#5B8DEF] ring-1 ring-background" />
         <Dot className="-ml-1 bg-[#3BB273] ring-1 ring-background" />
       </span>
-      <Line className="w-5" />
+      <Line className="w-3" />
     </Surface>
   ),
 }
@@ -69,31 +72,167 @@ const LABELS: Record<Layout, string> = {
 
 const ORDER: Layout[] = ['pill', 'stamp', 'split', 'card', 'team']
 
-/** The badge model, as a grid of thumbnails. */
+/**
+ * The badge model, as a strip of thumbnails. Fluid's selection pattern (as in
+ * TabsSubtle): one selected background and one hover background glide between
+ * items on the DS springs, a focus ring follows the keyboard, and the label
+ * reserves its semibold width so selecting never shifts it.
+ */
 export function LayoutSection() {
   const { config, update } = useEditor()
+  const shape = useShape()
+  const containerRef = useRef<HTMLDivElement>(null)
+  const buttons = useRef<(HTMLButtonElement | null)[]>([])
+  const [mouseInside, setMouseInside] = useState(false)
+  const [focusedIndex, setFocusedIndex] = useState<number | null>(null)
+  const { activeIndex: hoveredIndex, setActiveIndex: setHoveredIndex, itemRects, isMeasured, handlers, registerItem } =
+    useFluidHover(containerRef, { axis: 'x' })
+
+  // Registered once, like TabsSubtle's tabs: an inline ref callback would re-register every render.
+  useEffect(() => {
+    buttons.current.forEach((node, index) => registerItem(index, node))
+    return () => ORDER.forEach((_, index) => registerItem(index, null))
+  }, [registerItem])
+
+  const selectedIndex = Math.max(0, ORDER.indexOf(config.layout))
+  const select = (index: number) => update((c) => ({ ...c, layout: ORDER[index] }))
+
+  const selectedRect = isMeasured ? itemRects[selectedIndex] : undefined
+  const hoverRect = isMeasured && hoveredIndex !== null ? itemRects[hoveredIndex] : undefined
+  const focusRect = isMeasured && focusedIndex !== null ? itemRects[focusedIndex] : undefined
+  const isHovering = hoveredIndex !== null && hoveredIndex !== selectedIndex
+
+  // Radio group keyboard: arrows move the selection and the focus, wrapping.
+  const onKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
+    const step = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[e.key]
+    let next: number | null = step ? (selectedIndex + step + ORDER.length) % ORDER.length : null
+    if (e.key === 'Home') next = 0
+    if (e.key === 'End') next = ORDER.length - 1
+    if (next === null) return
+    e.preventDefault()
+    select(next)
+    buttons.current[next]?.focus()
+  }
+
   return (
-    <div role="radiogroup" aria-label="Style" className="grid grid-cols-5 gap-1">
-      {ORDER.map((layout) => {
-        const selected = config.layout === layout
+    <div
+      ref={containerRef}
+      role="radiogroup"
+      aria-label="Style"
+      className="relative grid grid-cols-5 gap-1"
+      onMouseMove={(e) => {
+        setMouseInside(true)
+        handlers.onMouseMove(e)
+      }}
+      onMouseLeave={() => {
+        setMouseInside(false)
+        handlers.onMouseLeave()
+      }}
+      onClick={handlers.onClick}
+      onKeyDown={onKeyDown}
+      onFocus={(e) => {
+        const index = Number((e.target as HTMLElement).closest('[data-fluid-hover-index]')?.getAttribute('data-fluid-hover-index'))
+        if (Number.isNaN(index)) return
+        setHoveredIndex(index)
+        setFocusedIndex((e.target as HTMLElement).matches(':focus-visible') ? index : null)
+      }}
+      onBlur={(e) => {
+        if (containerRef.current?.contains(e.relatedTarget as Node)) return
+        setFocusedIndex(null)
+        if (!mouseInside) setHoveredIndex(null)
+      }}
+    >
+      {/* Selected background */}
+      {selectedRect && (
+        <motion.div
+          aria-hidden="true"
+          className={cn('pointer-events-none absolute bg-active', shape.bg)}
+          initial={false}
+          animate={{ ...selectedRect, opacity: isHovering ? 0.8 : 1 }}
+          transition={{ ...spring.moderate, opacity: { duration: 0.08 } }}
+        />
+      )}
+
+      {/* Hover background: leaves from the selected item, returns to it */}
+      <AnimatePresence>
+        {hoverRect && isHovering && selectedRect && (
+          <motion.div
+            aria-hidden="true"
+            className={cn('pointer-events-none absolute bg-active', shape.bg)}
+            initial={{ ...selectedRect, opacity: 0 }}
+            animate={{ ...hoverRect, opacity: 0.4 }}
+            exit={
+              mouseInside
+                ? { opacity: 0, transition: spring.fast.exit }
+                : { ...selectedRect, opacity: 0, transition: { ...spring.moderate, opacity: { duration: 0.06 } } }
+            }
+            transition={{ ...spring.fast, opacity: { duration: 0.08 } }}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Focus ring */}
+      <AnimatePresence>
+        {focusRect && (
+          <motion.div
+            aria-hidden="true"
+            className={cn('pointer-events-none absolute z-20 border border-[color:var(--focus-ring,#6B97FF)]', shape.focusRing)}
+            initial={false}
+            animate={{
+              left: focusRect.left - 2,
+              top: focusRect.top - 2,
+              width: focusRect.width + 4,
+              height: focusRect.height + 4,
+            }}
+            exit={{ opacity: 0, transition: spring.fast.exit }}
+            transition={{ ...spring.fast, opacity: { duration: 0.08 } }}
+          />
+        )}
+      </AnimatePresence>
+
+      {ORDER.map((layout, index) => {
+        const selected = index === selectedIndex
+        const active = selected || hoveredIndex === index
         return (
           <button
             key={layout}
+            ref={(node) => {
+              buttons.current[index] = node
+            }}
             type="button"
             role="radio"
             aria-checked={selected}
-            onClick={() => update((c) => ({ ...c, layout }))}
+            tabIndex={selected ? 0 : -1}
+            data-fluid-hover-index={index}
+            onClick={() => select(index)}
             className={cn(
-              'flex cursor-pointer flex-col items-center gap-1.5 rounded-lg px-1 pb-1.5 pt-2.5 outline-none transition-colors focus-visible:ring-2 focus-visible:ring-[color:var(--focus-ring)]',
-              selected ? 'bg-active text-foreground ring-1 ring-inset ring-foreground/15' : 'text-muted-foreground hover:bg-hover hover:text-foreground',
+              'relative z-10 flex min-w-0 cursor-pointer flex-col items-center gap-1.5 overflow-hidden px-1 pb-2 pt-2.5 outline-none',
+              shape.bg,
             )}
-            style={FAST_CSS}
           >
-            <span aria-hidden="true" className="flex h-7 items-center justify-center text-foreground/70">
+            <span
+              aria-hidden="true"
+              className={cn(
+                'flex h-7 items-center justify-center transition-opacity duration-80',
+                active ? 'text-foreground/70 opacity-100' : 'text-foreground/70 opacity-80',
+              )}
+            >
               {THUMBS[layout]}
             </span>
-            <span className={typeClass('caption')} style={{ fontVariationSettings: selected ? fontWeights.semibold : fontWeights.normal }}>
-              {LABELS[layout]}
+            {/* The invisible semibold copy reserves the width: no shift on select. */}
+            <span className={cn('inline-grid whitespace-nowrap', typeClass('caption'))}>
+              <span className="invisible col-start-1 row-start-1" style={{ fontVariationSettings: fontWeights.semibold }}>
+                {LABELS[layout]}
+              </span>
+              <span
+                className={cn(
+                  'col-start-1 row-start-1 text-center transition-[color,font-variation-settings] duration-80',
+                  active ? 'text-foreground' : 'text-muted-foreground',
+                )}
+                style={{ fontVariationSettings: selected ? fontWeights.semibold : fontWeights.normal }}
+              >
+                {LABELS[layout]}
+              </span>
             </span>
           </button>
         )
