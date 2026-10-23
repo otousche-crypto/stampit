@@ -20,7 +20,7 @@ function load(): Promise<HighlighterCore> {
   return highlighter
 }
 
-export type Grammar = 'html' | 'tsx' | 'vue' | 'svelte' | 'astro'
+export type Grammar = 'html' | 'tsx' | 'vue' | 'svelte' | 'astro' | 'dart'
 
 /** The other grammars load the first time their language is picked. */
 const GRAMMARS: Record<Exclude<Grammar, 'html'>, () => Promise<{ default: LanguageInput }>> = {
@@ -28,6 +28,7 @@ const GRAMMARS: Record<Exclude<Grammar, 'html'>, () => Promise<{ default: Langua
   vue: () => import('@shikijs/langs/vue'),
   svelte: () => import('@shikijs/langs/svelte'),
   astro: () => import('@shikijs/langs/astro'),
+  dart: () => import('@shikijs/langs/dart'),
 }
 
 export async function highlightCode(code: string, grammar: Grammar = 'html'): Promise<string> {
