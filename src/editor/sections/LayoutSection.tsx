@@ -23,17 +23,6 @@ const THUMBS: Record<Layout, ReactNode> = {
       <Line className="w-5" />
     </Surface>
   ),
-  text: (
-    <span className="flex items-center gap-1">
-      <Line className="w-4 opacity-40" />
-      <Line className="w-6 shadow-[0_2px_0_currentColor]" />
-    </span>
-  ),
-  avatar: (
-    <Surface className="size-4 justify-center rounded-full">
-      <Dot />
-    </Surface>
-  ),
   stamp: (
     <span className="grid size-7 place-items-center rounded-full border border-dashed border-current/50">
       <Dot className="size-3" />
@@ -49,28 +38,13 @@ const THUMBS: Record<Layout, ReactNode> = {
       </span>
     </span>
   ),
-  floating: (
-    <span className="relative h-7 w-12 rounded-[4px] border border-current/20">
-      <Surface className="absolute bottom-0.5 right-0.5 h-2.5 gap-0.5 rounded-full pl-px pr-1">
-        <Dot className="size-1.5" />
-        <Line className="h-[2px] w-3" />
-      </Surface>
-    </span>
-  ),
   card: (
-    <Surface className="h-7 w-12 gap-1 rounded-md px-1">
+    <Surface className="h-7 w-10 gap-1 rounded-md px-1">
       <Dot className="size-3" />
       <span className="flex flex-col gap-0.5">
         <Line className="w-5" />
         <Line className="w-3 opacity-40" />
       </span>
-    </Surface>
-  ),
-  status: (
-    <Surface className="h-4 gap-1 rounded-full pl-1 pr-1.5">
-      <span className="size-1.5 rounded-full bg-[#22C55E]" />
-      <Line className="w-4" />
-      <Line className="w-3 opacity-40" />
     </Surface>
   ),
   team: (
@@ -87,23 +61,19 @@ const THUMBS: Record<Layout, ReactNode> = {
 
 const LABELS: Record<Layout, string> = {
   pill: 'Pill',
-  text: 'Text link',
-  avatar: 'Avatar',
   stamp: 'Stamp',
   split: 'Label',
-  floating: 'Floating',
   card: 'Card',
-  status: 'Status',
   team: 'Team',
 }
 
-const ORDER: Layout[] = ['pill', 'text', 'avatar', 'stamp', 'split', 'floating', 'card', 'status', 'team']
+const ORDER: Layout[] = ['pill', 'stamp', 'split', 'card', 'team']
 
 /** The badge model, as a grid of thumbnails. */
 export function LayoutSection() {
   const { config, update } = useEditor()
   return (
-    <div role="radiogroup" aria-label="Style" className="grid grid-cols-3 gap-1.5">
+    <div role="radiogroup" aria-label="Style" className="grid grid-cols-5 gap-1">
       {ORDER.map((layout) => {
         const selected = config.layout === layout
         return (

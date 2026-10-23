@@ -48,13 +48,9 @@ const seconds = (s: string) => s.replace(/^\./, '0.')
 /** One line per badge model; the reference implementation has the exact CSS. */
 const LAYOUT_SPEC: Record<BadgeConfig['layout'], string> = {
   pill: 'Pill. [avatar] · normal text · bold text · icon, in one row, vertically centered, no wrapping.',
-  text: "Text link. No background, border or shadow: an inline link in the host page's own font and text color (normal text at 60% opacity), with a small 20px round avatar. The bold text gets an underline on hover and focus.",
-  avatar: 'Avatar. Only the round avatar shows, on the badge surface. On hover or focus the surface widens to the right and the text and icon unfold (max-width transition, slow spring).',
   stamp: 'Stamp. A circle with the avatar in its center and the full text, upper-case, running around the edge (SVG textPath with textLength = the circumference). The text ring turns slowly (one turn per 24s, linear); no rotation with reduced motion.',
   split: 'Label, in two parts like a shields.io badge: avatar and normal text on the badge surface, then the bold text and icon on an inverted segment (bold text color as background, surface color as text).',
-  floating: 'Floating. Pinned to the bottom-right corner of the window (position: fixed, 16px from the edges, safe-area aware, high z-index). Fully open at the top of the page; once the page is scrolled more than 80px it folds down to the avatar, and unfolds again on hover or focus. Social links open to its left.',
   card: 'Card. A small card: avatar 44px on the left; normal text (12px), bold text (16px) and the role (13px, normal text color) stacked on the right; the icon in the top-right corner; the social links always visible in a row underneath. The whole card is the link (a stretched ::before), the social links sit above it.',
-  status: 'Status. A green status dot (#22C55E, with a soft pulsing ring) in the avatar corner, or before the text when there is no avatar; then the status in the bold style, then "· name" in the normal style.',
   team: 'Team. Overlapping round avatars (yours on top, then up to two teammates as initials on colored circles, each ringed with the surface color), then the normal text and the names: "Olivier, Camille & Lucas", or "… & N others" beyond three.',
 }
 

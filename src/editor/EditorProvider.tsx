@@ -172,7 +172,6 @@ export function EditorProvider({
         avatarFailed,
         previewScheme: config.theme.adaptToSite ? previewBackground : undefined,
         skipEntrance: !entranceLive,
-        staticPosition: true,
       }),
     [config, uploadDataUrl, avatarFailed, previewBackground, entranceLive],
   )

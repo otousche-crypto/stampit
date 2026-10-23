@@ -12,9 +12,8 @@ export function ShapeSection() {
   const { config, update } = useEditor()
   const shape = config.shape
   const set = (patch: Partial<Shape>) => update((c) => ({ ...c, shape: { ...c.shape, ...patch } }))
-  // A text link has no surface; a stamp is always round and carries no icon.
-  const surface = config.layout !== 'text'
-  const corners = surface && config.layout !== 'stamp'
+  // A stamp is always round and carries no icon.
+  const corners = config.layout !== 'stamp'
   const icon = config.layout !== 'stamp'
 
   return (
@@ -30,29 +29,25 @@ export function ShapeSection() {
           ]}
         />
       )}
-      {surface && (
-        <>
-          <SelectRow
-            label="Border"
-            value={String(shape.borderWidth) as '0' | '1' | '2'}
-            onChange={(w) => set({ borderWidth: Number(w) as Shape['borderWidth'] })}
-            options={[
-              { value: '0', label: 'None' },
-              { value: '1', label: '1 px' },
-              { value: '2', label: '2 px' },
-            ]}
-          />
-          <SelectRow
-            label="Shadow"
-            value={shape.shadow}
-            onChange={(shadow) => set({ shadow })}
-            options={[
-              { value: 'none', label: 'None' },
-              { value: 'soft', label: 'Soft' },
-            ]}
-          />
-        </>
-      )}
+      <SelectRow
+        label="Border"
+        value={String(shape.borderWidth) as '0' | '1' | '2'}
+        onChange={(w) => set({ borderWidth: Number(w) as Shape['borderWidth'] })}
+        options={[
+          { value: '0', label: 'None' },
+          { value: '1', label: '1 px' },
+          { value: '2', label: '2 px' },
+        ]}
+      />
+      <SelectRow
+        label="Shadow"
+        value={shape.shadow}
+        onChange={(shadow) => set({ shadow })}
+        options={[
+          { value: 'none', label: 'None' },
+          { value: 'soft', label: 'Soft' },
+        ]}
+      />
       {icon && (
         <SelectRow
           label="Icon"

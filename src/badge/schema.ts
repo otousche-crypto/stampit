@@ -41,7 +41,7 @@ export const SOCIALS = ['github', 'linkedin', 'x', 'instagram', 'dribbble'] as c
 export const ICON_STYLES = ['arrow', 'triangle', 'link'] as const
 
 /** Badge models (editor "Style"). Same config, a different rendering. */
-export const LAYOUTS = ['pill', 'text', 'avatar', 'stamp', 'split', 'floating', 'card', 'status', 'team'] as const
+export const LAYOUTS = ['pill', 'stamp', 'split', 'card', 'team'] as const
 
 export const channelSchema = z.object({
   id: z.string().min(1).max(32),
@@ -72,8 +72,6 @@ export const badgeConfigSchema = z.object({
     font: z.enum(['sans', 'serif', 'mono']),
     /** Card: a line under the name. */
     role: z.string().max(40),
-    /** Status: replaces the normal text. */
-    status: z.string().max(32),
   }),
 
   /** Team: the other people, after the bold text. */
@@ -183,7 +181,6 @@ export function createDefaultConfig(overrides?: { id?: string; updatedAt?: strin
       size: 'm',
       font: 'sans',
       role: 'Product designer',
-      status: 'Available for work',
     },
     team: ['Camille Bernard', 'Lucas Fontaine'],
     avatar: { source: 'initials', initials: null, url: null, background: DEFAULT_AVATAR_BACKGROUND },
