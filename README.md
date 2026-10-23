@@ -2,7 +2,7 @@
 
 > Stamp everything you ship.
 
-Make a "Made by" signature badge for your project footers, then copy a prompt for your AI coding agent or a standalone HTML/CSS snippet. Product spec: [docs/PRD.md](docs/PRD.md).
+Make a "Made by" signature badge for your projects, then copy a prompt for your AI coding agent or a standalone HTML/CSS snippet. Product spec: [docs/PRD.md](docs/PRD.md).
 
 ## Develop
 

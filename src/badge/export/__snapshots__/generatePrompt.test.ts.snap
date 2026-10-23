@@ -5,7 +5,7 @@ exports[`generatePrompt > snapshot: adaptive 1`] = `
 
 ## Goal
 
-Add this signature badge to the footer of the current project, using the project's own stack and conventions (components, styling approach, file structure). The badge reads "Built by Grace Hopper".
+Add this signature badge to the current project where the user wants it (in the footer if they haven't said where), using the project's own stack and conventions (components, styling approach, file structure). The badge reads "Built by Grace Hopper".
 Match the visual spec and behavior below exactly. The reference implementation at the end is the source of truth: adapt it to the project rather than pasting it as-is when a native approach fits better. Add no new dependency.
 
 ## Visual spec
@@ -74,7 +74,7 @@ Standalone HTML/CSS, tested in Chrome, Safari and Firefox:
 
 ## Acceptance criteria
 
-1. Rendering: the footer shows the badge at 36px high with the exact colors, radius, border and shadow above, in both light and dark site themes.
+1. Rendering: the page shows the badge at 36px high with the exact colors, radius, border and shadow above, in both light and dark site themes.
 2. Hover: the arrow slides 2px up-right and the shadow grows, with no layout shift.
 3. Click: the badge opens mailto:grace@example.com in a new tab.
 4. Keyboard: Tab reaches the badge, the focus ring is visible, Enter follows the link.
@@ -87,7 +87,7 @@ exports[`generatePrompt > snapshot: bubbles-2 1`] = `
 
 ## Goal
 
-Add this signature badge to the footer of the current project, using the project's own stack and conventions (components, styling approach, file structure). The badge reads "Launched by Olivier Tousche".
+Add this signature badge to the current project where the user wants it (in the footer if they haven't said where), using the project's own stack and conventions (components, styling approach, file structure). The badge reads "Launched by Olivier Tousche".
 Match the visual spec and behavior below exactly. The reference implementation at the end is the source of truth: adapt it to the project rather than pasting it as-is when a native approach fits better. Add no new dependency.
 
 ## Visual spec
@@ -175,7 +175,7 @@ Standalone HTML/CSS/JS, tested in Chrome, Safari and Firefox:
 
 ## Acceptance criteria
 
-1. Rendering: the footer shows the badge at 36px high with the exact colors, radius, border and shadow above, in both light and dark site themes.
+1. Rendering: the page shows the badge at 36px high with the exact colors, radius, border and shadow above, in both light and dark site themes.
 2. Hover: the "+" nudges and the shadow grows; the menu does not open on hover, with no layout shift.
 3. Open/close: a click opens the bubbles above the badge (below near the top of the screen), inside the viewport; outside click, Escape and a second click close them.
 4. Keyboard: Tab, Enter/Space, arrows, Home/End and Escape work as specified, focus returns to the badge, and the focus ring is visible.
@@ -188,7 +188,7 @@ exports[`generatePrompt > snapshot: bubbles-8 1`] = `
 
 ## Goal
 
-Add this signature badge to the footer of the current project, using the project's own stack and conventions (components, styling approach, file structure). The badge reads "Crafted by Eight Links".
+Add this signature badge to the current project where the user wants it (in the footer if they haven't said where), using the project's own stack and conventions (components, styling approach, file structure). The badge reads "Crafted by Eight Links".
 Match the visual spec and behavior below exactly. The reference implementation at the end is the source of truth: adapt it to the project rather than pasting it as-is when a native approach fits better. Add no new dependency.
 
 ## Visual spec
@@ -288,7 +288,7 @@ Standalone HTML/CSS/JS, tested in Chrome, Safari and Firefox:
 
 ## Acceptance criteria
 
-1. Rendering: the footer shows the badge at 30px high with the exact colors, radius, border and shadow above, in both light and dark site themes.
+1. Rendering: the page shows the badge at 30px high with the exact colors, radius, border and shadow above, in both light and dark site themes.
 2. Hover: the "+" nudges and the shadow grows; the menu does not open on hover, with no layout shift.
 3. Open/close: a click opens the bubbles above the badge (below near the top of the screen), inside the viewport; outside click, Escape and a second click close them.
 4. Keyboard: Tab, Enter/Space, arrows, Home/End and Escape work as specified, focus returns to the badge, and the focus ring is visible.
@@ -301,7 +301,7 @@ exports[`generatePrompt > snapshot: glass 1`] = `
 
 ## Goal
 
-Add this signature badge to the footer of the current project, using the project's own stack and conventions (components, styling approach, file structure). The badge reads "Glassworks".
+Add this signature badge to the current project where the user wants it (in the footer if they haven't said where), using the project's own stack and conventions (components, styling approach, file structure). The badge reads "Glassworks".
 Match the visual spec and behavior below exactly. The reference implementation at the end is the source of truth: adapt it to the project rather than pasting it as-is when a native approach fits better. Add no new dependency.
 
 ## Visual spec
@@ -368,7 +368,7 @@ Standalone HTML/CSS, tested in Chrome, Safari and Firefox:
 
 ## Acceptance criteria
 
-1. Rendering: the footer shows the badge at 30px high with the exact colors, radius, border and shadow above, in both light and dark site themes.
+1. Rendering: the page shows the badge at 30px high with the exact colors, radius, border and shadow above, in both light and dark site themes.
 2. Hover: the arrow slides 2px up-right and the shadow grows, with no layout shift.
 3. Click: the badge opens https://glass.example in a new tab.
 4. Keyboard: Tab reaches the badge, the focus ring is visible, Enter follows the link.
@@ -381,7 +381,7 @@ exports[`generatePrompt > snapshot: layout-card 1`] = `
 
 ## Goal
 
-Add this signature badge to the footer of the current project, using the project's own stack and conventions (components, styling approach, file structure). The badge reads "Crafted by Ada Lovelace".
+Add this signature badge to the current project where the user wants it (in the footer if they haven't said where), using the project's own stack and conventions (components, styling approach, file structure). The badge reads "Crafted by Ada Lovelace".
 Match the visual spec and behavior below exactly. The reference implementation at the end is the source of truth: adapt it to the project rather than pasting it as-is when a native approach fits better. Add no new dependency.
 
 ## Visual spec
@@ -458,7 +458,7 @@ Standalone HTML/CSS, tested in Chrome, Safari and Firefox:
 
 ## Acceptance criteria
 
-1. Rendering: the footer shows the badge at 36px high with the exact colors, radius, border and shadow above, in both light and dark site themes.
+1. Rendering: the page shows the badge at 36px high with the exact colors, radius, border and shadow above, in both light and dark site themes.
 2. Hover: the arrow slides 2px up-right and the shadow grows, with no layout shift.
 3. Click: the badge opens https://ada.dev in a new tab.
 4. Keyboard: Tab reaches the badge, the focus ring is visible, Enter follows the link.
@@ -471,7 +471,7 @@ exports[`generatePrompt > snapshot: layout-split 1`] = `
 
 ## Goal
 
-Add this signature badge to the footer of the current project, using the project's own stack and conventions (components, styling approach, file structure). The badge reads "Crafted by Ada Lovelace".
+Add this signature badge to the current project where the user wants it (in the footer if they haven't said where), using the project's own stack and conventions (components, styling approach, file structure). The badge reads "Crafted by Ada Lovelace".
 Match the visual spec and behavior below exactly. The reference implementation at the end is the source of truth: adapt it to the project rather than pasting it as-is when a native approach fits better. Add no new dependency.
 
 ## Visual spec
@@ -545,7 +545,7 @@ Standalone HTML/CSS, tested in Chrome, Safari and Firefox:
 
 ## Acceptance criteria
 
-1. Rendering: the footer shows the badge at 36px high with the exact colors, radius, border and shadow above, in both light and dark site themes.
+1. Rendering: the page shows the badge at 36px high with the exact colors, radius, border and shadow above, in both light and dark site themes.
 2. Hover: the arrow slides 2px up-right and the shadow grows, with no layout shift.
 3. Click: the badge opens https://ada.dev in a new tab.
 4. Keyboard: Tab reaches the badge, the focus ring is visible, Enter follows the link.
@@ -558,7 +558,7 @@ exports[`generatePrompt > snapshot: layout-stamp 1`] = `
 
 ## Goal
 
-Add this signature badge to the footer of the current project, using the project's own stack and conventions (components, styling approach, file structure). The badge reads "Crafted by Ada Lovelace".
+Add this signature badge to the current project where the user wants it (in the footer if they haven't said where), using the project's own stack and conventions (components, styling approach, file structure). The badge reads "Crafted by Ada Lovelace".
 Match the visual spec and behavior below exactly. The reference implementation at the end is the source of truth: adapt it to the project rather than pasting it as-is when a native approach fits better. Add no new dependency.
 
 ## Visual spec
@@ -632,7 +632,7 @@ Standalone HTML/CSS, tested in Chrome, Safari and Firefox:
 
 ## Acceptance criteria
 
-1. Rendering: the footer shows the badge at 36px high with the exact colors, radius, border and shadow above, in both light and dark site themes.
+1. Rendering: the page shows the badge at 36px high with the exact colors, radius, border and shadow above, in both light and dark site themes.
 2. Hover: the arrow slides 2px up-right and the shadow grows, with no layout shift.
 3. Click: the badge opens https://ada.dev in a new tab.
 4. Keyboard: Tab reaches the badge, the focus ring is visible, Enter follows the link.
@@ -645,7 +645,7 @@ exports[`generatePrompt > snapshot: layout-team 1`] = `
 
 ## Goal
 
-Add this signature badge to the footer of the current project, using the project's own stack and conventions (components, styling approach, file structure). The badge reads "Crafted by Ada, Grace & 2 others".
+Add this signature badge to the current project where the user wants it (in the footer if they haven't said where), using the project's own stack and conventions (components, styling approach, file structure). The badge reads "Crafted by Ada, Grace & 2 others".
 Match the visual spec and behavior below exactly. The reference implementation at the end is the source of truth: adapt it to the project rather than pasting it as-is when a native approach fits better. Add no new dependency.
 
 ## Visual spec
@@ -720,7 +720,7 @@ Standalone HTML/CSS, tested in Chrome, Safari and Firefox:
 
 ## Acceptance criteria
 
-1. Rendering: the footer shows the badge at 36px high with the exact colors, radius, border and shadow above, in both light and dark site themes.
+1. Rendering: the page shows the badge at 36px high with the exact colors, radius, border and shadow above, in both light and dark site themes.
 2. Hover: the arrow slides 2px up-right and the shadow grows, with no layout shift.
 3. Click: the badge opens https://ada.dev in a new tab.
 4. Keyboard: Tab reaches the badge, the focus ring is visible, Enter follows the link.
@@ -733,7 +733,7 @@ exports[`generatePrompt > snapshot: link-initials 1`] = `
 
 ## Goal
 
-Add this signature badge to the footer of the current project, using the project's own stack and conventions (components, styling approach, file structure). The badge reads "Crafted by Ada Lovelace".
+Add this signature badge to the current project where the user wants it (in the footer if they haven't said where), using the project's own stack and conventions (components, styling approach, file structure). The badge reads "Crafted by Ada Lovelace".
 Match the visual spec and behavior below exactly. The reference implementation at the end is the source of truth: adapt it to the project rather than pasting it as-is when a native approach fits better. Add no new dependency.
 
 ## Visual spec
@@ -802,7 +802,7 @@ Standalone HTML/CSS, tested in Chrome, Safari and Firefox:
 
 ## Acceptance criteria
 
-1. Rendering: the footer shows the badge at 36px high with the exact colors, radius, border and shadow above, in both light and dark site themes.
+1. Rendering: the page shows the badge at 36px high with the exact colors, radius, border and shadow above, in both light and dark site themes.
 2. Hover: the arrow slides 2px up-right and the shadow grows, with no layout shift.
 3. Click: the badge opens https://ada.dev in a new tab.
 4. Keyboard: Tab reaches the badge, the focus ring is visible, Enter follows the link.
@@ -815,7 +815,7 @@ exports[`generatePrompt > snapshot: link-photo 1`] = `
 
 ## Goal
 
-Add this signature badge to the footer of the current project, using the project's own stack and conventions (components, styling approach, file structure). The badge reads "Launched by Olivier Tousche".
+Add this signature badge to the current project where the user wants it (in the footer if they haven't said where), using the project's own stack and conventions (components, styling approach, file structure). The badge reads "Launched by Olivier Tousche".
 Match the visual spec and behavior below exactly. The reference implementation at the end is the source of truth: adapt it to the project rather than pasting it as-is when a native approach fits better. Add no new dependency.
 
 ## Visual spec
@@ -882,7 +882,7 @@ Standalone HTML/CSS, tested in Chrome, Safari and Firefox:
 
 ## Acceptance criteria
 
-1. Rendering: the footer shows the badge at 44px high with the exact colors, radius, border and shadow above, in both light and dark site themes.
+1. Rendering: the page shows the badge at 44px high with the exact colors, radius, border and shadow above, in both light and dark site themes.
 2. Hover: the arrow slides 2px up-right and the shadow grows, with no layout shift.
 3. Click: the badge opens https://example.com.
 4. Keyboard: Tab reaches the badge, the focus ring is visible, Enter follows the link.
@@ -895,7 +895,7 @@ exports[`generatePrompt > snapshot: link-socials 1`] = `
 
 ## Goal
 
-Add this signature badge to the footer of the current project, using the project's own stack and conventions (components, styling approach, file structure). The badge reads "Crafted by Ada Lovelace".
+Add this signature badge to the current project where the user wants it (in the footer if they haven't said where), using the project's own stack and conventions (components, styling approach, file structure). The badge reads "Crafted by Ada Lovelace".
 Match the visual spec and behavior below exactly. The reference implementation at the end is the source of truth: adapt it to the project rather than pasting it as-is when a native approach fits better. Add no new dependency.
 
 ## Visual spec
@@ -972,7 +972,7 @@ Standalone HTML/CSS, tested in Chrome, Safari and Firefox:
 
 ## Acceptance criteria
 
-1. Rendering: the footer shows the badge at 36px high with the exact colors, radius, border and shadow above, in both light and dark site themes.
+1. Rendering: the page shows the badge at 36px high with the exact colors, radius, border and shadow above, in both light and dark site themes.
 2. Hover: the arrow slides 2px up-right and the shadow grows, with no layout shift.
 3. Click: the badge opens https://ada.dev in a new tab.
 4. Keyboard: Tab reaches the badge, the focus ring is visible, Enter follows the link.
