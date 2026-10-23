@@ -237,7 +237,7 @@ export function generatePrompt(config: BadgeConfig, options: GeneratePromptOptio
   const ENTRANCE_TEXT = {
     shake: 'gives a short horizontal shake (±3px)',
     bump: 'gives a small bump: scale 1 → 1.08 → 0.97 → 1',
-    shine: 'shows a light sheen sweeping once from left to right across it (a gradient band on a clipped ::after, 0.2s after load)',
+    shine: 'shows a sheen sweeping once from left to right across it (a gradient band on a clipped ::after, 0.2s after load: white on dark surfaces, a faint dark band on light ones)',
   } as const
   const HOVER_TEXT = {
     grow: 'scales to 1.04 (fast spring)',
@@ -250,7 +250,7 @@ export function generatePrompt(config: BadgeConfig, options: GeneratePromptOptio
   }
   if (repeat !== 'none') {
     out.push(
-      `- On delay: every ${seconds(CSS_SPRINGS.repeat.duration)}, starting ${seconds(CSS_SPRINGS.repeat.duration)} after load, the badge ${ENTRANCE_TEXT[repeat].replace(' (a gradient band on a clipped ::after, 0.2s after load)', ' (a gradient band on a clipped ::after)')}. Loop it with CSS (one keyframe cycle per period), no timers.`,
+      `- On delay: every ${seconds(CSS_SPRINGS.repeat.duration)}, starting ${seconds(CSS_SPRINGS.repeat.duration)} after load, the badge ${ENTRANCE_TEXT[repeat].replace(', 0.2s after load:', ':')}. Loop it with CSS (one keyframe cycle per period), no timers.`,
     )
   }
   if (hover !== 'none') {
