@@ -1,4 +1,4 @@
-import { bestOn, contrastRatio } from '../contrast'
+import { bestOn, contrastRatio, parseHex, relativeLuminance } from '../contrast'
 import { SOCIALS, type BadgeConfig, type BadgeSize, type Layout, type Palette, type SocialNetwork } from '../schema'
 import { CHANNELS, channelLabel, isValidUrl } from '../channels'
 import { BUBBLE_STAGGER_MS, CSS_SPRINGS, TOOLTIP_DELAY, type CssSpringName } from '../springs-css'
@@ -198,6 +198,15 @@ function strokeSvg(cls: string, size: number, body: string): string {
 // CSS
 // ---------------------------------------------------------------------------
 
+/**
+ * The Shine band: white on a dark or see-through surface, a faint dark band on
+ * a light one (white on white would not show).
+ */
+export function sheenColor(p: Palette): string {
+  const bg = parseHex(p.background)
+  return bg.a < 0.5 || relativeLuminance(bg) < 0.4 ? 'rgba(255,255,255,.55)' : 'rgba(0,0,0,.12)'
+}
+
 function paletteVars(p: Palette, prefix: string): string {
   return [
     `${prefix}bg:${css(p.background)}`,
@@ -251,6 +260,8 @@ function buildCss(config: BadgeConfig, avatar: ResolvedAvatar, previewScheme?: '
   )
   const vars = [paletteVars(lightOrBase, v)]
   if (anyBlur) vars.push(`${v}blur:${lightOrBase.blur}px`)
+  const shine = config.motion.entrance === 'shine' || config.motion.repeat === 'shine'
+  if (shine) vars.push(`${v}sh:${sheenColor(lightOrBase)}`)
   rules.push(
     `.${c}{${vars.join(';')};display:inline-flex;align-items:center;gap:6px;position:relative;vertical-align:middle;font-family:${FONT_STACKS[config.text.font]};font-size:${size.text}px;font-weight:400;font-style:normal;font-variant:normal;line-height:1.2;text-align:left;white-space:nowrap;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}`,
   )
@@ -335,6 +346,7 @@ function buildCss(config: BadgeConfig, avatar: ResolvedAvatar, previewScheme?: '
     const dark = palettes.dark
     const darkVars = [paletteVars(dark, v)]
     if (anyBlur) darkVars.push(`${v}blur:${dark.blur}px`)
+    if (shine && sheenColor(dark) !== sheenColor(palettes.light)) darkVars.push(`${v}sh:${sheenColor(dark)}`)
     let darkRules = `.${c}{${darkVars.join(';')}}`
     if (hasAvatar && avatar.kind === 'initials') {
       const lightInitials = initialsColor(config, palettes.light)
@@ -434,7 +446,7 @@ function motionRules(ctx: CssContext): string[] {
     // A light band sweeps across the pill, clipped to its shape.
     rules.push(`.${c}__pill{position:relative;overflow:hidden}`)
     rules.push(
-      `.${c}__pill::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;background:linear-gradient(105deg,transparent 30%,rgba(255,255,255,.55) 50%,transparent 70%);transform:translateX(110%);animation:${sheen.join(',')}}`,
+      `.${c}__pill::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;background:linear-gradient(105deg,transparent 30%,var(${ctx.v}sh) 50%,transparent 70%);transform:translateX(110%);animation:${sheen.join(',')}}`,
     )
   }
   switch (hover) {
