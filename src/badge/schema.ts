@@ -189,8 +189,8 @@ export function createDefaultConfig(overrides?: { id?: string; updatedAt?: strin
       base: 'light',
       palettes: { light: { ...LIGHT_PALETTE }, dark: { ...DARK_PALETTE } },
     },
-    shape: { radius: 1, borderWidth: 1, shadow: 'soft', showIcon: true, iconStyle: 'arrow' },
-    motion: { entrance: 'none', repeat: 'none', hover: 'none' },
+    shape: { radius: 1, borderWidth: 0, shadow: 'none', showIcon: true, iconStyle: 'arrow' },
+    motion: { entrance: 'shake', repeat: 'shine', hover: 'grow' },
     click: {
       mode: 'link',
       link: { url: '', newTab: true },

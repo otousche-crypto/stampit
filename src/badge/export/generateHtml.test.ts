@@ -72,7 +72,9 @@ describe('generateHtml', () => {
   })
 
   it('reproduces the Décadi badge in Light / M', () => {
-    const { css } = generateBadge(FIXTURES['link-initials'])
+    // The Décadi badge has a 1px border and the soft shadow (no longer the defaults).
+    const decadi = mergeDeep(FIXTURES['link-initials'], { shape: { borderWidth: 1, shadow: 'soft' } })
+    const { css } = generateBadge(decadi)
     expect(css).toContain('height:36px')
     expect(css).toContain('padding:0 12px 0 4px')
     expect(css).toContain('gap:8px')
@@ -120,9 +122,16 @@ describe('reduced motion', () => {
 })
 
 describe('animations', () => {
-  it('emits nothing by default', () => {
+  it('emits nothing when every animation is off', () => {
+    const still = mergeDeep(FIXTURES['link-initials'], { motion: { entrance: 'none', repeat: 'none', hover: 'none' } })
+    expect(generateBadge(still).css).not.toContain('@keyframes')
+  })
+
+  it('shakes on appear, shines every few seconds and grows on hover by default', () => {
     const { css } = generateBadge(FIXTURES['link-initials'])
-    expect(css).not.toContain('@keyframes')
+    expect(css).toContain('@keyframes sp-test1234-in')
+    expect(css).toContain('@keyframes sp-test1234-rp')
+    expect(css).toContain('.sp-test1234__pill:hover{transform:scale(1.04)}')
   })
 
   it('animates the wrapper on appear and the pill on hover', () => {

@@ -32,8 +32,8 @@ export const DEMO_CONFIG: BadgeConfig = {
       dark: { background: '#14141C', border: '#2E2E3A', textNormal: '#8A8A99', textBold: '#FFFFFF', icon: '#8A8A99', blur: 0 },
     },
   },
-  shape: { radius: 1, borderWidth: 1, shadow: 'soft', showIcon: true, iconStyle: 'arrow' },
-  motion: { entrance: 'none', repeat: 'none', hover: 'none' },
+  shape: { radius: 1, borderWidth: 0, shadow: 'none', showIcon: true, iconStyle: 'arrow' },
+  motion: { entrance: 'shake', repeat: 'shine', hover: 'grow' },
   click: {
     mode: 'link',
     link: { url: 'https://www.linkedin.com/in/olivier-tousche-a6160b122/', newTab: true },
