@@ -4,7 +4,6 @@ import { Suggestions, WELL_FIELD } from '../controls'
 import { useEditor } from '../EditorProvider'
 
 const NORMAL_SUGGESTIONS = ['Made by', 'Launched by', 'Built by', 'Designed by']
-const STATUS_SUGGESTIONS = ['Open to work', 'Booking for Q1', 'Taking new clients']
 
 /** Up to five teammates after the bold text. */
 const MAX_TEAM = 5
@@ -16,7 +15,6 @@ export function TextSection({ autoFocusBold }: { autoFocusBold?: boolean }) {
   const text = config.text
   const layout = config.layout
   const set = (patch: Partial<Text>) => update((c) => ({ ...c, text: { ...c.text, ...patch } }))
-  const status = layout === 'status'
 
   // Always one empty field at the end to add a teammate; clearing a field removes it.
   const teamFields = config.team.length < MAX_TEAM ? [...config.team, ''] : config.team
@@ -32,27 +30,15 @@ export function TextSection({ autoFocusBold }: { autoFocusBold?: boolean }) {
       {/* Side by side: one InputGroup each, so each keeps its own vertical hover scope. */}
       <div className="grid grid-cols-2 gap-2">
         <InputGroup size="compact" className="w-full">
-          {status ? (
-            <InputField
-              index={0}
-              label="Status"
-              className={WELL_FIELD}
-              placeholder="Available for work"
-              value={text.status}
-              maxLength={32}
-              onChange={(value) => set({ status: value })}
-            />
-          ) : (
-            <InputField
-              index={0}
-              label="Normal text"
-              className={WELL_FIELD}
-              placeholder="Crafted by"
-              value={text.normal}
-              maxLength={24}
-              onChange={(normal) => set({ normal })}
-            />
-          )}
+          <InputField
+            index={0}
+            label="Normal text"
+            className={WELL_FIELD}
+            placeholder="Crafted by"
+            value={text.normal}
+            maxLength={24}
+            onChange={(normal) => set({ normal })}
+          />
         </InputGroup>
         <InputGroup size="compact" className="w-full">
           <InputField
@@ -68,11 +54,7 @@ export function TextSection({ autoFocusBold }: { autoFocusBold?: boolean }) {
           />
         </InputGroup>
       </div>
-      {status ? (
-        <Suggestions label="Status suggestions" items={STATUS_SUGGESTIONS} onPick={(value) => set({ status: value })} />
-      ) : (
-        <Suggestions label="Suggestions" items={NORMAL_SUGGESTIONS} onPick={(normal) => set({ normal })} />
-      )}
+      <Suggestions label="Suggestions" items={NORMAL_SUGGESTIONS} onPick={(normal) => set({ normal })} />
 
       {layout === 'card' && (
         <InputGroup size="compact" className="mt-2 w-full">

@@ -19,7 +19,6 @@ export const DEMO_CONFIG: BadgeConfig = {
     size: 'm',
     font: 'sans',
     role: 'Product designer',
-    status: 'Available for work',
   },
   team: [],
   // Olivier's photo first; the home page swaps in initials when the name spins.

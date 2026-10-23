@@ -18,13 +18,6 @@ describe('generateHtml', () => {
     expect(team(['Grace Hopper', 'Alan Turing', 'Linus Torvalds'])).toBe('Ada, Grace & 2 others')
   })
 
-  it('pins Floating to the corner, except in the preview', () => {
-    const config = FIXTURES['layout-floating']
-    expect(generateBadge(config).css).toContain('position:fixed')
-    expect(generateBadge(config).js).toContain('data-c')
-    expect(generateBadge(config, { staticPosition: true }).css).not.toContain('position:fixed')
-    expect(generateBadge(config, { staticPosition: true }).js).toBeNull()
-  })
 
   it('names the stamp link, whose text is drawn in SVG', () => {
     expect(generateBadge(FIXTURES['layout-stamp']).html).toContain('aria-label="Crafted by Ada Lovelace, opens in a new tab"')

@@ -40,24 +40,16 @@ export type GenerateHtmlOptions = {
   previewScheme?: 'light' | 'dark'
   /** Preview only: leave out the appear animation (it would replay on every edit). */
   skipEntrance?: boolean
-  /** Preview only: a Floating badge stays in place instead of pinning to the window corner. */
-  staticPosition?: boolean
 }
 
 /** Stamp diameter per size, in px. */
 export const STAMP_SIZES: Record<BadgeSize, number> = { s: 88, m: 104, l: 120 }
 
 /** Layouts that always show an avatar (initials when there is no photo). */
-const NEEDS_AVATAR: ReadonlySet<Layout> = new Set(['avatar', 'stamp', 'floating', 'card', 'team'])
-
-/** Avatar + text that unfolds on hover (Avatar) or folds away on scroll (Floating). */
-const EXPANDS: ReadonlySet<Layout> = new Set(['avatar', 'floating'])
+const NEEDS_AVATAR: ReadonlySet<Layout> = new Set(['stamp', 'card', 'team'])
 
 /** Team members' initials sit on these colors, in order. */
 export const TEAM_COLORS = ['#5B8DEF', '#3BB273', '#E15A97', '#F2A541', '#8E6CEF']
-
-/** Status dot. */
-export const STATUS_GREEN = '#22C55E'
 
 /** The bubble menu only exists on the classic pill. */
 export function usesBubbles(config: BadgeConfig): boolean {
@@ -110,8 +102,7 @@ export function initialsColor(config: BadgeConfig, palette: Palette): string {
 
 /** Accessible text of the badge, normal and bold in display order. */
 export function badgeText(config: BadgeConfig): string {
-  const { normal, bold, order, status } = config.text
-  if (config.layout === 'status') return [status.trim(), bold.trim()].filter(Boolean).join(' · ')
+  const { normal, bold, order } = config.text
   const name = config.layout === 'team' ? teamNames(config) : bold
   const parts = order === 'normal-first' ? [normal, name] : [name, normal]
   return parts
@@ -209,8 +200,7 @@ function transition(ctx: CssContext, property: string, name: CssSpringName, dela
   return `${property} ${CSS_SPRINGS[name].duration} ${springVar(ctx, name)}${delay ? ` ${delay}` : ''}`
 }
 
-function buildCss(config: BadgeConfig, avatar: ResolvedAvatar, options: GenerateHtmlOptions): string {
-  const previewScheme = options.previewScheme
+function buildCss(config: BadgeConfig, avatar: ResolvedAvatar, previewScheme?: 'light' | 'dark'): string {
   const id = config.id
   const ctx: CssContext = { c: `sp-${id}`, v: `--sp-${id}-`, config, springs: new Set() }
   const { c, v } = ctx
@@ -262,7 +252,6 @@ function buildCss(config: BadgeConfig, avatar: ResolvedAvatar, options: Generate
   const pillTransitions: string[] = []
   if (soft) pillTransitions.push(transition(ctx, 'box-shadow', 'fast'))
   if (hover === 'grow' || hover === 'lift') pillTransitions.push(transition(ctx, 'transform', 'fast'))
-  if (EXPANDS.has(layout)) pillTransitions.push(transition(ctx, 'padding', 'slow'))
   if (pillTransitions.length) pill.push(`transition:${pillTransitions.join(',')}`)
   rules.push(`.${c}__pill{${pill.join(';')}}`)
   if (soft) rules.push(`.${c}__pill:hover{box-shadow:${shadow(SOFT_SHADOW_HOVER)}}`)
@@ -316,7 +305,7 @@ function buildCss(config: BadgeConfig, avatar: ResolvedAvatar, options: Generate
   }
   if (bubbles) rules.push(...bubbleRules(ctx, { radius: config.shape.radius, ring, soft, anyBlur }))
   if (activeSocials(config).length) rules.push(...socialRules(ctx, { radius, ring, soft, anyBlur }))
-  rules.push(...layoutRules(ctx, { padLeft, staticPosition: !!options.staticPosition }))
+  rules.push(...layoutRules(ctx, { padLeft }))
 
   if (adaptToSite) {
     const dark = palettes.dark
@@ -338,7 +327,7 @@ function buildCss(config: BadgeConfig, avatar: ResolvedAvatar, options: Generate
     reduced.push(`.${c},.${c} .${c}__pill,.${c} .${c}__pill:hover{animation:none;transform:none}.${c} .${c}__pill::after{animation:none;opacity:0}`)
   }
   if (layout === 'stamp') reduced.push(`.${c} .${c}__ring{animation:none}`)
-  if (layout === 'status') reduced.push(`.${c} .${c}__dot{animation:none}`)
+
   if (!bubbles) {
     reduced.push(`.${c} .${c}__pill:hover .${c}__ic,.${c} .${c}__pill:focus-visible .${c}__ic{transform:none}`)
   } else {
@@ -443,82 +432,21 @@ function motionRules(ctx: CssContext): string[] {
   return rules
 }
 
-/** Upper bound of the folded text's width, in px: about 0.62 em per character. */
-function foldWidth(config: BadgeConfig): number {
-  const size = SIZES[config.text.size]
-  const chars = Array.from(badgeText(config)).length
-  return Math.ceil(chars * size.text * 0.62 + size.gap * 2 + (config.shape.showIcon ? size.icon + size.gap : 0) + 8)
-}
-
 /** What each non-pill layout changes on top of the pill rules (same specificity, later wins). */
 function layoutRules(
   ctx: CssContext,
-  { padLeft, staticPosition }: { padLeft: number; staticPosition: boolean },
+  { padLeft }: { padLeft: number },
 ): string[] {
   const { c, v, config } = ctx
   const size = SIZES[config.text.size]
   const layout = config.layout
   const rules: string[] = []
-  const shown = `.${c}:hover,.${c}:focus-within`
-  const within = (sel: string) => shown.split(',').map((s) => `${s} ${sel}`).join(',')
 
   switch (layout) {
     case 'pill':
       break
 
-    case 'text': {
-      // A plain inline link in the site's own font and color: no surface at all.
-      rules.push(
-        `.${c}{font-family:inherit}`,
-        `.${c}__pill,.${c}__b{color:inherit}`,
-        `.${c}__n,.${c}__ic{color:inherit;opacity:.6}`,
-        `.${c}__pill,.${c}__pill:hover{height:auto;padding:2px 0;gap:6px;border-radius:4px;background:none;box-shadow:none;-webkit-backdrop-filter:none;backdrop-filter:none}`,
-        `.${c}__av{width:20px;height:20px;border-radius:50%;font-size:8px}`,
-        `.${c}__b{text-decoration:underline;text-decoration-color:transparent;text-decoration-thickness:1px;text-underline-offset:3px;transition:${transition(ctx, 'text-decoration-color', 'fast')}}`,
-        `.${c}__pill:hover .${c}__b,.${c}__pill:focus-visible .${c}__b{text-decoration-color:currentColor}`,
-      )
-      break
-    }
 
-    case 'avatar':
-    case 'floating': {
-      // The text unfolds through max-width, up to a generous estimate of its width
-      // (a grid 0fr → 1fr track collapses in shrink-to-fit hosts).
-      const open = foldWidth(config)
-      const fold = [
-        `.${c}__pill{gap:0}`,
-        `.${c}__x{flex:none;display:block;overflow:hidden;transition:${transition(ctx, 'max-width', 'slow')}}`,
-        `.${c}__xc{display:flex;align-items:center;gap:${size.gap}px;padding-left:${size.gap}px}`,
-        `@media (prefers-reduced-motion:reduce){.${c} .${c}__x,.${c} .${c}__pill{transition:none}}`,
-      ]
-      if (layout === 'avatar') {
-        rules.push(
-          ...fold,
-          `.${c}__pill{padding:0 ${padLeft}px}`,
-          `.${c}__x{max-width:0}`,
-          `${within(`.${c}__pill`)}{padding-right:${size.padRight}px}`,
-          `${within(`.${c}__x`)}{max-width:${open}px}`,
-        )
-      } else {
-        // Open at the top of the page; folds to the avatar once scrolled (data-c, set by the script).
-        const folded = `.${c}[data-c]:not(:hover):not(:focus-within)`
-        rules.push(
-          ...fold,
-          `.${c}__x{max-width:${open}px}`,
-          `${folded} .${c}__pill{padding-right:${padLeft}px}`,
-          `${folded} .${c}__x{max-width:0}`,
-          // Links open to the left: the badge sits in the right corner.
-          `.${c}__sos{left:auto;right:100%;padding-left:0;padding-right:6px;flex-direction:row-reverse}`,
-          `.${c}__so{transform:translateX(6px) scale(.8)}`,
-        )
-        if (!staticPosition) {
-          rules.push(
-            `.${c}{position:fixed;right:max(16px,env(safe-area-inset-right));bottom:max(16px,env(safe-area-inset-bottom));z-index:2147483000}`,
-          )
-        }
-      }
-      break
-    }
 
     case 'stamp': {
       const d = STAMP_SIZES[config.text.size]
@@ -546,16 +474,6 @@ function layoutRules(
       break
     }
 
-    case 'status': {
-      rules.push(
-        `@keyframes ${c}-dot{0%{box-shadow:0 0 0 0 rgba(34,197,94,.55)}70%,100%{box-shadow:0 0 0 6px rgba(34,197,94,0)}}`,
-        `.${c}__dot{flex:none;display:block;width:8px;height:8px;border-radius:50%;background:${css(STATUS_GREEN)};animation:${c}-dot 2s ease-out infinite}`,
-        `.${c}__avw{position:relative;flex:none;display:grid}`,
-        // On the avatar: an "online" dot in its corner, ringed with the badge surface.
-        `.${c}__avw .${c}__dot{position:absolute;right:-1px;bottom:-1px;width:9px;height:9px;outline:2px solid var(${v}bg)}`,
-      )
-      break
-    }
 
     case 'team': {
       const overlap = Math.round(size.avatar * 0.32)
@@ -809,12 +727,6 @@ function innerHtml(c: string, config: BadgeConfig, avatar: ResolvedAvatar, bubbl
   const bold = config.text.bold.trim()
   const span = (cls: string, text: string) => (text ? `<span class="${c}__${cls}">${escapeHtml(text)}</span>` : '')
   switch (config.layout) {
-    case 'avatar':
-    case 'floating':
-      return [
-        av,
-        `<span class="${c}__x"><span class="${c}__xc">${textHtml(c, config)}${icon}</span></span>`,
-      ]
     case 'stamp':
       return [ringHtml(c, config), av]
     case 'split':
@@ -822,13 +734,6 @@ function innerHtml(c: string, config: BadgeConfig, avatar: ResolvedAvatar, bubbl
         `<span class="${c}__l">${av}${span('n', normal)}</span>`,
         `<span class="${c}__r">${span('b', bold)}${icon}</span>`,
       ]
-    case 'status': {
-      const dot = `<span class="${c}__dot" aria-hidden="true"></span>`
-      const lead = av ? `<span class="${c}__avw">${av}${dot}</span>` : dot
-      const name = bold ? `<span class="${c}__n">· ${escapeHtml(bold)}</span>` : ''
-      const status = span('b', config.text.status.trim())
-      return [lead, `<span>${[status, name].filter(Boolean).join(' ')}</span>`, icon].filter(Boolean)
-    }
     case 'team': {
       const members = teamMembers(config)
         .slice(0, 2)
@@ -845,11 +750,6 @@ function innerHtml(c: string, config: BadgeConfig, avatar: ResolvedAvatar, bubbl
     default:
       return [av, textHtml(c, config), icon].filter(Boolean)
   }
-}
-
-/** Floating: folds to the avatar once the page is scrolled. */
-function floatingJs(c: string): string {
-  return `(function(){var l=document.querySelectorAll(".${c}");function u(){for(var i=0;i<l.length;i++)l[i].toggleAttribute("data-c",scrollY>80)}addEventListener("scroll",u,{passive:true});u()})();`
 }
 
 function textHtml(c: string, config: BadgeConfig): string {
@@ -871,7 +771,7 @@ export function generateBadge(config: BadgeConfig, options: GenerateHtmlOptions 
   const c = `sp-${config.id}`
   const avatar = resolveAvatar(config, options)
   const label = badgeText(config)
-  const cssText = buildCss(config, avatar, options)
+  const cssText = buildCss(config, avatar, options.previewScheme)
   const bubbles = usesBubbles(config)
   const inner = innerHtml(c, config, avatar, bubbles).filter(Boolean)
   const body = `\n    ${inner.join('\n    ')}\n  `
@@ -904,7 +804,6 @@ export function generateBadge(config: BadgeConfig, options: GenerateHtmlOptions 
     html = card
       ? `<div class="${c}">\n  <div class="${c}__pill">\n  ${link}${socialsHtml(c, config)}\n  </div>\n</div>`
       : `<div class="${c}">\n  ${link}${socialsHtml(c, config)}\n</div>`
-    if (config.layout === 'floating' && !options.staticPosition) js = floatingJs(c)
   }
 
   const header = `<!-- Stampit badge${options.editUrl ? ` · edit: ${commentSafe(options.editUrl)}` : ''} -->`
