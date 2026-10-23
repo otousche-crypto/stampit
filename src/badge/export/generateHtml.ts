@@ -54,6 +54,15 @@ function stampText(config: BadgeConfig): string {
   return `${badgeText(config).toUpperCase()}\u00A0•\u00A0`
 }
 
+/** Normal and bold text in display order, the bold one in its own tspan, then the separator. */
+function ringTspans(c: string, config: BadgeConfig): string {
+  const normal = escapeHtml(config.text.normal.trim().toUpperCase())
+  const bold = config.text.bold.trim().toUpperCase()
+  const b = bold ? `<tspan class="${c}__rb">${escapeHtml(bold)}</tspan>` : ''
+  const parts = (config.text.order === 'normal-first' ? [normal, b] : [b, normal]).filter(Boolean)
+  return `${parts.join(' ')}\u00A0•\u00A0`
+}
+
 /** Fills the whole turn: extra-bold capitals are about 0.72 em wide; never above 9.5 units. */
 function stampFontSize(config: BadgeConfig): number {
   const chars = Array.from(stampText(config)).length
@@ -472,7 +481,9 @@ function layoutRules(
         `@keyframes ${c}-spin{to{transform:rotate(360deg)}}`,
         `.${c}__ring{position:absolute;inset:0;display:block;width:100%;height:100%;overflow:visible;pointer-events:none;animation:${c}-spin 24s linear infinite}`,
         // In CSS, not as an attribute: the reset's font:inherit would win over it.
-        `.${c}__ring text{fill:var(${v}tb);font-size:${stampFontSize(config)}px;font-weight:800}`,
+        `.${c}__ring text{fill:var(${v}tn);font-size:${stampFontSize(config)}px;font-weight:500}`,
+        // Only the bold text is bold, as on the pill.
+        `.${c}__ring .${c}__rb{fill:var(${v}tb);font-weight:800}`,
         `.${c}__ring circle{fill:none;stroke:var(${v}bd);stroke-width:1}`,
       )
       break
@@ -728,7 +739,7 @@ function iconHtml(c: string, config: BadgeConfig, bubbles: boolean): string {
 /** Stamp: the text runs around a circle, sized so it fills the whole turn. */
 function ringHtml(c: string, config: BadgeConfig): string {
   const r = RING_RADIUS
-  return `<svg class="${c}__ring" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><path id="${c}-arc" d="M${50 - r},50a${r},${r} 0 1,1 ${2 * r},0a${r},${r} 0 1,1 -${2 * r},0" fill="none"/><circle cx="50" cy="50" r="29"/><text><textPath href="#${c}-arc" textLength="${RING_LENGTH}" lengthAdjust="spacing">${escapeHtml(stampText(config))}</textPath></text></svg>`
+  return `<svg class="${c}__ring" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><path id="${c}-arc" d="M${50 - r},50a${r},${r} 0 1,1 ${2 * r},0a${r},${r} 0 1,1 -${2 * r},0" fill="none"/><circle cx="50" cy="50" r="29"/><text><textPath href="#${c}-arc" textLength="${RING_LENGTH}" lengthAdjust="spacing">${ringTspans(c, config)}</textPath></text></svg>`
 }
 
 /** The inside of the clickable element, per layout. */
