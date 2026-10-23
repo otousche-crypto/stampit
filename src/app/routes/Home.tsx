@@ -1,4 +1,4 @@
-import { lazy, Suspense, useRef, useSyncExternalStore, type ReactNode } from 'react'
+import { lazy, Suspense, useEffect, useRef, useSyncExternalStore, type ReactNode } from 'react'
 import { ArrowDown } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { BadgePreview } from '@/badge/render/BadgePreview'
@@ -116,9 +116,18 @@ export function Home() {
   useDemoCycle(demoRef, DEMO_WORDS, DEMO_FIRST, DEMO_PEOPLE)
   // The demo follows the site's Light / Dark.
   const demoHtml = useAppearance() === 'dark' ? DEMO_HTML_DARK : DEMO_HTML_LIGHT
+  // Magnetic anchor: the page snaps to the hero or to the editor, never in
+  // between. Set on <html> (the scroller) for this page only.
+  useEffect(() => {
+    const root = document.documentElement
+    root.style.scrollSnapType = 'y mandatory'
+    return () => {
+      root.style.scrollSnapType = ''
+    }
+  }, [])
   return (
     <>
-      <div className={cn('flex min-h-dvh flex-col', PAGE_BACKGROUND, HERO_DARK)}>
+      <div className={cn('flex min-h-dvh snap-start flex-col', PAGE_BACKGROUND, HERO_DARK)}>
 
         <main className="flex flex-1 flex-col items-center px-4 pb-16 pt-24 sm:pt-28">
           {/* Hero: a marketing headline, deliberately beyond the type scale. */}
@@ -161,7 +170,7 @@ export function Home() {
           </div>
         </main>
       </div>
-      <section ref={editorRef} id="create" aria-label="Badge editor" className="h-dvh">
+      <section ref={editorRef} id="create" aria-label="Badge editor" className="h-dvh snap-start snap-always">
         <Suspense fallback={<div className="h-dvh bg-background" aria-busy="true" />}>
           <Create embedded />
         </Suspense>
