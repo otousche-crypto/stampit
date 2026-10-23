@@ -50,7 +50,8 @@ const RING_RADIUS = 37
 const RING_LENGTH = Math.round(2 * Math.PI * RING_RADIUS * 10) / 10
 
 function stampText(config: BadgeConfig): string {
-  return `${badgeText(config).toUpperCase()} • `
+  // Non-breaking spaces: SVG drops the trailing ordinary one, which left the dot stuck to the first word.
+  return `${badgeText(config).toUpperCase()}\u00A0•\u00A0`
 }
 
 /** Fills the whole turn: semibold capitals are about 0.68 em wide; never above 9.5 units. */
