@@ -64,7 +64,7 @@ function ringTspans(c: string, config: BadgeConfig): string {
 }
 
 /** Fills the whole turn: extra-bold capitals are about 0.72 em wide; never above 9.5 units. */
-function stampFontSize(config: BadgeConfig): number {
+export function stampFontSize(config: BadgeConfig): number {
   const chars = Array.from(stampText(config)).length
   return Math.round(Math.min(9.5, RING_LENGTH / (chars * 0.72)) * 10) / 10
 }
@@ -135,7 +135,7 @@ export function badgeText(config: BadgeConfig): string {
     .join(' ')
 }
 
-function initialsOf(name: string): string {
+export function initialsOf(name: string): string {
   const words = name.trim().split(/\s+/).filter(Boolean)
   return (words.slice(0, 2).map((w) => Array.from(w)[0] ?? '').join('') || '?').toUpperCase()
 }
@@ -797,7 +797,16 @@ function textHtml(c: string, config: BadgeConfig): string {
   return `<span>${parts.join(' ')}</span>`
 }
 
-export type GeneratedBadge = { header: string; html: string; css: string; js: string | null; code: string }
+export type GeneratedBadge = {
+  header: string
+  html: string
+  css: string
+  js: string | null
+  code: string
+  /** What it was made from: the Flutter export rebuilds the badge from the settings. */
+  config: BadgeConfig
+  options: GenerateHtmlOptions
+}
 
 /** Pure: config → standalone HTML/CSS(/JS) snippet. What the preview shows is what gets copied. */
 export function generateBadge(config: BadgeConfig, options: GenerateHtmlOptions = {}): GeneratedBadge {
@@ -846,7 +855,7 @@ export function generateBadge(config: BadgeConfig, options: GenerateHtmlOptions 
   const parts = [header, `<style>${cssText}</style>`, html]
   if (js) parts.push(`<script>${js}</script>`)
   const code = parts.join('\n') + '\n'
-  return { header, html, css: cssText, js, code }
+  return { header, html, css: cssText, js, code, config, options }
 }
 
 export function generateHtml(config: BadgeConfig, options: GenerateHtmlOptions = {}): string {

@@ -1,7 +1,8 @@
 import type { GeneratedBadge } from './generateHtml'
+import { generateFlutter } from './flutter'
 
 /** The Code tab's languages. HTML is the snippet itself; the others wrap the same markup, CSS and script. */
-export const CODE_LANGUAGES = ['html', 'react', 'vue', 'svelte', 'astro'] as const
+export const CODE_LANGUAGES = ['html', 'react', 'vue', 'svelte', 'astro', 'flutter'] as const
 export type CodeLanguage = (typeof CODE_LANGUAGES)[number]
 
 export const CODE_LANGUAGE_LABELS: Record<CodeLanguage, string> = {
@@ -10,15 +11,17 @@ export const CODE_LANGUAGE_LABELS: Record<CodeLanguage, string> = {
   vue: 'Vue',
   svelte: 'Svelte',
   astro: 'Astro',
+  flutter: 'Flutter',
 }
 
 /** Shiki grammar per language. */
-export const CODE_LANGUAGE_GRAMMAR: Record<CodeLanguage, 'html' | 'tsx' | 'vue' | 'svelte' | 'astro'> = {
+export const CODE_LANGUAGE_GRAMMAR: Record<CodeLanguage, 'html' | 'tsx' | 'vue' | 'svelte' | 'astro' | 'dart'> = {
   html: 'html',
   react: 'tsx',
   vue: 'vue',
   svelte: 'svelte',
   astro: 'astro',
+  flutter: 'dart',
 }
 
 /** Suggested file name, shown in the header comment. */
@@ -28,6 +31,7 @@ const FILE_NAMES: Record<CodeLanguage, string> = {
   vue: 'StampitBadge.vue',
   svelte: 'StampitBadge.svelte',
   astro: 'StampitBadge.astro',
+  flutter: 'stampit_badge.dart',
 }
 
 export function codeFileName(language: CodeLanguage): string {
@@ -134,5 +138,9 @@ export function toFramework(badge: GeneratedBadge, language: CodeLanguage): stri
       if (js) parts.push('', '<script is:inline>', js, '</script>')
       return parts.join('\n') + '\n'
     }
+
+    case 'flutter':
+      // Native widgets: the badge rebuilt from its settings, no WebView.
+      return generateFlutter(badge.config, badge.options, header)
   }
 }

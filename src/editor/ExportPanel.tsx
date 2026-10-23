@@ -111,8 +111,12 @@ export function ExportPanel({ className }: { className?: string }) {
           onBlocked={revealErrors}
         />
         <p className={cn('px-1 text-muted-foreground tabular-nums', typeClass('caption'))}>
-          {language === 'html' ? `Plain HTML/CSS${badge.js ? '/JS' : ''}` : `${CODE_LANGUAGE_LABELS[language]} component`}.{' '}
-          {formatWeight(bytes)}.
+          {language === 'html'
+            ? `Plain HTML/CSS${badge.js ? '/JS' : ''}`
+            : language === 'flutter'
+              ? 'Flutter widget. Needs url_launcher'
+              : `${CODE_LANGUAGE_LABELS[language]} component`}
+          .{language === 'flutter' ? '' : ` ${formatWeight(bytes)}.`}
         </p>
         <CopyField label="Code" value={code} copyButton={false} className="min-h-40 flex-1">
           {highlighted ? <div className="stampit-code" dangerouslySetInnerHTML={{ __html: highlighted }} /> : undefined}
