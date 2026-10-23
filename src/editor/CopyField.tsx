@@ -43,11 +43,13 @@ type CopyFieldProps = {
   children?: ReactNode
   label: string
   disabled?: boolean
+  /** The copy button inside the box. Off when a copy button sits outside it. */
+  copyButton?: boolean
   className?: string
 }
 
 /** A read-only, scrollable text box with its copy button inside. */
-export function CopyField({ value, children, label, disabled = false, className }: CopyFieldProps) {
+export function CopyField({ value, children, label, disabled = false, copyButton = true, className }: CopyFieldProps) {
   const [copied, setCopied] = useState<boolean | null>(null)
 
   useEffect(() => {
@@ -65,12 +67,14 @@ export function CopyField({ value, children, label, disabled = false, className 
         tabIndex={0}
         className={cn(
           // pb-12 lets the last lines scroll clear of the bottom fade.
-          'min-h-0 flex-1 overflow-auto p-3 pt-10 pb-12 text-[11px] leading-[16px] outline-none [mask-image:linear-gradient(to_bottom,#000_calc(100%-48px),transparent)] focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-[color:var(--focus-ring)] [&_pre]:whitespace-pre-wrap [&_pre]:break-words',
+          'min-h-0 flex-1 overflow-auto p-3 pb-12 text-[11px] leading-[16px] outline-none [mask-image:linear-gradient(to_bottom,#000_calc(100%-48px),transparent)] focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-[color:var(--focus-ring)] [&_pre]:whitespace-pre-wrap [&_pre]:break-words',
+          copyButton && 'pt-10',
           disabled && 'opacity-50',
         )}
       >
         {children ?? <pre className="font-mono">{value}</pre>}
       </div>
+      {copyButton && (
       <button
         type="button"
         disabled={disabled}
@@ -104,6 +108,7 @@ export function CopyField({ value, children, label, disabled = false, className 
           {copied === true ? 'Copied' : copied === false ? "Couldn't copy" : ''}
         </span>
       </button>
+      )}
     </div>
   )
 }

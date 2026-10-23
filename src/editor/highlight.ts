@@ -1,4 +1,4 @@
-import type { HighlighterCore } from 'shiki/core'
+import type { HighlighterCore, LanguageInput } from 'shiki/core'
 
 let highlighter: Promise<HighlighterCore> | null = null
 
@@ -20,11 +20,26 @@ function load(): Promise<HighlighterCore> {
   return highlighter
 }
 
-export async function highlightHtml(code: string): Promise<string> {
+export type Grammar = 'html' | 'tsx' | 'vue' | 'svelte' | 'astro'
+
+/** The other grammars load the first time their language is picked. */
+const GRAMMARS: Record<Exclude<Grammar, 'html'>, () => Promise<{ default: LanguageInput }>> = {
+  tsx: () => import('@shikijs/langs/tsx'),
+  vue: () => import('@shikijs/langs/vue'),
+  svelte: () => import('@shikijs/langs/svelte'),
+  astro: () => import('@shikijs/langs/astro'),
+}
+
+export async function highlightCode(code: string, grammar: Grammar = 'html'): Promise<string> {
   const hl = await load()
+  if (grammar !== 'html' && !hl.getLoadedLanguages().includes(grammar)) {
+    await hl.loadLanguage((await GRAMMARS[grammar]()).default)
+  }
   return hl.codeToHtml(code, {
-    lang: 'html',
+    lang: grammar,
     themes: { light: 'github-light', dark: 'github-dark' },
     defaultColor: false,
   })
 }
+
+export const highlightHtml = (code: string) => highlightCode(code, 'html')

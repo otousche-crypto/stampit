@@ -30,7 +30,56 @@ const ICON_HOVER_TEXT = {
 /** Where the agent should put the uploaded photo. */
 export const UPLOAD_PUBLIC_PATH = '/stampit-avatar.webp'
 
-export type GeneratePromptOptions = Pick<GenerateHtmlOptions, 'editUrl' | 'avatarFailed'>
+/** AI tools the prompt can be tuned for ("Optimized for" in the Prompt tab). */
+export const PROMPT_AGENTS = ['claude-code', 'codex', 'cursor', 'replit', 'lovable', 'bolt', 'v0'] as const
+export type PromptAgent = (typeof PROMPT_AGENTS)[number]
+
+export const PROMPT_AGENT_LABELS: Record<PromptAgent, string> = {
+  'claude-code': 'Claude Code',
+  codex: 'Codex',
+  cursor: 'Cursor',
+  replit: 'Replit',
+  lovable: 'Lovable',
+  bolt: 'Bolt.new',
+  v0: 'v0 by Vercel',
+}
+
+/**
+ * How each tool works, in a few lines: coding agents read and edit the user's
+ * repository; app builders edit a hosted app, often React + Tailwind, and take
+ * files as chat attachments.
+ */
+const AGENT_NOTES: Record<PromptAgent, string[]> = {
+  'claude-code': [
+    "You are running in the user's repository. Search it for the footer component (or the root layout if there is none), add the badge there, then run the project's typecheck, lint and tests and fix anything you broke.",
+  ],
+  codex: [
+    "You are working in the user's repository. Find the footer component (or the root layout), make the change as a small, focused diff, then run the project's checks (typecheck, lint, tests) before you finish.",
+  ],
+  cursor: [
+    "Use the codebase context to find the footer component (or the root layout) and edit it in place. Keep the change to the files that need it, and follow the project's rules files (.cursor/rules) if any.",
+  ],
+  replit: [
+    "Edit this Repl's footer (create a simple footer if the app has none). Use the language and framework already in the Repl, add no package, and restart the app to check the badge renders.",
+  ],
+  lovable: [
+    'This is a Lovable app (React, Vite, Tailwind, shadcn/ui). Add the badge as its own component (for example src/components/StampitBadge.tsx) and render it in the footer; create a simple footer if there is none. Keep the CSS in the component exactly as given: the class names are already unique.',
+  ],
+  bolt: [
+    "This is a Bolt.new project. Detect its framework from package.json, add the badge as a component in that framework and render it in the footer (create one if needed). Add no dependency and keep the preview running.",
+  ],
+  v0: [
+    'This is a v0 project (Next.js App Router, Tailwind, shadcn/ui). Add the badge as a client component (it needs "use client" if it runs a script) and render it in the footer of app/layout.tsx, or in a footer component if one exists.',
+  ],
+}
+
+/** App builders take the photo as a chat attachment rather than a file in the repo. */
+const BUILDERS: ReadonlySet<PromptAgent> = new Set(['replit', 'lovable', 'bolt', 'v0'])
+
+export type GeneratePromptOptions = Pick<GenerateHtmlOptions, 'editUrl' | 'avatarFailed'> & {
+  /** Tune the brief for one tool. Omitted, it stays tool-neutral. */
+  agent?: PromptAgent
+}
 
 function paletteLines(p: Palette): string[] {
   return [
@@ -82,6 +131,10 @@ export function generatePrompt(config: BadgeConfig, options: GeneratePromptOptio
     `Add this signature badge to the footer of the current project, using the project's own stack and conventions (components, styling approach, file structure). The badge reads "${text}".`,
     'Match the visual spec and behavior below exactly. The reference implementation at the end is the source of truth: adapt it to the project rather than pasting it as-is when a native approach fits better. Add no new dependency.',
   )
+  if (options.agent) {
+    section(`Working in ${PROMPT_AGENT_LABELS[options.agent]}`)
+    out.push(...AGENT_NOTES[options.agent])
+  }
 
   section('Visual spec')
   out.push(
@@ -229,7 +282,9 @@ export function generatePrompt(config: BadgeConfig, options: GeneratePromptOptio
   if (upload) {
     section('Avatar')
     out.push(
-      `The avatar is a photo the user downloaded from Stampit as "stampit-avatar.webp". Ask for it if it isn't in the project yet, place it at public${UPLOAD_PUBLIC_PATH} (or the project's static assets folder) and reference it as ${UPLOAD_PUBLIC_PATH}. The reference below already points there.`,
+      options.agent && BUILDERS.has(options.agent)
+        ? `The avatar is a photo the user downloaded from Stampit as "stampit-avatar.webp". Ask them to attach it to this chat if they haven't, save it as public${UPLOAD_PUBLIC_PATH} (or the app's static assets folder) and reference it as ${UPLOAD_PUBLIC_PATH}. The reference below already points there.`
+        : `The avatar is a photo the user downloaded from Stampit as "stampit-avatar.webp". Ask for it if it isn't in the project yet, place it at public${UPLOAD_PUBLIC_PATH} (or the project's static assets folder) and reference it as ${UPLOAD_PUBLIC_PATH}. The reference below already points there.`,
     )
   }
 

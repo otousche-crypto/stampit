@@ -785,7 +785,7 @@ function textHtml(c: string, config: BadgeConfig): string {
   return `<span>${parts.join(' ')}</span>`
 }
 
-export type GeneratedBadge = { html: string; css: string; js: string | null; code: string }
+export type GeneratedBadge = { header: string; html: string; css: string; js: string | null; code: string }
 
 /** Pure: config → standalone HTML/CSS(/JS) snippet. What the preview shows is what gets copied. */
 export function generateBadge(config: BadgeConfig, options: GenerateHtmlOptions = {}): GeneratedBadge {
@@ -834,7 +834,7 @@ export function generateBadge(config: BadgeConfig, options: GenerateHtmlOptions 
   const parts = [header, `<style>${cssText}</style>`, html]
   if (js) parts.push(`<script>${js}</script>`)
   const code = parts.join('\n') + '\n'
-  return { html, css: cssText, js, code }
+  return { header, html, css: cssText, js, code }
 }
 
 export function generateHtml(config: BadgeConfig, options: GenerateHtmlOptions = {}): string {
