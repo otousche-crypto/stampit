@@ -7,11 +7,11 @@ import { PREVIEW_BACKDROPS, useEditor } from './EditorProvider'
 
 /** The badge itself, centred on the preview backdrop (which the layout paints). */
 export function PreviewStage({ showHint = true, className }: { showHint?: boolean; className?: string }) {
-  const { preview, previewBackground, zoom, config, replayEntrance, entranceKey } = useEditor()
+  const { preview, previewBackground, zoom, config, replayEntrance, entranceKey, hoverDemo } = useEditor()
   const dark = previewBackground === 'dark'
   return (
     <section aria-label="Preview" className={cn('relative flex min-h-0 items-center justify-center', className)}>
-      <BadgePreview key={entranceKey} code={preview.code} interceptLinks scale={zoom} />
+      <BadgePreview key={entranceKey} code={preview.code} interceptLinks hoverDemo={hoverDemo} scale={zoom} />
       {config.motion.entrance !== 'none' && (
         <Button
           variant="secondary"

@@ -21,13 +21,13 @@ const HOVER_OPTIONS: { value: HoverEffect; label: string; icon: typeof Ban }[] =
 ]
 
 export function AnimationSection() {
-  const { config, update } = useEditor()
+  const { config, update, previewMotion } = useEditor()
   const set = (patch: Partial<Motion>) => update((c) => ({ ...c, motion: { ...c.motion, ...patch } }))
   return (
     <RowList>
-      <SelectRow label="On appear" value={config.motion.entrance} onChange={(entrance) => set({ entrance })} options={ENTRANCE_OPTIONS} />
-      <SelectRow label="On delay" value={config.motion.repeat} onChange={(repeat) => set({ repeat })} options={ENTRANCE_OPTIONS} />
-      <SelectRow label="On hover" value={config.motion.hover} onChange={(hover) => set({ hover })} options={HOVER_OPTIONS} />
+      <SelectRow label="On appear" value={config.motion.entrance} onChange={(entrance) => set({ entrance })} onPreview={(v) => previewMotion('entrance', v)} options={ENTRANCE_OPTIONS} />
+      <SelectRow label="On delay" value={config.motion.repeat} onChange={(repeat) => set({ repeat })} onPreview={(v) => previewMotion('repeat', v)} options={ENTRANCE_OPTIONS} />
+      <SelectRow label="On hover" value={config.motion.hover} onChange={(hover) => set({ hover })} onPreview={(v) => previewMotion('hover', v)} options={HOVER_OPTIONS} />
     </RowList>
   )
 }

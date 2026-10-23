@@ -1,4 +1,4 @@
-import { createContext, useContext, useId, useLayoutEffect, useRef, type ReactNode } from 'react'
+import { createContext, useContext, useEffect, useId, useLayoutEffect, useRef, type ReactNode } from 'react'
 import { useFluidHover } from '@/hooks/use-fluid-hover'
 import { FluidHoverHighlight } from '@/components/fluid-hover-highlight'
 import { useShape } from '@/lib/shape-context'
@@ -240,17 +240,43 @@ export function SelectRow<T extends string>({
   options,
   value,
   onChange,
+  onPreview,
   placeholder = 'Custom',
 }: {
   label: string
   options: SelectRowOption<T>[]
   value: T | null
   onChange: (value: T) => void
+  /** The option hovered or focused in the open menu; `null` once none is. */
+  onPreview?: (value: T | null) => void
   placeholder?: string
 }) {
   const id = useId()
   const current = options.find((o) => o.value === value)
   const inList = useContext(RowListContext)
+  // Moving between options blurs one then focuses the next: the "none" is
+  // deferred a tick so it never lands in between.
+  const clearTimer = useRef<number | undefined>(undefined)
+  const onPreviewRef = useRef(onPreview)
+  onPreviewRef.current = onPreview
+  useEffect(
+    () => () => {
+      window.clearTimeout(clearTimer.current)
+      onPreviewRef.current?.(null)
+    },
+    [],
+  )
+  const previewHandlers = (option: T) =>
+    onPreview && {
+      onFocus: () => {
+        window.clearTimeout(clearTimer.current)
+        onPreview(option)
+      },
+      onBlur: () => {
+        window.clearTimeout(clearTimer.current)
+        clearTimer.current = window.setTimeout(() => onPreviewRef.current?.(null))
+      },
+    }
   return (
     <div className="flex min-h-9 items-center justify-between gap-2 pl-2">
       <span id={id} className={cn('text-muted-foreground', typeClass('body'))}>
@@ -273,10 +299,16 @@ export function SelectRow<T extends string>({
               'relative hover:bg-transparent [&[data-fluid-hover-active]_svg]:text-foreground [&[data-fluid-hover-active]_svg]:stroke-[2]',
           )}
           {...(inList && { [ROW_ITEM_ATTR]: '' })}
+          // Closing the menu hands focus back here, and an option removed
+          // with the menu may never report its blur.
+          onFocus={onPreview && (() => {
+            window.clearTimeout(clearTimer.current)
+            onPreview(null)
+          })}
         />
         <SelectContent>
           {options.map((o, i) => (
-            <SelectItem key={o.value} index={i} value={o.value} icon={o.icon}>
+            <SelectItem key={o.value} index={i} value={o.value} icon={o.icon} {...previewHandlers(o.value)}>
               {o.label}
             </SelectItem>
           ))}

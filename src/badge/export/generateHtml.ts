@@ -40,6 +40,11 @@ export type GenerateHtmlOptions = {
   previewScheme?: 'light' | 'dark'
   /** Preview only: leave out the appear animation (it would replay on every edit). */
   skipEntrance?: boolean
+  /**
+   * Preview only: the hover effect also plays while an ancestor carries this
+   * attribute, so the editor can show it without the pointer on the badge.
+   */
+  hoverDemoAttr?: string
 }
 
 /** Stamp diameter per size, in px. */
@@ -222,6 +227,14 @@ type CssContext = {
   v: string // custom property prefix, e.g. "--sp-abc123-"
   config: BadgeConfig
   springs: Set<CssSpringName>
+  /** Preview only: see `GenerateHtmlOptions.hoverDemoAttr`. */
+  hoverDemoAttr?: string
+}
+
+/** `.c__pill:hover`, plus the preview's demo trigger when there is one. */
+function pillHover(ctx: CssContext, prefix = ''): string {
+  const own = `${prefix}.${ctx.c}__pill:hover`
+  return ctx.hoverDemoAttr ? `${own},[${ctx.hoverDemoAttr}] ${prefix}.${ctx.c}__pill` : own
 }
 
 function springVar(ctx: CssContext, name: CssSpringName): string {
@@ -233,9 +246,14 @@ function transition(ctx: CssContext, property: string, name: CssSpringName, dela
   return `${property} ${CSS_SPRINGS[name].duration} ${springVar(ctx, name)}${delay ? ` ${delay}` : ''}`
 }
 
-function buildCss(config: BadgeConfig, avatar: ResolvedAvatar, previewScheme?: 'light' | 'dark'): string {
+function buildCss(
+  config: BadgeConfig,
+  avatar: ResolvedAvatar,
+  previewScheme?: 'light' | 'dark',
+  hoverDemoAttr?: string,
+): string {
   const id = config.id
-  const ctx: CssContext = { c: `sp-${id}`, v: `--sp-${id}-`, config, springs: new Set() }
+  const ctx: CssContext = { c: `sp-${id}`, v: `--sp-${id}-`, config, springs: new Set(), hoverDemoAttr }
   const { c, v } = ctx
   const size = SIZES[config.text.size]
   const { palettes, adaptToSite, base } = config.theme
@@ -360,7 +378,7 @@ function buildCss(config: BadgeConfig, avatar: ResolvedAvatar, previewScheme?: '
   // Reduced motion: nothing travels, rotates or scales; state changes are instant or fade.
   const reduced = [`.${c}__ic{transition:none}`]
   if (config.motion.entrance !== 'none' || config.motion.repeat !== 'none' || config.motion.hover !== 'none') {
-    reduced.push(`.${c},.${c} .${c}__pill,.${c} .${c}__pill:hover{animation:none;transform:none}.${c} .${c}__pill::after{animation:none;opacity:0}`)
+    reduced.push(`.${c},.${c} .${c}__pill,${pillHover(ctx, `.${c} `)}{animation:none;transform:none}.${c} .${c}__pill::after{animation:none;opacity:0}`)
   }
   if (layout === 'stamp') reduced.push(`.${c} .${c}__ring{animation:none}`)
 
@@ -451,18 +469,18 @@ function motionRules(ctx: CssContext): string[] {
   }
   switch (hover) {
     case 'grow':
-      rules.push(`.${c}__pill:hover{transform:scale(1.04)}`)
+      rules.push(`${pillHover(ctx)}{transform:scale(1.04)}`)
       break
     case 'lift':
-      rules.push(`.${c}__pill:hover{transform:translateY(-2px)}`)
+      rules.push(`${pillHover(ctx)}{transform:translateY(-2px)}`)
       break
     case 'pulse':
       rules.push(`@keyframes ${c}-hv{50%{transform:scale(1.05)}}`)
-      rules.push(`.${c}__pill:hover{animation:${c}-hv ${CSS_SPRINGS.attention.duration} ${springVar(ctx, 'attention')} infinite}`)
+      rules.push(`${pillHover(ctx)}{animation:${c}-hv ${CSS_SPRINGS.attention.duration} ${springVar(ctx, 'attention')} infinite}`)
       break
     case 'shake':
       rules.push(`@keyframes ${c}-hv{20%,60%{transform:translateX(-2px)}40%,80%{transform:translateX(2px)}}`)
-      rules.push(`.${c}__pill:hover{animation:${c}-hv ${CSS_SPRINGS.attention.duration} ${springVar(ctx, 'attention')}}`)
+      rules.push(`${pillHover(ctx)}{animation:${c}-hv ${CSS_SPRINGS.attention.duration} ${springVar(ctx, 'attention')}}`)
       break
   }
   return rules
@@ -816,7 +834,7 @@ export function generateBadge(config: BadgeConfig, options: GenerateHtmlOptions 
   const c = `sp-${config.id}`
   const avatar = resolveAvatar(config, options)
   const label = badgeText(config)
-  const cssText = buildCss(config, avatar, options.previewScheme)
+  const cssText = buildCss(config, avatar, options.previewScheme, options.hoverDemoAttr)
   const bubbles = usesBubbles(config)
   const inner = innerHtml(c, config, avatar, bubbles).filter(Boolean)
   const body = `\n    ${inner.join('\n    ')}\n  `
