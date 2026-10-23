@@ -3,17 +3,35 @@ import { AnimatePresence, motion } from 'motion/react'
 import type { Layout } from '@/badge/schema'
 import { useFluidHover } from '@/hooks/use-fluid-hover'
 import { useShape } from '@/lib/shape-context'
+import { useSurface } from '@/lib/surface-context'
+import { surfaceClasses } from '@/lib/surface-classes'
 import { spring } from '@/lib/springs'
 import { typeClass } from '@/lib/type-scale'
 import { fontWeights } from '@/lib/font-weight'
 import { cn } from '@/lib/utils'
 import { useEditor } from '../EditorProvider'
 
+/** Ring in a surface's own color, so overlapping avatars read as cut out of it. Literal classes for Tailwind. */
+const SURFACE_RING: Record<number, string> = {
+  1: 'ring-surface-1',
+  2: 'ring-surface-2',
+  3: 'ring-surface-3',
+  4: 'ring-surface-4',
+  5: 'ring-surface-5',
+  6: 'ring-surface-6',
+  7: 'ring-surface-7',
+  8: 'ring-surface-8',
+}
+
+/** A miniature badge sits one step above the panel it is drawn on (Fluid surface ladder). */
+const useThumbLevel = () => Math.min(useSurface() + 1, 8)
+
 /** Thumbnail primitives: a surface, an avatar dot and text lines, in the current text color. */
 const Surface = ({ className, children }: { className?: string; children: ReactNode }) => (
-  <span className={cn('flex items-center bg-background shadow-[0_0_0_1px_rgba(0,0,0,0.06),0_1px_3px_rgba(0,0,0,0.08)] dark:bg-white/10', className)}>
-    {children}
-  </span>
+  <span className={cn('flex items-center', surfaceClasses(useThumbLevel()), className)}>{children}</span>
+)
+const StackDot = ({ className }: { className?: string }) => (
+  <Dot className={cn('-ml-1 ring-1', SURFACE_RING[useThumbLevel()], className)} />
 )
 const Dot = ({ className }: { className?: string }) => <span className={cn('size-2.5 shrink-0 rounded-full bg-[#FF6B35]', className)} />
 const Line = ({ className }: { className?: string }) => <span className={cn('h-[3px] shrink-0 rounded-full bg-current', className)} />
@@ -32,14 +50,14 @@ const THUMBS: Record<Layout, ReactNode> = {
     </span>
   ),
   split: (
-    <span className="flex h-4 overflow-hidden rounded-full shadow-[0_0_0_1px_rgba(0,0,0,0.08)]">
-      <span className="flex items-center bg-background px-1 dark:bg-white/10">
+    <Surface className="h-4 overflow-hidden rounded-full">
+      <span className="flex h-full items-center px-1">
         <Line className="w-2.5 opacity-40" />
       </span>
-      <span className="flex items-center bg-foreground px-1">
+      <span className="flex h-full items-center bg-foreground px-1">
         <Line className="w-3.5 text-background" />
       </span>
-    </span>
+    </Surface>
   ),
   card: (
     <Surface className="h-7 w-10 gap-1 rounded-md px-1">
@@ -54,8 +72,8 @@ const THUMBS: Record<Layout, ReactNode> = {
     <Surface className="h-4 gap-1 rounded-full pl-0.5 pr-1.5">
       <span className="flex">
         <Dot />
-        <Dot className="-ml-1 bg-[#5B8DEF] ring-1 ring-background" />
-        <Dot className="-ml-1 bg-[#3BB273] ring-1 ring-background" />
+        <StackDot className="bg-[#5B8DEF]" />
+        <StackDot className="bg-[#3BB273]" />
       </span>
       <Line className="w-3" />
     </Surface>

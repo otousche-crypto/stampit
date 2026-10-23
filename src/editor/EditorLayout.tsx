@@ -46,12 +46,13 @@ export function EditorLayout({ autoFocus = true }: { autoFocus?: boolean }) {
         <div className="flex h-[35dvh] min-h-44 shrink-0 flex-col overflow-hidden border-b border-border" style={backdrop}>
           <PreviewStage showHint={false} className="flex-1" />
         </div>
-        <div aria-label="Settings" role="region" className="min-h-0 flex-1 overflow-y-auto bg-background">
+        {/* Same surface level as the desktop cards, so menus opened from it land on the same step. */}
+        <Elevated offset={2} aria-label="Settings" role="region" className="min-h-0 flex-1 overflow-y-auto">
           <SettingsPanel autoFocus={autoFocus} />
           <div className="flex justify-center px-3 pb-24 pt-2">
             <ResetButton />
           </div>
-        </div>
+        </Elevated>
         {/* Only while the editor is on screen (it sits under the home page). */}
         {inView && <ExportSheet />}
       </div>
