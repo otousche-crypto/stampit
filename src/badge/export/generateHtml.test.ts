@@ -43,7 +43,10 @@ describe('generateHtml', () => {
 
   it('emits only the CSS it needs', () => {
     const link = generateBadge(FIXTURES['link-initials'])
-    expect(link.css).not.toContain('prefers-color-scheme')
+    // Adapt to site theme is on by default: one palette only when it is off.
+    expect(link.css).toContain('@media (prefers-color-scheme:dark)')
+    const oneTheme = mergeDeep(FIXTURES['link-initials'], { theme: { adaptToSite: false } })
+    expect(generateBadge(oneTheme).css).not.toContain('prefers-color-scheme')
     expect(link.css).not.toContain('backdrop-filter')
     expect(link.css).not.toContain('__menu')
     expect(link.js).toBeNull()
