@@ -483,7 +483,7 @@ function layoutRules(
         // In CSS, not as an attribute: the reset's font:inherit would win over it.
         `.${c}__ring text{fill:var(${v}tn);font-size:${stampFontSize(config)}px;font-weight:500}`,
         // Only the bold text is bold, as on the pill.
-        `.${c}__ring .${c}__rb{fill:var(${v}tb);font-weight:800}`,
+        `.${c}__ring .${c}__rb{fill:var(${v}tb);font-weight:650}`,
         `.${c}__ring circle{fill:none;stroke:var(${v}bd);stroke-width:1}`,
       )
       break
