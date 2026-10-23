@@ -138,7 +138,7 @@ export function Home() {
           </PhoneBottom>
 
           <p className="max-w-2xl text-center text-[clamp(16px,2.2vw,21px)] leading-[1.5] text-muted-foreground">
-            A tiny, customizable badge for your footer. Style it, add your links, paste one snippet. No account, no
+            A tiny, customizable badge. Style it, add your links, paste one snippet. No account, no
             dependency.
           </p>
 

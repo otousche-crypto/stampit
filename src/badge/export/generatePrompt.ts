@@ -51,25 +51,25 @@ export const PROMPT_AGENT_LABELS: Record<PromptAgent, string> = {
  */
 const AGENT_NOTES: Record<PromptAgent, string[]> = {
   'claude-code': [
-    "You are running in the user's repository. Search it for the footer component (or the root layout if there is none), add the badge there, then run the project's typecheck, lint and tests and fix anything you broke.",
+    "You are running in the user's repository. Find where the badge goes (the place the user asked for, otherwise the footer component or the root layout), add it there, then run the project's typecheck, lint and tests and fix anything you broke.",
   ],
   codex: [
-    "You are working in the user's repository. Find the footer component (or the root layout), make the change as a small, focused diff, then run the project's checks (typecheck, lint, tests) before you finish.",
+    "You are working in the user's repository. Find where the badge goes (the place the user asked for, otherwise the footer component or the root layout), make the change as a small, focused diff, then run the project's checks (typecheck, lint, tests) before you finish.",
   ],
   cursor: [
-    "Use the codebase context to find the footer component (or the root layout) and edit it in place. Keep the change to the files that need it, and follow the project's rules files (.cursor/rules) if any.",
+    "Use the codebase context to find where the badge goes (the place the user asked for, otherwise the footer component or the root layout) and edit it in place. Keep the change to the files that need it, and follow the project's rules files (.cursor/rules) if any.",
   ],
   replit: [
-    "Edit this Repl's footer (create a simple footer if the app has none). Use the language and framework already in the Repl, add no package, and restart the app to check the badge renders.",
+    "Add the badge where the user asked, otherwise in this Repl's footer (create a simple footer if the app has none). Use the language and framework already in the Repl, add no package, and restart the app to check the badge renders.",
   ],
   lovable: [
-    'This is a Lovable app (React, Vite, Tailwind, shadcn/ui). Add the badge as its own component (for example src/components/StampitBadge.tsx) and render it in the footer; create a simple footer if there is none. Keep the CSS in the component exactly as given: the class names are already unique.',
+    'This is a Lovable app (React, Vite, Tailwind, shadcn/ui). Add the badge as its own component (for example src/components/StampitBadge.tsx) and render it where the user asked, otherwise in the footer (create a simple footer if there is none). Keep the CSS in the component exactly as given: the class names are already unique.',
   ],
   bolt: [
-    "This is a Bolt.new project. Detect its framework from package.json, add the badge as a component in that framework and render it in the footer (create one if needed). Add no dependency and keep the preview running.",
+    "This is a Bolt.new project. Detect its framework from package.json, add the badge as a component in that framework and render it where the user asked, otherwise in the footer (create one if needed). Add no dependency and keep the preview running.",
   ],
   v0: [
-    'This is a v0 project (Next.js App Router, Tailwind, shadcn/ui). Add the badge as a client component (it needs "use client" if it runs a script) and render it in the footer of app/layout.tsx, or in a footer component if one exists.',
+    'This is a v0 project (Next.js App Router, Tailwind, shadcn/ui). Add the badge as a client component (it needs "use client" if it runs a script) and render it where the user asked, otherwise in the footer of app/layout.tsx or in a footer component if one exists.',
   ],
 }
 
@@ -128,7 +128,7 @@ export function generatePrompt(config: BadgeConfig, options: GeneratePromptOptio
 
   section('Goal')
   out.push(
-    `Add this signature badge to the footer of the current project, using the project's own stack and conventions (components, styling approach, file structure). The badge reads "${text}".`,
+    `Add this signature badge to the current project where the user wants it (in the footer if they haven't said where), using the project's own stack and conventions (components, styling approach, file structure). The badge reads "${text}".`,
     'Match the visual spec and behavior below exactly. The reference implementation at the end is the source of truth: adapt it to the project rather than pasting it as-is when a native approach fits better. Add no new dependency.',
   )
   if (options.agent) {
@@ -293,7 +293,7 @@ export function generatePrompt(config: BadgeConfig, options: GeneratePromptOptio
 
   section('Acceptance criteria')
   out.push(
-    `1. Rendering: the footer shows the badge at ${size.height}px high with the exact colors, radius, border and shadow above, in ${adaptToSite ? 'both light and dark site themes' : 'the page'}.`,
+    `1. Rendering: the page shows the badge at ${size.height}px high with the exact colors, radius, border and shadow above, in ${adaptToSite ? 'both light and dark site themes' : 'the page'}.`,
     `2. Hover: ${bubbles ? 'the "+" nudges and the shadow grows; the menu does not open on hover' : 'the arrow slides 2px up-right and the shadow grows'}, with no layout shift.`,
     bubbles
       ? '3. Open/close: a click opens the bubbles above the badge (below near the top of the screen), inside the viewport; outside click, Escape and a second click close them.'
