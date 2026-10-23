@@ -185,7 +185,7 @@ export function createDefaultConfig(overrides?: { id?: string; updatedAt?: strin
     team: ['Camille Bernard', 'Lucas Fontaine'],
     avatar: { source: 'initials', initials: null, url: null, background: DEFAULT_AVATAR_BACKGROUND },
     theme: {
-      adaptToSite: false,
+      adaptToSite: true,
       base: 'light',
       palettes: { light: { ...LIGHT_PALETTE }, dark: { ...DARK_PALETTE } },
     },
