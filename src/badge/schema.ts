@@ -189,7 +189,7 @@ export function createDefaultConfig(overrides?: { id?: string; updatedAt?: strin
       base: 'light',
       palettes: { light: { ...LIGHT_PALETTE }, dark: { ...DARK_PALETTE } },
     },
-    shape: { radius: 1, borderWidth: 0, shadow: 'none', showIcon: true, iconStyle: 'arrow' },
+    shape: { radius: 1, borderWidth: 0, shadow: 'soft', showIcon: true, iconStyle: 'arrow' },
     motion: { entrance: 'shake', repeat: 'shine', hover: 'grow' },
     click: {
       mode: 'link',
