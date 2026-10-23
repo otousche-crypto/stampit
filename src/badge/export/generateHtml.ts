@@ -1,5 +1,5 @@
 import { bestOn, contrastRatio } from '../contrast'
-import { SOCIALS, type BadgeConfig, type BadgeSize, type Palette, type SocialNetwork } from '../schema'
+import { SOCIALS, type BadgeConfig, type BadgeSize, type Layout, type Palette, type SocialNetwork } from '../schema'
 import { CHANNELS, channelLabel, isValidUrl } from '../channels'
 import { BUBBLE_STAGGER_MS, CSS_SPRINGS, TOOLTIP_DELAY, type CssSpringName } from '../springs-css'
 import { badgeRuntime } from './runtime'
@@ -40,6 +40,28 @@ export type GenerateHtmlOptions = {
   previewScheme?: 'light' | 'dark'
   /** Preview only: leave out the appear animation (it would replay on every edit). */
   skipEntrance?: boolean
+  /** Preview only: a Floating badge stays in place instead of pinning to the window corner. */
+  staticPosition?: boolean
+}
+
+/** Stamp diameter per size, in px. */
+export const STAMP_SIZES: Record<BadgeSize, number> = { s: 88, m: 104, l: 120 }
+
+/** Layouts that always show an avatar (initials when there is no photo). */
+const NEEDS_AVATAR: ReadonlySet<Layout> = new Set(['avatar', 'stamp', 'floating', 'card', 'team'])
+
+/** Avatar + text that unfolds on hover (Avatar) or folds away on scroll (Floating). */
+const EXPANDS: ReadonlySet<Layout> = new Set(['avatar', 'floating'])
+
+/** Team members' initials sit on these colors, in order. */
+export const TEAM_COLORS = ['#5B8DEF', '#3BB273', '#E15A97', '#F2A541', '#8E6CEF']
+
+/** Status dot. */
+export const STATUS_GREEN = '#22C55E'
+
+/** The bubble menu only exists on the classic pill. */
+export function usesBubbles(config: BadgeConfig): boolean {
+  return config.click.mode === 'bubbles' && config.layout === 'pill'
 }
 
 // ---------------------------------------------------------------------------
@@ -88,12 +110,36 @@ export function initialsColor(config: BadgeConfig, palette: Palette): string {
 
 /** Accessible text of the badge, normal and bold in display order. */
 export function badgeText(config: BadgeConfig): string {
-  const { normal, bold, order } = config.text
-  const parts = order === 'normal-first' ? [normal, bold] : [bold, normal]
+  const { normal, bold, order, status } = config.text
+  if (config.layout === 'status') return [status.trim(), bold.trim()].filter(Boolean).join(' · ')
+  const name = config.layout === 'team' ? teamNames(config) : bold
+  const parts = order === 'normal-first' ? [normal, name] : [name, normal]
   return parts
     .map((p) => p.trim())
     .filter(Boolean)
     .join(' ')
+}
+
+function initialsOf(name: string): string {
+  const words = name.trim().split(/\s+/).filter(Boolean)
+  return (words.slice(0, 2).map((w) => Array.from(w)[0] ?? '').join('') || '?').toUpperCase()
+}
+
+const firstName = (name: string) => name.trim().split(/\s+/)[0] ?? ''
+
+/** Team members with a name. */
+export function teamMembers(config: BadgeConfig): string[] {
+  return config.team.map((n) => n.trim()).filter(Boolean)
+}
+
+/** "Olivier", "Olivier & Camille", "Olivier, Camille & Lucas", "Olivier, Camille & 3 others". */
+export function teamNames(config: BadgeConfig): string {
+  const lead = config.text.bold.trim()
+  const others = teamMembers(config)
+  if (!others.length) return lead
+  const names = [firstName(lead) || lead, ...others.map(firstName)].filter(Boolean)
+  if (names.length <= 3) return names.length === 1 ? names[0] : `${names.slice(0, -1).join(', ')} & ${names[names.length - 1]}`
+  return `${names.slice(0, 2).join(', ')} & ${names.length - 2} others`
 }
 
 export type ResolvedAvatar =
@@ -103,8 +149,8 @@ export type ResolvedAvatar =
 
 export function resolveAvatar(config: BadgeConfig, options: GenerateHtmlOptions = {}): ResolvedAvatar {
   const { source, url } = config.avatar
-  if (source === 'none') return { kind: 'none' }
   const initials = { kind: 'initials' as const, initials: deriveInitials(config) }
+  if (source === 'none') return NEEDS_AVATAR.has(config.layout) ? initials : { kind: 'none' }
   if (source === 'initials' || options.avatarFailed) return initials
   if (source === 'url') return url ? { kind: 'image', src: url } : initials
   // upload
@@ -163,7 +209,8 @@ function transition(ctx: CssContext, property: string, name: CssSpringName, dela
   return `${property} ${CSS_SPRINGS[name].duration} ${springVar(ctx, name)}${delay ? ` ${delay}` : ''}`
 }
 
-function buildCss(config: BadgeConfig, avatar: ResolvedAvatar, previewScheme?: 'light' | 'dark'): string {
+function buildCss(config: BadgeConfig, avatar: ResolvedAvatar, options: GenerateHtmlOptions): string {
+  const previewScheme = options.previewScheme
   const id = config.id
   const ctx: CssContext = { c: `sp-${id}`, v: `--sp-${id}-`, config, springs: new Set() }
   const { c, v } = ctx
@@ -176,7 +223,8 @@ function buildCss(config: BadgeConfig, avatar: ResolvedAvatar, previewScheme?: '
   const border = config.shape.borderWidth
   const soft = config.shape.shadow === 'soft'
   const showIcon = config.shape.showIcon
-  const bubbles = config.click.mode === 'bubbles'
+  const bubbles = usesBubbles(config)
+  const layout = config.layout
   const anyBlur = adaptToSite ? palettes.light.blur > 0 || palettes.dark.blur > 0 : lightOrBase.blur > 0
 
   const ring = border > 0 ? `inset 0 0 0 ${border}px var(${v}bd)` : ''
@@ -214,6 +262,7 @@ function buildCss(config: BadgeConfig, avatar: ResolvedAvatar, previewScheme?: '
   const pillTransitions: string[] = []
   if (soft) pillTransitions.push(transition(ctx, 'box-shadow', 'fast'))
   if (hover === 'grow' || hover === 'lift') pillTransitions.push(transition(ctx, 'transform', 'fast'))
+  if (EXPANDS.has(layout)) pillTransitions.push(transition(ctx, 'padding', 'slow'))
   if (pillTransitions.length) pill.push(`transition:${pillTransitions.join(',')}`)
   rules.push(`.${c}__pill{${pill.join(';')}}`)
   if (soft) rules.push(`.${c}__pill:hover{box-shadow:${shadow(SOFT_SHADOW_HOVER)}}`)
@@ -267,6 +316,7 @@ function buildCss(config: BadgeConfig, avatar: ResolvedAvatar, previewScheme?: '
   }
   if (bubbles) rules.push(...bubbleRules(ctx, { radius: config.shape.radius, ring, soft, anyBlur }))
   if (activeSocials(config).length) rules.push(...socialRules(ctx, { radius, ring, soft, anyBlur }))
+  rules.push(...layoutRules(ctx, { padLeft, staticPosition: !!options.staticPosition }))
 
   if (adaptToSite) {
     const dark = palettes.dark
@@ -287,6 +337,8 @@ function buildCss(config: BadgeConfig, avatar: ResolvedAvatar, previewScheme?: '
   if (config.motion.entrance !== 'none' || config.motion.repeat !== 'none' || config.motion.hover !== 'none') {
     reduced.push(`.${c},.${c} .${c}__pill,.${c} .${c}__pill:hover{animation:none;transform:none}.${c} .${c}__pill::after{animation:none;opacity:0}`)
   }
+  if (layout === 'stamp') reduced.push(`.${c} .${c}__ring{animation:none}`)
+  if (layout === 'status') reduced.push(`.${c} .${c}__dot{animation:none}`)
   if (!bubbles) {
     reduced.push(`.${c} .${c}__pill:hover .${c}__ic,.${c} .${c}__pill:focus-visible .${c}__ic{transform:none}`)
   } else {
@@ -387,6 +439,159 @@ function motionRules(ctx: CssContext): string[] {
       rules.push(`@keyframes ${c}-hv{20%,60%{transform:translateX(-2px)}40%,80%{transform:translateX(2px)}}`)
       rules.push(`.${c}__pill:hover{animation:${c}-hv ${CSS_SPRINGS.attention.duration} ${springVar(ctx, 'attention')}}`)
       break
+  }
+  return rules
+}
+
+/** Upper bound of the folded text's width, in px: about 0.62 em per character. */
+function foldWidth(config: BadgeConfig): number {
+  const size = SIZES[config.text.size]
+  const chars = Array.from(badgeText(config)).length
+  return Math.ceil(chars * size.text * 0.62 + size.gap * 2 + (config.shape.showIcon ? size.icon + size.gap : 0) + 8)
+}
+
+/** What each non-pill layout changes on top of the pill rules (same specificity, later wins). */
+function layoutRules(
+  ctx: CssContext,
+  { padLeft, staticPosition }: { padLeft: number; staticPosition: boolean },
+): string[] {
+  const { c, v, config } = ctx
+  const size = SIZES[config.text.size]
+  const layout = config.layout
+  const rules: string[] = []
+  const shown = `.${c}:hover,.${c}:focus-within`
+  const within = (sel: string) => shown.split(',').map((s) => `${s} ${sel}`).join(',')
+
+  switch (layout) {
+    case 'pill':
+      break
+
+    case 'text': {
+      // A plain inline link in the site's own font and color: no surface at all.
+      rules.push(
+        `.${c}{font-family:inherit}`,
+        `.${c}__pill,.${c}__b{color:inherit}`,
+        `.${c}__n,.${c}__ic{color:inherit;opacity:.6}`,
+        `.${c}__pill,.${c}__pill:hover{height:auto;padding:2px 0;gap:6px;border-radius:4px;background:none;box-shadow:none;-webkit-backdrop-filter:none;backdrop-filter:none}`,
+        `.${c}__av{width:20px;height:20px;border-radius:50%;font-size:8px}`,
+        `.${c}__b{text-decoration:underline;text-decoration-color:transparent;text-decoration-thickness:1px;text-underline-offset:3px;transition:${transition(ctx, 'text-decoration-color', 'fast')}}`,
+        `.${c}__pill:hover .${c}__b,.${c}__pill:focus-visible .${c}__b{text-decoration-color:currentColor}`,
+      )
+      break
+    }
+
+    case 'avatar':
+    case 'floating': {
+      // The text unfolds through max-width, up to a generous estimate of its width
+      // (a grid 0fr → 1fr track collapses in shrink-to-fit hosts).
+      const open = foldWidth(config)
+      const fold = [
+        `.${c}__pill{gap:0}`,
+        `.${c}__x{flex:none;display:block;overflow:hidden;transition:${transition(ctx, 'max-width', 'slow')}}`,
+        `.${c}__xc{display:flex;align-items:center;gap:${size.gap}px;padding-left:${size.gap}px}`,
+        `@media (prefers-reduced-motion:reduce){.${c} .${c}__x,.${c} .${c}__pill{transition:none}}`,
+      ]
+      if (layout === 'avatar') {
+        rules.push(
+          ...fold,
+          `.${c}__pill{padding:0 ${padLeft}px}`,
+          `.${c}__x{max-width:0}`,
+          `${within(`.${c}__pill`)}{padding-right:${size.padRight}px}`,
+          `${within(`.${c}__x`)}{max-width:${open}px}`,
+        )
+      } else {
+        // Open at the top of the page; folds to the avatar once scrolled (data-c, set by the script).
+        const folded = `.${c}[data-c]:not(:hover):not(:focus-within)`
+        rules.push(
+          ...fold,
+          `.${c}__x{max-width:${open}px}`,
+          `${folded} .${c}__pill{padding-right:${padLeft}px}`,
+          `${folded} .${c}__x{max-width:0}`,
+          // Links open to the left: the badge sits in the right corner.
+          `.${c}__sos{left:auto;right:100%;padding-left:0;padding-right:6px;flex-direction:row-reverse}`,
+          `.${c}__so{transform:translateX(6px) scale(.8)}`,
+        )
+        if (!staticPosition) {
+          rules.push(
+            `.${c}{position:fixed;right:max(16px,env(safe-area-inset-right));bottom:max(16px,env(safe-area-inset-bottom));z-index:2147483000}`,
+          )
+        }
+      }
+      break
+    }
+
+    case 'stamp': {
+      const d = STAMP_SIZES[config.text.size]
+      const av = Math.round(d * 0.46)
+      rules.push(
+        `.${c}__pill{position:relative;justify-content:center;width:${d}px;height:${d}px;padding:0;gap:0;border-radius:50%}`,
+        `.${c}__av{width:${av}px;height:${av}px;border-radius:50%;font-size:${Math.round(av * 0.36)}px}`,
+        `@keyframes ${c}-spin{to{transform:rotate(360deg)}}`,
+        `.${c}__ring{position:absolute;inset:0;display:block;width:100%;height:100%;overflow:visible;pointer-events:none;animation:${c}-spin 24s linear infinite}`,
+        `.${c}__ring text{fill:var(${v}tb);font-weight:600}`,
+        `.${c}__ring circle{fill:none;stroke:var(${v}bd);stroke-width:1}`,
+      )
+      break
+    }
+
+    case 'split': {
+      // shields.io style: the normal text on the badge surface, the name on an inverted one.
+      rules.push(
+        `.${c}__pill{gap:0;padding:0;overflow:hidden}`,
+        `.${c}__l,.${c}__r{display:flex;align-items:center;height:100%}`,
+        `.${c}__l{gap:${size.gap}px;padding:0 ${size.gap}px 0 ${padLeft}px}`,
+        `.${c}__r{gap:6px;padding:0 ${size.padRight}px 0 ${size.gap}px;background:var(${v}tb);color:var(${v}bg)}`,
+        `.${c}__r .${c}__b,.${c}__r .${c}__ic{color:inherit}`,
+      )
+      break
+    }
+
+    case 'status': {
+      rules.push(
+        `@keyframes ${c}-dot{0%{box-shadow:0 0 0 0 rgba(34,197,94,.55)}70%,100%{box-shadow:0 0 0 6px rgba(34,197,94,0)}}`,
+        `.${c}__dot{flex:none;display:block;width:8px;height:8px;border-radius:50%;background:${css(STATUS_GREEN)};animation:${c}-dot 2s ease-out infinite}`,
+        `.${c}__avw{position:relative;flex:none;display:grid}`,
+        // On the avatar: an "online" dot in its corner, ringed with the badge surface.
+        `.${c}__avw .${c}__dot{position:absolute;right:-1px;bottom:-1px;width:9px;height:9px;outline:2px solid var(${v}bg)}`,
+      )
+      break
+    }
+
+    case 'team': {
+      const overlap = Math.round(size.avatar * 0.32)
+      rules.push(
+        `.${c}__stk{display:flex;flex:none}`,
+        `.${c}__stk .${c}__av{position:relative;box-shadow:0 0 0 2px var(${v}bg)}`,
+        `.${c}__stk .${c}__av+.${c}__av{margin-left:-${overlap}px}`,
+        `.${c}__stk .${c}__tm{color:#fff;font-size:${Math.round(size.avatar * 0.36)}px;font-weight:600;line-height:1}`,
+        ...TEAM_COLORS.slice(0, 2).map((color, i) => `.${c}__stk .${c}__tm:nth-child(${i + 2}){background:${css(color)}}`),
+        // The lead avatar on top.
+        `.${c}__stk .${c}__av:nth-child(1){z-index:3}.${c}__stk .${c}__av:nth-child(2){z-index:2}`,
+      )
+      break
+    }
+
+    case 'card': {
+      const r = Math.round(8 + config.shape.radius * 12)
+      const av = 44
+      rules.push(
+        `.${c}__pill{position:relative;flex-direction:column;align-items:stretch;width:auto;min-width:240px;height:auto;padding:14px;gap:12px;border-radius:${r}px;cursor:default}`,
+        `.${c}__lk{display:flex;align-items:center;gap:12px;color:inherit;outline:none;cursor:pointer}`,
+        // The whole card is the link's hit area; the social links sit above it.
+        `.${c}__lk::before{content:"";position:absolute;inset:0;border-radius:inherit}`,
+        `.${c}__lk:focus-visible::before{outline:2px solid var(${v}tb);outline-offset:2px}`,
+        `.${c}__av{width:${av}px;height:${av}px;border-radius:${config.shape.radius >= 0.5 ? '50%' : `${r - 4}px`};font-size:17px}`,
+        `.${c}__ct{display:flex;flex-direction:column;gap:1px;min-width:0;line-height:1.25}`,
+        `.${c}__ct .${c}__n{font-size:12px}`,
+        `.${c}__ct .${c}__b{font-size:16px}`,
+        `.${c}__ro{font-size:13px;color:var(${v}tn)}`,
+        `.${c}__lk .${c}__ic{margin-left:auto;align-self:flex-start}`,
+        `.${c}__sos,.${c}:hover .${c}__sos{position:relative;left:auto;top:auto;bottom:auto;z-index:1;padding:0;pointer-events:auto}`,
+        `.${c}__so{width:32px;height:32px;border-radius:${config.shape.radius >= 0.5 ? '50%' : '8px'};box-shadow:inset 0 0 0 1px var(${v}bd);opacity:1;transform:none;pointer-events:auto}`,
+        `.${c}__so svg{width:15px;height:15px}`,
+      )
+      break
+    }
   }
   return rules
 }
@@ -579,6 +784,74 @@ function avatarHtml(c: string, avatar: ResolvedAvatar, size: number): string {
   return `<span class="${c}__av" aria-hidden="true"><img src="${escapeHtml(avatar.src)}" alt="" width="${size}" height="${size}" decoding="async"></span>`
 }
 
+function iconHtml(c: string, config: BadgeConfig, bubbles: boolean): string {
+  const size = SIZES[config.text.size]
+  return config.shape.showIcon
+    ? strokeSvg(`${c}__ic`, size.icon, bubbles ? PLUS_ICON : LINK_ICONS[config.shape.iconStyle].body)
+    : ''
+}
+
+/** Stamp: the text runs around a circle, sized so it fills the whole turn. */
+function ringHtml(c: string, config: BadgeConfig): string {
+  const text = `${badgeText(config).toUpperCase()} • `
+  const circumference = Math.round(2 * Math.PI * 40 * 10) / 10
+  // Rough glyph width of semibold capitals: about 0.66 em.
+  const fontSize = Math.round(Math.min(10, circumference / (Array.from(text).length * 0.66)) * 10) / 10
+  return `<svg class="${c}__ring" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><path id="${c}-arc" d="M10,50a40,40 0 1,1 80,0a40,40 0 1,1 -80,0" fill="none"/><circle cx="50" cy="50" r="31"/><text font-size="${fontSize}"><textPath href="#${c}-arc" textLength="${circumference}" lengthAdjust="spacing">${escapeHtml(text)}</textPath></text></svg>`
+}
+
+/** The inside of the clickable element, per layout. */
+function innerHtml(c: string, config: BadgeConfig, avatar: ResolvedAvatar, bubbles: boolean): string[] {
+  const size = SIZES[config.text.size]
+  const av = avatarHtml(c, avatar, size.avatar)
+  const icon = iconHtml(c, config, bubbles)
+  const normal = config.text.normal.trim()
+  const bold = config.text.bold.trim()
+  const span = (cls: string, text: string) => (text ? `<span class="${c}__${cls}">${escapeHtml(text)}</span>` : '')
+  switch (config.layout) {
+    case 'avatar':
+    case 'floating':
+      return [
+        av,
+        `<span class="${c}__x"><span class="${c}__xc">${textHtml(c, config)}${icon}</span></span>`,
+      ]
+    case 'stamp':
+      return [ringHtml(c, config), av]
+    case 'split':
+      return [
+        `<span class="${c}__l">${av}${span('n', normal)}</span>`,
+        `<span class="${c}__r">${span('b', bold)}${icon}</span>`,
+      ]
+    case 'status': {
+      const dot = `<span class="${c}__dot" aria-hidden="true"></span>`
+      const lead = av ? `<span class="${c}__avw">${av}${dot}</span>` : dot
+      const name = bold ? `<span class="${c}__n">· ${escapeHtml(bold)}</span>` : ''
+      const status = span('b', config.text.status.trim())
+      return [lead, `<span>${[status, name].filter(Boolean).join(' ')}</span>`, icon].filter(Boolean)
+    }
+    case 'team': {
+      const members = teamMembers(config)
+        .slice(0, 2)
+        .map((name) => `<span class="${c}__av ${c}__tm" aria-hidden="true">${escapeHtml(initialsOf(name))}</span>`)
+      const n = span('n', normal)
+      const b = span('b', teamNames(config))
+      const parts = (config.text.order === 'normal-first' ? [n, b] : [b, n]).filter(Boolean)
+      return [`<span class="${c}__stk">${av}${members.join('')}</span>`, `<span>${parts.join(' ')}</span>`, icon].filter(Boolean)
+    }
+    case 'card': {
+      const lines = [span('n', normal), span('b', bold), span('ro', config.text.role.trim())].filter(Boolean)
+      return [av, `<span class="${c}__ct">${lines.join('')}</span>`, icon].filter(Boolean)
+    }
+    default:
+      return [av, textHtml(c, config), icon].filter(Boolean)
+  }
+}
+
+/** Floating: folds to the avatar once the page is scrolled. */
+function floatingJs(c: string): string {
+  return `(function(){var l=document.querySelectorAll(".${c}");function u(){for(var i=0;i<l.length;i++)l[i].toggleAttribute("data-c",scrollY>80)}addEventListener("scroll",u,{passive:true});u()})();`
+}
+
 function textHtml(c: string, config: BadgeConfig): string {
   const normal = config.text.normal.trim()
   const bold = config.text.bold.trim()
@@ -596,18 +869,11 @@ export function generateBadge(config: BadgeConfig, options: GenerateHtmlOptions 
     config = { ...config, motion: { ...config.motion, entrance: 'none' } }
   }
   const c = `sp-${config.id}`
-  const size = SIZES[config.text.size]
   const avatar = resolveAvatar(config, options)
   const label = badgeText(config)
-  const cssText = buildCss(config, avatar, options.previewScheme)
-  const bubbles = config.click.mode === 'bubbles'
-  const inner = [
-    avatarHtml(c, avatar, size.avatar),
-    textHtml(c, config),
-    config.shape.showIcon
-      ? strokeSvg(`${c}__ic`, size.icon, bubbles ? PLUS_ICON : LINK_ICONS[config.shape.iconStyle].body)
-      : '',
-  ].filter(Boolean)
+  const cssText = buildCss(config, avatar, options)
+  const bubbles = usesBubbles(config)
+  const inner = innerHtml(c, config, avatar, bubbles).filter(Boolean)
   const body = `\n    ${inner.join('\n    ')}\n  `
 
   let html: string
@@ -629,10 +895,16 @@ export function generateBadge(config: BadgeConfig, options: GenerateHtmlOptions 
     const { url, newTab } = config.click.link
     const isMail = url.startsWith('mailto:')
     const blank = newTab && !isMail
-    const attrs = [`class="${c}__pill"`, `href="${escapeHtml(url || '#')}"`]
+    const card = config.layout === 'card'
+    const attrs = [`class="${c}__${card ? 'lk' : 'pill'}"`, `href="${escapeHtml(url || '#')}"`]
     if (blank) attrs.push('target="_blank"', 'rel="noopener noreferrer"')
-    if (blank) attrs.push(`aria-label="${escapeHtml(`${label}, opens in a new tab`)}"`)
-    html = `<div class="${c}">\n  <a ${attrs.join(' ')}>${body}</a>${socialsHtml(c, config)}\n</div>`
+    // The stamp's text is drawn in an SVG: the link carries it as its name.
+    if (blank || config.layout === 'stamp') attrs.push(`aria-label="${escapeHtml(blank ? `${label}, opens in a new tab` : label)}"`)
+    const link = `<a ${attrs.join(' ')}>${body}</a>`
+    html = card
+      ? `<div class="${c}">\n  <div class="${c}__pill">\n  ${link}${socialsHtml(c, config)}\n  </div>\n</div>`
+      : `<div class="${c}">\n  ${link}${socialsHtml(c, config)}\n</div>`
+    if (config.layout === 'floating' && !options.staticPosition) js = floatingJs(c)
   }
 
   const header = `<!-- Stampit badge${options.editUrl ? ` · edit: ${commentSafe(options.editUrl)}` : ''} -->`

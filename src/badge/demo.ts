@@ -9,8 +9,19 @@ export const DEMO_CONFIG: BadgeConfig = {
   schemaVersion: 1,
   id: 'olivierT',
   updatedAt: '2026-10-22T12:00:00Z',
+  layout: 'pill',
   preset: 'light',
-  text: { normal: 'Designed by', bold: 'Olivier Tousche', order: 'normal-first', boldWeight: 500, size: 'm', font: 'sans' },
+  text: {
+    normal: 'Designed by',
+    bold: 'Olivier Tousche',
+    order: 'normal-first',
+    boldWeight: 500,
+    size: 'm',
+    font: 'sans',
+    role: 'Product designer',
+    status: 'Available for work',
+  },
+  team: [],
   // Olivier's photo first; the home page swaps in initials when the name spins.
   avatar: { source: 'url', initials: null, url: '/olivier-avatar.png', background: '#FF6B35' },
   theme: {

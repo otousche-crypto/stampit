@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { generateBadge, generateHtml, deriveInitials, badgeText } from './generateHtml'
+import { generateBadge, generateHtml, deriveInitials, badgeText, teamNames } from './generateHtml'
 import { FIXTURES } from './fixtures'
 import { createDefaultConfig, mergeDeep } from '../schema'
 
@@ -9,6 +9,33 @@ describe('generateHtml', () => {
       expect(generateHtml(config, { editUrl: 'https://stampit.example/create#c=abc--def' })).toMatchSnapshot()
     })
   }
+
+  it('names the team', () => {
+    const team = (names: string[]) => teamNames(mergeDeep(createDefaultConfig(), { text: { bold: 'Ada Lovelace' }, team: names }))
+    expect(team([])).toBe('Ada Lovelace')
+    expect(team(['Grace Hopper'])).toBe('Ada & Grace')
+    expect(team(['Grace Hopper', 'Alan Turing'])).toBe('Ada, Grace & Alan')
+    expect(team(['Grace Hopper', 'Alan Turing', 'Linus Torvalds'])).toBe('Ada, Grace & 2 others')
+  })
+
+  it('pins Floating to the corner, except in the preview', () => {
+    const config = FIXTURES['layout-floating']
+    expect(generateBadge(config).css).toContain('position:fixed')
+    expect(generateBadge(config).js).toContain('data-c')
+    expect(generateBadge(config, { staticPosition: true }).css).not.toContain('position:fixed')
+    expect(generateBadge(config, { staticPosition: true }).js).toBeNull()
+  })
+
+  it('names the stamp link, whose text is drawn in SVG', () => {
+    expect(generateBadge(FIXTURES['layout-stamp']).html).toContain('aria-label="Crafted by Ada Lovelace, opens in a new tab"')
+  })
+
+  it('keeps the card social links outside the main link', () => {
+    const { html } = generateBadge(FIXTURES['layout-card'])
+    const link = html.slice(html.indexOf('<a class="sp-test1234__lk"'), html.indexOf('</a>'))
+    expect(link).not.toContain('github.com')
+    expect(html).toContain('Product designer')
+  })
 
   it('is pure', () => {
     const config = FIXTURES['link-initials']
