@@ -10,9 +10,14 @@ type BadgePreviewProps = {
   interceptLinks?: boolean
   /** Rendering scale, applied with CSS `zoom` so the badge's own positioning stays exact. */
   scale?: number
+  /** Editor: play the badge's hover effect without the pointer on it. */
+  hoverDemo?: boolean
   className?: string
   style?: CSSProperties
 }
+
+/** Set on the host while `hoverDemo`; the preview's snippet reacts to it (`hoverDemoAttr`). */
+export const HOVER_DEMO_ATTR = 'data-hover-demo'
 
 /** How long the intercepted-link tooltip stays up. Not an animation timing. */
 const LINK_TIP_MS = 2400
@@ -21,7 +26,7 @@ const LINK_TIP_MS = 2400
  * Injects the generated snippet as-is, scripts included. This is the real
  * export, not a React re-implementation: what you see is what you copy.
  */
-export function BadgePreview({ code, interceptLinks = false, scale = 1, className, style }: BadgePreviewProps) {
+export function BadgePreview({ code, interceptLinks = false, hoverDemo = false, scale = 1, className, style }: BadgePreviewProps) {
   const hostRef = useRef<HTMLDivElement>(null)
   const [tip, setTip] = useState<{ url: string; rect: DOMRect } | null>(null)
 
@@ -45,6 +50,19 @@ export function BadgePreview({ code, interceptLinks = false, scale = 1, classNam
       })
     }
   }, [code])
+
+  // Set a frame after the snippet is in, so a freshly injected badge starts
+  // at rest and its hover effect transitions in rather than appearing.
+  useEffect(() => {
+    const host = hostRef.current
+    if (!host) return
+    host.removeAttribute(HOVER_DEMO_ATTR)
+    if (!hoverDemo) return
+    let id = requestAnimationFrame(() => {
+      id = requestAnimationFrame(() => host.setAttribute(HOVER_DEMO_ATTR, ''))
+    })
+    return () => cancelAnimationFrame(id)
+  }, [hoverDemo, code])
 
   useEffect(() => {
     const host = hostRef.current
