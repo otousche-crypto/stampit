@@ -40,6 +40,9 @@ export const SOCIALS = ['github', 'linkedin', 'x', 'instagram', 'dribbble'] as c
 
 export const ICON_STYLES = ['arrow', 'triangle', 'link'] as const
 
+/** Badge models (editor "Style"). Same config, a different rendering. */
+export const LAYOUTS = ['pill', 'text', 'avatar', 'stamp', 'split', 'floating', 'card', 'status', 'team'] as const
+
 export const channelSchema = z.object({
   id: z.string().min(1).max(32),
   type: z.enum(CHANNEL_TYPES),
@@ -55,6 +58,8 @@ export const badgeConfigSchema = z.object({
   id: idSchema,
   updatedAt: z.string(),
 
+  layout: z.enum(LAYOUTS).catch('pill'),
+
   preset: z.enum(['light', 'dark', 'glass', 'brand', 'custom']),
   brandColor: hexSchema.optional(),
 
@@ -65,7 +70,14 @@ export const badgeConfigSchema = z.object({
     boldWeight: z.union([z.literal(400), z.literal(500), z.literal(600)]),
     size: z.enum(['s', 'm', 'l']),
     font: z.enum(['sans', 'serif', 'mono']),
+    /** Card: a line under the name. */
+    role: z.string().max(40),
+    /** Status: replaces the normal text. */
+    status: z.string().max(32),
   }),
+
+  /** Team: the other people, after the bold text. */
+  team: z.array(z.string().max(32)).max(5),
 
   avatar: z.object({
     source: z.enum(['none', 'initials', 'upload', 'url']),
@@ -127,6 +139,7 @@ export type SocialNetwork = (typeof SOCIALS)[number]
 export type IconStyle = (typeof ICON_STYLES)[number]
 export type Entrance = (typeof ENTRANCES)[number]
 export type HoverEffect = (typeof HOVERS)[number]
+export type Layout = (typeof LAYOUTS)[number]
 
 export const CURRENT_SCHEMA_VERSION = 1
 
@@ -160,6 +173,7 @@ export function createDefaultConfig(overrides?: { id?: string; updatedAt?: strin
     schemaVersion: 1,
     id: overrides?.id ?? newBadgeId(),
     updatedAt: overrides?.updatedAt ?? new Date().toISOString(),
+    layout: 'pill',
     preset: 'light',
     text: {
       normal: 'Crafted by',
@@ -168,7 +182,10 @@ export function createDefaultConfig(overrides?: { id?: string; updatedAt?: strin
       boldWeight: 500,
       size: 'm',
       font: 'sans',
+      role: 'Product designer',
+      status: 'Available for work',
     },
+    team: ['Camille Bernard', 'Lucas Fontaine'],
     avatar: { source: 'initials', initials: null, url: null, background: DEFAULT_AVATAR_BACKGROUND },
     theme: {
       adaptToSite: false,

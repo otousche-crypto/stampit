@@ -8,6 +8,7 @@ import { ColorsSection } from './sections/ColorsSection'
 import { ShapeSection } from './sections/ShapeSection'
 import { ClickSection } from './sections/ClickSection'
 import { AnimationSection } from './sections/AnimationSection'
+import { LayoutSection } from './sections/LayoutSection'
 
 const NOTICES = {
   'invalid-link': "This link couldn't be read. We loaded a fresh badge.",
@@ -34,6 +35,9 @@ export function SettingsPanel({ autoFocus: allowAutoFocus = true }: { autoFocus?
           </Banner>
         </div>
       )}
+      <Group>
+        <LayoutSection />
+      </Group>
       <Group>
         <AvatarSection />
         <TextSection autoFocusBold={autoFocus} />

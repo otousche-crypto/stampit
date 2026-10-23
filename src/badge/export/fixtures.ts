@@ -1,5 +1,5 @@
 import { applyPreset, enableAdaptToSite } from '../presets'
-import { createDefaultConfig, mergeDeep, type BadgeConfig } from '../schema'
+import { LAYOUTS, createDefaultConfig, mergeDeep, type BadgeConfig } from '../schema'
 
 /** Fixed configs for snapshot tests (§13). Deterministic ids and dates. */
 const base = () => createDefaultConfig({ id: 'test1234', updatedAt: '2026-10-22T12:00:00.000Z' })
@@ -76,4 +76,16 @@ export const FIXTURES: Record<string, BadgeConfig> = {
     },
     enableAdaptToSite(base()),
   ),
+}
+
+/** One fixture per badge model (§ Style), on the same link config. */
+for (const layout of LAYOUTS) {
+  if (layout === 'pill') continue
+  FIXTURES[`layout-${layout}`] = with_({
+    layout,
+    text: { bold: 'Ada Lovelace' },
+    team: ['Grace Hopper', 'Alan Turing', 'Linus Torvalds'],
+    click: { link: { url: 'https://ada.dev', newTab: true } },
+    socials: { github: 'https://github.com/ada' },
+  })
 }
