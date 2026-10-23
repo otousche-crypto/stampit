@@ -4,8 +4,8 @@ import { motion } from 'motion/react'
 import { Code2, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { exitFallbackMs, spring } from '@/lib/springs'
-import { surfaceClasses } from '@/lib/surface-classes'
-import { SurfaceProvider } from '@/lib/surface-context'
+import { SURFACE_SHADOW, surfaceClasses } from '@/lib/surface-classes'
+import { SurfaceProvider, useSurface } from '@/lib/surface-context'
 import { typeClass } from '@/lib/type-scale'
 import { fontWeights } from '@/lib/font-weight'
 import { cn } from '@/lib/utils'
@@ -20,6 +20,8 @@ export function ExportSheet() {
   const [open, setOpen] = useState(false)
   const [mounted, setMounted] = useState(false)
   const triggerRef = useRef<HTMLButtonElement>(null)
+  // The floating button floats like a popover: two steps above its substrate.
+  const floatShadow = SURFACE_SHADOW[Math.min(useSurface() + 2, 8)]
   if (open && !mounted) setMounted(true)
 
   useEffect(() => {
@@ -35,7 +37,7 @@ export function ExportSheet() {
           ref={triggerRef}
           variant="primary"
           leadingIcon={Code2}
-          className="pointer-events-auto shadow-lg"
+          className={cn('pointer-events-auto', floatShadow)}
           aria-haspopup="dialog"
           onClick={() => setOpen(true)}
         >
