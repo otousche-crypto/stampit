@@ -54,10 +54,10 @@ function stampText(config: BadgeConfig): string {
   return `${badgeText(config).toUpperCase()}\u00A0•\u00A0`
 }
 
-/** Fills the whole turn: semibold capitals are about 0.68 em wide; never above 9.5 units. */
+/** Fills the whole turn: extra-bold capitals are about 0.72 em wide; never above 9.5 units. */
 function stampFontSize(config: BadgeConfig): number {
   const chars = Array.from(stampText(config)).length
-  return Math.round(Math.min(9.5, RING_LENGTH / (chars * 0.68)) * 10) / 10
+  return Math.round(Math.min(9.5, RING_LENGTH / (chars * 0.72)) * 10) / 10
 }
 
 /** Layouts that always show an avatar (initials when there is no photo). */
@@ -472,7 +472,7 @@ function layoutRules(
         `@keyframes ${c}-spin{to{transform:rotate(360deg)}}`,
         `.${c}__ring{position:absolute;inset:0;display:block;width:100%;height:100%;overflow:visible;pointer-events:none;animation:${c}-spin 24s linear infinite}`,
         // In CSS, not as an attribute: the reset's font:inherit would win over it.
-        `.${c}__ring text{fill:var(${v}tb);font-size:${stampFontSize(config)}px;font-weight:600}`,
+        `.${c}__ring text{fill:var(${v}tb);font-size:${stampFontSize(config)}px;font-weight:800}`,
         `.${c}__ring circle{fill:none;stroke:var(${v}bd);stroke-width:1}`,
       )
       break
