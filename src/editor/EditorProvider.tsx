@@ -47,6 +47,15 @@ type EditorContextValue = {
   entranceKey: number
 
   errors: EditorErrors
+  /**
+   * Set when a copy was attempted with blocking errors: fields show their
+   * error even if untouched, and the export column says what to fix.
+   */
+  errorsShown: boolean
+  /** Shows the errors and takes the user to the first field to fix. */
+  revealErrors: () => void
+  /** Changes on each reveal (the mobile sheet closes on it). */
+  revealKey: number
   contrastIssues: ContrastIssue[]
   /** What the preview renders (scheme forced to the preview background). */
   preview: GeneratedBadge
@@ -130,6 +139,33 @@ export function EditorProvider({
   const editingKey = activePaletteKey(config, previewBackground)
   const editingPalette = config.theme.palettes[editingKey]
   const errors = useMemo(() => validate(config), [config])
+  const [errorsShown, setErrorsShown] = useState(false)
+  const [revealKey, setRevealKey] = useState(0)
+  const revealErrors = useCallback(() => {
+    setErrorsShown(true)
+    setRevealKey((k) => k + 1)
+    // Fields carry data-field; the first one with an error gets scrolled to and focused.
+    const order = [
+      errors.text && 'text',
+      errors.linkUrl && 'linkUrl',
+      ...Object.keys(errors.social).map((network) => `social-${network}`),
+    ].filter(Boolean) as string[]
+    const target = order[0]
+    if (!target) return
+    const smooth = !window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    const go = () => {
+      const input = document.querySelector<HTMLInputElement>(`[data-field="${target}"] input`)
+      if (!input) return false
+      input.scrollIntoView({ block: 'center', behavior: smooth ? 'smooth' : 'auto' })
+      input.focus({ preventScroll: true })
+      return document.activeElement === input
+    }
+    // Once now (after the render that opens the social links), again once a
+    // closing sheet has let go of the focus.
+    requestAnimationFrame(() => {
+      if (!go()) window.setTimeout(go, 250)
+    })
+  }, [errors])
 
   const contrastIssues = useMemo(
     () =>
@@ -195,6 +231,9 @@ export function EditorProvider({
     replayEntrance,
     entranceKey,
     errors,
+    errorsShown,
+    revealErrors,
+    revealKey,
     contrastIssues,
     preview,
   }

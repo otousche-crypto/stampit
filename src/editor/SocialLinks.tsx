@@ -1,4 +1,4 @@
-import { useState, type ComponentType } from 'react'
+import { useEffect, useState, type ComponentType } from 'react'
 import { InputField, InputGroup } from '@/components/ui/input-group'
 import { CHANNELS, domainMatches, isValidUrl, normalizeUrl } from '@/badge/channels'
 import { SOCIALS, type SocialNetwork } from '@/badge/schema'
@@ -24,8 +24,14 @@ const LOGOS = Object.fromEntries(
  * right of the badge.
  */
 export function SocialLinks() {
-  const { config, update, errors } = useEditor()
+  const { config, update, errors, errorsShown, revealKey } = useEditor()
   const [touched, setTouched] = useState<Partial<Record<SocialNetwork, boolean>>>({})
+  const [open, setOpen] = useState('')
+  // A copy attempt with a broken social link unfolds the list to show it.
+  useEffect(() => {
+    if (revealKey && Object.keys(errors.social).length) setOpen('socials')
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [revealKey])
   const set = (network: SocialNetwork, url: string) =>
     update((c) => ({ ...c, socials: { ...c.socials, [network]: url } }))
 
@@ -33,7 +39,7 @@ export function SocialLinks() {
 
   return (
     // Folded by default: optional, and five fields would crowd the panel.
-    <Accordion type="single" collapsible size="compact" className="w-auto">
+    <Accordion type="single" collapsible size="compact" className="w-auto" value={open} onValueChange={setOpen}>
       <AccordionItem value="socials" highlight="trigger">
         <AccordionTrigger>{filled ? `Social links · ${filled}` : 'Social links'}</AccordionTrigger>
         <AccordionContent>
@@ -45,6 +51,7 @@ export function SocialLinks() {
               return (
                 <div
                   key={network}
+                  data-field={`social-${network}`}
                   onBlur={() => {
                     setTouched((t) => ({ ...t, [network]: true }))
                     const normalized = normalizeUrl(url)
@@ -60,7 +67,7 @@ export function SocialLinks() {
                     inputMode="url"
                     placeholder={def.placeholder}
                     value={url}
-                    error={touched[network] ? errors.social[network] : undefined}
+                    error={touched[network] || errorsShown ? errors.social[network] : undefined}
                     onChange={(v) => set(network, v)}
                   />
                   {mismatch && <Hint>{`This doesn't look like a ${def.label} link.`}</Hint>}

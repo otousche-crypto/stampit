@@ -40,7 +40,7 @@ export function TextSection({ autoFocusBold }: { autoFocusBold?: boolean }) {
             onChange={(normal) => set({ normal })}
           />
         </InputGroup>
-        <InputGroup size="compact" className="w-full">
+        <InputGroup size="compact" className="w-full" data-field="text">
           <InputField
             index={0}
             label="Bold text"
