@@ -43,7 +43,21 @@ export type GenerateHtmlOptions = {
 }
 
 /** Stamp diameter per size, in px. */
-export const STAMP_SIZES: Record<BadgeSize, number> = { s: 88, m: 104, l: 120 }
+export const STAMP_SIZES: Record<BadgeSize, number> = { s: 96, m: 112, l: 128 }
+
+/** Stamp geometry, in SVG units (viewBox 100): the text baseline circle, inside the edge. */
+const RING_RADIUS = 37
+const RING_LENGTH = Math.round(2 * Math.PI * RING_RADIUS * 10) / 10
+
+function stampText(config: BadgeConfig): string {
+  return `${badgeText(config).toUpperCase()} • `
+}
+
+/** Fills the whole turn: semibold capitals are about 0.68 em wide; never above 9.5 units. */
+function stampFontSize(config: BadgeConfig): number {
+  const chars = Array.from(stampText(config)).length
+  return Math.round(Math.min(9.5, RING_LENGTH / (chars * 0.68)) * 10) / 10
+}
 
 /** Layouts that always show an avatar (initials when there is no photo). */
 const NEEDS_AVATAR: ReadonlySet<Layout> = new Set(['stamp', 'card', 'team'])
@@ -450,13 +464,14 @@ function layoutRules(
 
     case 'stamp': {
       const d = STAMP_SIZES[config.text.size]
-      const av = Math.round(d * 0.46)
+      const av = Math.round(d * 0.44)
       rules.push(
         `.${c}__pill{position:relative;justify-content:center;width:${d}px;height:${d}px;padding:0;gap:0;border-radius:50%}`,
         `.${c}__av{width:${av}px;height:${av}px;border-radius:50%;font-size:${Math.round(av * 0.36)}px}`,
         `@keyframes ${c}-spin{to{transform:rotate(360deg)}}`,
         `.${c}__ring{position:absolute;inset:0;display:block;width:100%;height:100%;overflow:visible;pointer-events:none;animation:${c}-spin 24s linear infinite}`,
-        `.${c}__ring text{fill:var(${v}tb);font-weight:600}`,
+        // In CSS, not as an attribute: the reset's font:inherit would win over it.
+        `.${c}__ring text{fill:var(${v}tb);font-size:${stampFontSize(config)}px;font-weight:600}`,
         `.${c}__ring circle{fill:none;stroke:var(${v}bd);stroke-width:1}`,
       )
       break
@@ -711,11 +726,8 @@ function iconHtml(c: string, config: BadgeConfig, bubbles: boolean): string {
 
 /** Stamp: the text runs around a circle, sized so it fills the whole turn. */
 function ringHtml(c: string, config: BadgeConfig): string {
-  const text = `${badgeText(config).toUpperCase()} • `
-  const circumference = Math.round(2 * Math.PI * 40 * 10) / 10
-  // Rough glyph width of semibold capitals: about 0.66 em.
-  const fontSize = Math.round(Math.min(10, circumference / (Array.from(text).length * 0.66)) * 10) / 10
-  return `<svg class="${c}__ring" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><path id="${c}-arc" d="M10,50a40,40 0 1,1 80,0a40,40 0 1,1 -80,0" fill="none"/><circle cx="50" cy="50" r="31"/><text font-size="${fontSize}"><textPath href="#${c}-arc" textLength="${circumference}" lengthAdjust="spacing">${escapeHtml(text)}</textPath></text></svg>`
+  const r = RING_RADIUS
+  return `<svg class="${c}__ring" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><path id="${c}-arc" d="M${50 - r},50a${r},${r} 0 1,1 ${2 * r},0a${r},${r} 0 1,1 -${2 * r},0" fill="none"/><circle cx="50" cy="50" r="29"/><text><textPath href="#${c}-arc" textLength="${RING_LENGTH}" lengthAdjust="spacing">${escapeHtml(stampText(config))}</textPath></text></svg>`
 }
 
 /** The inside of the clickable element, per layout. */
