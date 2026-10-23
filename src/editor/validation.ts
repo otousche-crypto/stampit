@@ -46,9 +46,9 @@ export function hasBlockingErrors(errors: EditorErrors): boolean {
 /** One short sentence for the export column. */
 export function blockingSummary(errors: EditorErrors): string | null {
   if (errors.text) return 'Add some text to your badge first.'
-  if (errors.linkUrl) return 'Add a valid link in “On click” first.'
-  if (errors.channels) return 'Add at least two channels in “On click” first.'
-  if (Object.keys(errors.channel).length) return 'Fix the channel links in “On click” first.'
+  if (errors.linkUrl) return 'Add a valid link first.'
+  if (errors.channels) return 'Add at least two channels first.'
+  if (Object.keys(errors.channel).length) return 'Fix the channel links first.'
   if (Object.keys(errors.social).length) return 'Fix the social links first.'
   return null
 }
