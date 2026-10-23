@@ -14,7 +14,7 @@ type Click = BadgeConfig['click']
  * Bubbles menu mode stays in the generator but is no longer offered.)
  */
 export function ClickSection() {
-  const { config, update, errors } = useEditor()
+  const { config, update, errors, errorsShown } = useEditor()
   const click = config.click
   const [touched, setTouched] = useState(false)
   const setLink = (patch: Partial<Click['link']>) =>
@@ -29,6 +29,7 @@ export function ClickSection() {
     <div className="flex flex-col gap-2">
       <InputGroup size="compact" className="w-full">
         <div
+          data-field="linkUrl"
           onBlur={() => {
             setTouched(true)
             const normalized = normalizeUrl(click.link.url)
@@ -44,7 +45,7 @@ export function ClickSection() {
             icon={Link2}
             placeholder="yoursite.com"
             value={click.link.url}
-            error={touched ? errors.linkUrl : undefined}
+            error={touched || errorsShown ? errors.linkUrl : undefined}
             onChange={(url) => setLink({ url })}
           />
         </div>

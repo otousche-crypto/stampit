@@ -30,7 +30,7 @@ export function formatWeight(bytes: number): string {
 
 /** Right column: a Prompt tab and a Code tab, each a copy field. */
 export function ExportPanel({ className }: { className?: string }) {
-  const { config, errors, uploadDataUrl, avatarFailed } = useEditor()
+  const { config, errors, errorsShown, revealErrors, uploadDataUrl, avatarFailed } = useEditor()
   const blocked = hasBlockingErrors(errors)
   const [tab, setTab] = useState(0)
   const [editUrl, setEditUrl] = useState<string | undefined>(undefined)
@@ -89,12 +89,13 @@ export function ExportPanel({ className }: { className?: string }) {
           selected={agent}
           onSelect={setAgent}
           valueFor={promptFor}
-          disabled={blocked}
+          blocked={blocked}
+          onBlocked={revealErrors}
         />
         <p className={cn('px-1 text-muted-foreground', typeClass('caption'))}>
           Paste into your AI coding agent. It adds the badge with your project's stack.
         </p>
-        <CopyField label="Prompt" value={prompt} disabled={blocked} copyButton={false} className="min-h-40 flex-1" />
+        <CopyField label="Prompt" value={prompt} copyButton={false} className="min-h-40 flex-1" />
       </TabsSubtlePanel>
 
       <TabsSubtlePanel idPrefix="export" index={1} selectedIndex={tab} className="flex min-h-0 flex-1 flex-col gap-1.5">
@@ -106,19 +107,21 @@ export function ExportPanel({ className }: { className?: string }) {
           selected={language}
           onSelect={setLanguage}
           valueFor={codeFor}
-          disabled={blocked}
+          blocked={blocked}
+          onBlocked={revealErrors}
         />
         <p className={cn('px-1 text-muted-foreground tabular-nums', typeClass('caption'))}>
           {language === 'html' ? `Plain HTML/CSS${badge.js ? '/JS' : ''}` : `${CODE_LANGUAGE_LABELS[language]} component`}.{' '}
           {formatWeight(bytes)}.
         </p>
-        <CopyField label="Code" value={code} disabled={blocked} copyButton={false} className="min-h-40 flex-1">
+        <CopyField label="Code" value={code} copyButton={false} className="min-h-40 flex-1">
           {highlighted ? <div className="stampit-code" dangerouslySetInnerHTML={{ __html: highlighted }} /> : undefined}
         </CopyField>
       </TabsSubtlePanel>
 
-      {blocked && (
-        <p role="status" className={cn('px-1 text-destructive', typeClass('caption'))}>
+      {/* Only after a copy attempt: until then the button just works. */}
+      {blocked && errorsShown && (
+        <p role="alert" className={cn('px-1 text-destructive', typeClass('caption'))}>
           {blockingSummary(errors)}
         </p>
       )}

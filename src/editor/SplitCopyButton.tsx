@@ -23,7 +23,8 @@ export function SplitCopyButton<T extends string>({
   selected,
   onSelect,
   valueFor,
-  disabled = false,
+  blocked = false,
+  onBlocked,
 }: {
   label: string
   icon: LucideIcon
@@ -34,7 +35,9 @@ export function SplitCopyButton<T extends string>({
   onSelect: (value: T) => void
   /** The text to copy for an option (or the neutral version). */
   valueFor: (value: T | null) => string
-  disabled?: boolean
+  /** Something must be fixed first: clicks don't copy, they call onBlocked. */
+  blocked?: boolean
+  onBlocked?: () => void
 }) {
   const [copied, setCopied] = useState(false)
   useEffect(() => {
@@ -43,7 +46,13 @@ export function SplitCopyButton<T extends string>({
     return () => window.clearTimeout(t)
   }, [copied])
 
-  const copy = async (value: T | null) => setCopied(await copyText(valueFor(value)))
+  const copy = async (value: T | null) => {
+    if (blocked) {
+      onBlocked?.()
+      return
+    }
+    setCopied(await copyText(valueFor(value)))
+  }
   const checkedIndex = selected === null ? undefined : options.findIndex((o) => o.value === selected)
 
   return (
@@ -52,13 +61,12 @@ export function SplitCopyButton<T extends string>({
         variant="primary"
         size="compact"
         leadingIcon={copied ? Check : icon}
-        disabled={disabled}
         className="flex-1 rounded-r-none"
         onClick={() => copy(selected)}
       >
         {copied ? 'Copied' : label}
       </Button>
-      <DropdownMenu disabled={disabled} size="compact">
+      <DropdownMenu size="compact">
         <DropdownTrigger
           render={
             <Button variant="primary" size="icon-compact" className="rounded-l-none" aria-label={menuLabel}>

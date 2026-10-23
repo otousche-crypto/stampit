@@ -10,6 +10,7 @@ import { typeClass } from '@/lib/type-scale'
 import { fontWeights } from '@/lib/font-weight'
 import { cn } from '@/lib/utils'
 import { ExportPanel } from './ExportPanel'
+import { useEditor } from './EditorProvider'
 
 /**
  * Mobile: a floating "Get code" button opening a bottom sheet with the
@@ -22,6 +23,11 @@ export function ExportSheet() {
   const triggerRef = useRef<HTMLButtonElement>(null)
   // The floating button floats like a popover: two steps above its substrate.
   const floatShadow = SURFACE_SHADOW[Math.min(useSurface() + 2, 8)]
+  // A copy attempt with something to fix closes the sheet: the field is behind it.
+  const { revealKey } = useEditor()
+  useEffect(() => {
+    if (revealKey) setOpen(false)
+  }, [revealKey])
   if (open && !mounted) setMounted(true)
 
   useEffect(() => {
