@@ -5,29 +5,30 @@ import { BadgePreview } from '@/badge/render/BadgePreview'
 import { fontWeights } from '@/lib/font-weight'
 import { cn } from '@/lib/utils'
 import { DEMO_HTML_DARK, DEMO_HTML_LIGHT } from '../demo.generated'
-import { useDemoCycle } from '../useDemoCycle'
+import { useDemoCycle, type DemoPerson } from '../useDemoCycle'
 import { useAppearance } from '../appearance'
 
 /** First words the demo badge cycles through. */
 const DEMO_WORDS = ['Designed', 'Crafted', 'Shipped', 'Built']
 
 /**
- * The demo starts on "Designed by Olivier Tousche", then spins through these
- * (never back to Olivier). All about as wide as his name, so the fixed name
- * slot never looks half empty.
+ * The demo starts on "Designed by Olivier Tousche" (his photo), then spins
+ * through these people (never back to Olivier). Names are all about as wide
+ * as his, so the fixed name slot never looks half empty. Avatars: Microsoft
+ * Fluent Emoji 3D (MIT), designers, developers and builders.
  */
 const DEMO_FIRST = 'Olivier Tousche'
-const DEMO_NAMES = [
-  'Camille Bernard',
-  'Lucas Fontaine',
-  'Hannah Schmidt',
-  'Mateo Gonzalez',
-  'Clara Hoffmann',
-  'Sofia Marchetti',
-  'Jonas Lindqvist',
-  'Amélie Rousseau',
-  'Daniel Okafor',
-  'Yuki Nakamura',
+const DEMO_PEOPLE: DemoPerson[] = [
+  { name: 'Camille Bernard', avatar: '/avatars/camille.png' },
+  { name: 'Lucas Fontaine', avatar: '/avatars/lucas.png' },
+  { name: 'Hannah Schmidt', avatar: '/avatars/hannah.png' },
+  { name: 'Mateo Gonzalez', avatar: '/avatars/mateo.png' },
+  { name: 'Clara Hoffmann', avatar: '/avatars/clara.png' },
+  { name: 'Sofia Marchetti', avatar: '/avatars/sofia.png' },
+  { name: 'Jonas Lindqvist', avatar: '/avatars/jonas.png' },
+  { name: 'Amélie Rousseau', avatar: '/avatars/amelie.png' },
+  { name: 'Daniel Okafor', avatar: '/avatars/daniel.png' },
+  { name: 'Yuki Nakamura', avatar: '/avatars/yuki.png' },
 ]
 
 // The editor lives right under the landing; it carries most of the UI kit.
@@ -110,7 +111,7 @@ function PhoneBottom({ children }: { children: ReactNode }) {
 export function Home() {
   const editorRef = useRef<HTMLElement>(null)
   const demoRef = useRef<HTMLDivElement>(null)
-  useDemoCycle(demoRef, DEMO_WORDS, DEMO_FIRST, DEMO_NAMES)
+  useDemoCycle(demoRef, DEMO_WORDS, DEMO_FIRST, DEMO_PEOPLE)
   // The demo follows the site's Light / Dark.
   const demoHtml = useAppearance() === 'dark' ? DEMO_HTML_DARK : DEMO_HTML_LIGHT
   return (

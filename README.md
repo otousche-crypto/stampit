@@ -30,3 +30,7 @@ npm run build      # demo badge + type check + Vite build
 ## Open points (PRD §16)
 
 The domain is still a placeholder: `src/config/site.ts` and the meta tags in `index.html`.
+
+## Credits
+
+The home page demo avatars (`public/avatars/`) are from [Fluent Emoji](https://github.com/microsoft/fluentui-emoji) by Microsoft, MIT License.

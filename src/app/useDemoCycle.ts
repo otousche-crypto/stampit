@@ -10,19 +10,17 @@ const SPIN_STEPS = [50, 50, 55, 60, 70, 80, 95, 115, 140, 175, 220]
 
 const sleep = (ms: number) => new Promise((r) => window.setTimeout(r, ms))
 
-const initialsOf = (name: string) =>
-  name
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((w) => w[0] ?? '')
-    .join('')
-    .toUpperCase()
+/** A demo person: a name and its avatar image. */
+export type DemoPerson = { name: string; avatar: string }
+
+/** Behind the transparent 3D avatars: a soft neutral that reads in light and dark. */
+const AVATAR_BACKGROUND = '#E9E9EE'
 
 /**
  * The home demo badge, alternating two effects:
  * 1. the verb is retyped ("Crafted by" → "Shipped by" → "Built by"…),
  * 2. then the name spins like a roulette and lands on a new random one
- *    (initials replace the photo). It starts on `first`, never comes back.
+ *    with its own avatar. It starts on `first`, never comes back.
  * The name slot is sized once to the widest name, so the badge never
  * changes width when the name does. Elements are looked up at every step:
  * the snippet can be re-injected (Light / Dark) at any time.
@@ -32,11 +30,15 @@ export function useDemoCycle(
   host: RefObject<HTMLElement | null>,
   verbs: string[],
   first: string,
-  names: string[],
+  people: DemoPerson[],
   suffix = ' by',
 ) {
   useEffect(() => {
     let cancelled = false
+    const names = people.map((p) => p.name)
+    const avatars = new Map(people.map((p) => [p.name, p.avatar]))
+    // Loaded up front: the roulette changes avatar every 50 ms.
+    for (const p of people) new Image().src = p.avatar
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     const find = (sel: string) => host.current?.querySelector<HTMLElement>(sel) ?? null
 
@@ -75,11 +77,12 @@ export function useDemoCycle(
           })
         }
       }
-      if (avatar && name !== first) {
-        // The photo belongs to the first name only: others get initials,
-        // styled like the generator's initials avatar.
-        avatar.textContent = initialsOf(name)
-        Object.assign(avatar.style, { color: '#000', fontSize: '11px', fontWeight: '600', lineHeight: '1' })
+      const src = avatars.get(name)
+      if (avatar && src) {
+        // The snippet's own <img> keeps its size and crop; only the picture changes.
+        const img = avatar.querySelector('img')
+        if (img) img.src = src
+        avatar.style.background = AVATAR_BACKGROUND
       }
     }
     const pick = (not: string) => {
@@ -133,5 +136,5 @@ export function useDemoCycle(
     return () => {
       cancelled = true
     }
-  }, [host, verbs, first, names, suffix])
+  }, [host, verbs, first, people, suffix])
 }
