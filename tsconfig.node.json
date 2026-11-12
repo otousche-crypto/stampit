@@ -26,6 +26,9 @@
   "include": [
     "vite.config.ts",
     "scripts",
+    "api",
+    "src/embed/server.ts",
+    "src/embed/devServer.ts",
     "src/**/*.test.ts",
     "src/types"
   ]

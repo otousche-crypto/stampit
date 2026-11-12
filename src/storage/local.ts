@@ -41,3 +41,31 @@ export function saveConfig(config: BadgeConfig): void {
 export function clearConfig(): void {
   write(CONFIG_KEY, null)
 }
+
+const EMBED_KEY = 'stampit:embed'
+const PUBLISH_KEY = 'stampit:publish-key'
+
+/** The hosted badge: its id (fixed after the first publish) and what was last published. */
+export type EmbedState = { id: string; code: string; updatedAt: string }
+
+export function loadEmbed(): EmbedState | null {
+  try {
+    const value = JSON.parse(read(EMBED_KEY) ?? 'null')
+    return value && typeof value.id === 'string' ? (value as EmbedState) : null
+  } catch {
+    return null
+  }
+}
+
+export function saveEmbed(state: EmbedState): void {
+  write(EMBED_KEY, JSON.stringify(state))
+}
+
+/** The owner's publish key, kept in this browser only. */
+export function loadPublishKey(): string {
+  return read(PUBLISH_KEY) ?? ''
+}
+
+export function savePublishKey(key: string | null): void {
+  write(PUBLISH_KEY, key)
+}

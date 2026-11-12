@@ -19,6 +19,7 @@ import { blockingSummary, hasBlockingErrors } from './validation'
 import { useEditor } from './EditorProvider'
 import { highlightCode } from './highlight'
 import { SplitCopyButton } from './SplitCopyButton'
+import { EmbedPanel } from './EmbedPanel'
 
 const AGENT_OPTIONS = PROMPT_AGENTS.map((value) => ({ value, label: PROMPT_AGENT_LABELS[value] }))
 const LANGUAGE_OPTIONS = CODE_LANGUAGES.map((value) => ({ value, label: CODE_LANGUAGE_LABELS[value] }))
@@ -27,7 +28,7 @@ export function formatWeight(bytes: number): string {
   return `~${Math.max(1, Math.round(bytes / 1024))} KB · zero dependency`
 }
 
-/** Right column: a Prompt tab and a Code tab, each a copy field. */
+/** Right column: a Prompt tab and a Code tab, each a copy field, and the hosted Embed. */
 export function ExportPanel({ className }: { className?: string }) {
   const { config, errors, errorsShown, revealErrors, avatarFailed } = useEditor()
   const blocked = hasBlockingErrors(errors)
@@ -75,6 +76,7 @@ export function ExportPanel({ className }: { className?: string }) {
       <TabsSubtle idPrefix="export" size="compact" selectedIndex={tab} onSelect={setTab}>
         <TabsSubtleItem index={0} label="Prompt" />
         <TabsSubtleItem index={1} label="Code" />
+        <TabsSubtleItem index={2} label="Embed" />
       </TabsSubtle>
 
       <TabsSubtlePanel idPrefix="export" index={0} selectedIndex={tab} className="flex min-h-0 flex-1 flex-col gap-1.5">
@@ -118,6 +120,10 @@ export function ExportPanel({ className }: { className?: string }) {
         <CopyField label="Code" value={code} copyButton={false} className="min-h-40 flex-1">
           {highlighted ? <div className="stampit-code" dangerouslySetInnerHTML={{ __html: highlighted }} /> : undefined}
         </CopyField>
+      </TabsSubtlePanel>
+
+      <TabsSubtlePanel idPrefix="export" index={2} selectedIndex={tab} className="flex min-h-0 flex-1 flex-col gap-1.5">
+        <EmbedPanel badge={badge} blocked={blocked} />
       </TabsSubtlePanel>
 
       {/* Only after a copy attempt: until then the button just works. */}

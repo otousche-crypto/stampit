@@ -1,11 +1,19 @@
 /// <reference types="vitest/config" />
 import { fileURLToPath, URL } from 'node:url'
-import { defineConfig } from 'vite'
+import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
+import { embedDevServer } from './src/embed/devServer'
 
-export default defineConfig({
-  plugins: [react(), tailwindcss()],
+const root = fileURLToPath(new URL('.', import.meta.url))
+
+export default defineConfig(({ mode }) => ({
+  plugins: [
+    react(),
+    tailwindcss(),
+    // The embed API (/api/publish, /e/{id}.js) without Vercel.
+    embedDevServer({ root, token: loadEnv(mode, root, '').STAMPIT_PUBLISH_TOKEN }),
+  ],
   resolve: {
     alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) },
   },
@@ -18,4 +26,4 @@ export default defineConfig({
   test: {
     environment: 'node',
   },
-})
+}))
