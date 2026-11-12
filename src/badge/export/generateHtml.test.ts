@@ -61,13 +61,15 @@ describe('generateHtml', () => {
     expect(p.html).toContain('aria-label="Launched by Olivier Tousche, open profile"')
     expect(p.html).toContain('<dialog id="sp-test1234-dlg" class="sp-test1234__dlg" aria-labelledby="sp-test1234-dlg-t">')
     expect(p.html).toContain('<form method="dialog">')
-    expect(p.html).toContain('I design and ship small, useful tools.')
     expect(p.html).toContain('aria-label="Portfolio, opens in a new tab"')
     expect(p.html).toContain('aria-label="LinkedIn, opens in a new tab"')
     expect(p.html).toContain('data-user="olivier"')
-    // Named projects only; an invalid address shows the project without a link.
+    // GitHub: only the bricks, as one link to the profile.
+    expect(p.html).toContain('aria-label="GitHub profile of @olivier, opens in a new tab"')
+    expect(p.css).toContain('@media (max-width:480px){.sp-test1234__dlg:modal{')
+    // Projects are links: named, with a valid address.
     expect(p.html).toContain('href="https://stampit.app"')
-    expect(p.html).toContain('<div class="sp-test1234__mc"><span class="sp-test1234__mcn">Décadi</span></div>')
+    expect(p.html).not.toContain('Décadi')
     expect(p.html).not.toContain('ignored.example')
     // The social links live in the modal, not beside the badge.
     expect(p.html).not.toContain('__sos')

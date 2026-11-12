@@ -35,7 +35,7 @@ export function ProfilePanel() {
     <div className="flex flex-col pb-24 md:pb-3">
       <Group>
         <SwitchRow label="Open a profile on click" checked={on} onToggle={() => setClick({ mode: on ? 'link' : 'profile' })} />
-        {!on && <Hint>Your badge opens a modal with your bio, links, GitHub activity and projects.</Hint>}
+        {!on && <Hint>Your badge opens a modal with your role, links, GitHub activity and projects.</Hint>}
       </Group>
       {on && (
         <>
@@ -45,19 +45,10 @@ export function ProfilePanel() {
                 index={0}
                 label="Role"
                 className={WELL_FIELD}
-                placeholder="Product designer"
+                placeholder="Product builder"
                 maxLength={40}
                 value={config.text.role}
                 onChange={(role) => update((c) => ({ ...c, text: { ...c.text, role } }))}
-              />
-              <InputField
-                index={1}
-                label="Bio"
-                className={WELL_FIELD}
-                placeholder="Designer shipping small, useful tools."
-                maxLength={160}
-                value={config.click.profile.bio}
-                onChange={(bio) => setClick({ profile: { ...config.click.profile, bio } })}
               />
             </InputGroup>
           </Group>

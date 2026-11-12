@@ -114,13 +114,12 @@ export const badgeConfigSchema = z.object({
   click: z.object({
     /**
      * Link: the badge goes to `link.url`. Profile: it opens a modal with the
-     * bio, links (`link.url` is the portfolio), GitHub activity and projects.
+     * links (`link.url` is the portfolio), GitHub activity and projects.
      * Retired Bubbles badges come back as links.
      */
     mode: z.enum(['link', 'profile']).catch('link'),
     link: z.object({ url: z.string().max(2048), newTab: z.boolean() }),
     profile: z.object({
-      bio: z.string().max(160),
       projects: z.array(projectSchema).max(MAX_PROJECTS),
     }),
   }),
@@ -203,7 +202,7 @@ export function createDefaultConfig(overrides?: { id?: string; updatedAt?: strin
     click: {
       mode: 'link',
       link: { url: '', newTab: true },
-      profile: { bio: '', projects: [] },
+      profile: { projects: [] },
     },
     socials: { github: '', linkedin: '', x: '', instagram: '', dribbble: '' },
   }

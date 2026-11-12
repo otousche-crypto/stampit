@@ -37,7 +37,6 @@ export const FIXTURES: Record<string, BadgeConfig> = {
       mode: 'profile',
       link: { url: 'https://olivier.dev', newTab: true },
       profile: {
-        bio: 'I design and ship small, useful tools.',
         projects: [
           { id: 'p1', name: 'Stampit', url: 'https://stampit.app', description: 'Signature badges for side projects' },
           { id: 'p2', name: 'Décadi', url: 'not a url', description: '' },

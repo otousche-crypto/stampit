@@ -63,17 +63,15 @@
   }
 
   function draw(days) {
-    var h = "", total = 0, last = -1, end = today();
+    var h = "", total = 0, end = today();
     for (var t = first(); t <= end; t += D) {
       var key = new Date(t).toISOString().slice(0, 10), v = days[key] || 0;
       total += v;
-      if (v) last = t;
       h += '<i data-l="' + (v ? v < 2 ? 1 : v < 4 ? 2 : v < 7 ? 3 : 4 : 0) + '" title="' + v + " · " + key + '"></i>';
     }
-    g.querySelector(".__C____gr").innerHTML = h;
-    g.querySelector(".__C____gn").textContent = total;
-    var a = last < 0 ? "" : last === end ? "Active today" : "Last active " + Math.round((end - last) / D) + "d ago";
-    g.querySelector(".__C____ga").textContent = a;
+    var gr = g.querySelector(".__C____gr");
+    gr.innerHTML = h;
+    gr.setAttribute("aria-label", gr.getAttribute("aria-label").split(":")[0] + ": " + total + " public events in the last 12 weeks");
     g.setAttribute("data-st", "ok");
   }
 })();

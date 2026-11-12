@@ -656,11 +656,11 @@ export function githubUser(config: BadgeConfig): string | null {
   return /^[A-Za-z0-9][A-Za-z0-9-]{0,38}$/.test(first) ? first : null
 }
 
-/** Projects with a name, in order; the link only when the address is valid. */
-export function profileProjects(config: BadgeConfig): { name: string; url: string | null; description: string }[] {
+/** Projects with a name and a valid address, in order: each one is a link. */
+export function profileProjects(config: BadgeConfig): { name: string; url: string; description: string }[] {
   return config.click.profile.projects
-    .map((p) => ({ name: p.name.trim(), url: isValidUrl(p.url.trim()) ? p.url.trim() : null, description: p.description.trim() }))
-    .filter((p) => p.name)
+    .map((p) => ({ name: p.name.trim(), url: p.url.trim(), description: p.description.trim() }))
+    .filter((p) => p.name && isValidUrl(p.url))
 }
 
 /** The modal always shows a face: initials when the badge itself has no avatar. */
@@ -718,6 +718,8 @@ function profileRules(
     `.${c}__dlg{${dlg.join(';')}}`,
     `.${c}__dlg[open]{opacity:1;transform:none;transition:${transition(ctx, 'opacity', 'slow')},${transition(ctx, 'transform', 'slow')},${discrete}}`,
     `@starting-style{.${c}__dlg[open]{${hidden}}}`,
+    // Phones: a sheet from the bottom edge, full width.
+    `@media (max-width:480px){.${c}__dlg:modal{width:100%;max-width:100%;margin:auto 0 0;padding:20px 20px max(20px,env(safe-area-inset-bottom));max-height:88dvh;border-radius:${r}px ${r}px 0 0;transform:translateY(24px)}.${c}__dlg:modal[open]{transform:none}@starting-style{.${c}__dlg:modal[open]{transform:translateY(24px)}}}`,
     `.${c}__dlg::backdrop{background:rgba(0,0,0,0);transition:background-color ${CSS_SPRINGS.slowExit.duration},${discrete}}`,
     `.${c}__dlg[open]::backdrop{background:rgba(0,0,0,.4)}`,
     `@starting-style{.${c}__dlg[open]::backdrop{background:rgba(0,0,0,0)}}`,
@@ -731,7 +733,6 @@ function profileRules(
     `.${c}__mav{flex:none;display:grid;place-items:center;width:56px;height:56px;border-radius:${round ? '50%' : `${inner}px`};overflow:hidden;background:${css(config.avatar.background)}}`,
     `.${c}__mn{display:block;font-size:18px;font-weight:${Math.max(500, config.text.boldWeight)};line-height:1.25}`,
     `.${c}__mr{display:block;margin-top:2px;color:var(${v}tn)}`,
-    `.${c}__mb{margin-top:16px;color:var(${v}tn)}`,
     // Links: Portfolio first, then the networks.
     `.${c}__ml{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:18px}`,
     `.${c}__mp{display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 14px;border-radius:${round ? '18px' : `${inner}px`};background:var(${v}tb);color:var(${v}on);font-weight:500}`,
@@ -744,25 +745,17 @@ function profileRules(
     // Sections.
     `.${c}__sec{margin-top:22px}`,
     `.${c}__mt{margin-bottom:10px;color:var(${v}tn);font-size:12px;font-weight:500;letter-spacing:.04em;text-transform:uppercase}`,
-    // GitHub: a 13-week grid, one cell per day, and the totals beside it.
-    `.${c}__gb{display:flex;flex-wrap:wrap;align-items:flex-end;gap:12px 20px}`,
-    `.${c}__gr{display:grid;grid-template-rows:repeat(7,10px);grid-auto-flow:column;grid-auto-columns:10px;gap:3px;min-width:166px;min-height:88px}`,
+    // GitHub: a 13-week grid, one brick per day, as wide as the modal.
+    `.${c}__gr{display:grid;grid-template-columns:repeat(13,1fr);grid-template-rows:repeat(7,1fr);grid-auto-flow:column;gap:3px;aspect-ratio:13/7;border-radius:4px}`,
     `.${c}__gr i{display:block;border-radius:2px;background:${tint(8)}}`,
     `.${c}__gr i[data-l="1"]{background:${tint(28)}}`,
     `.${c}__gr i[data-l="2"]{background:${tint(50)}}`,
     `.${c}__gr i[data-l="3"]{background:${tint(75)}}`,
     `.${c}__gr i[data-l="4"]{background:var(${v}tb)}`,
     `@keyframes ${c}-ld{50%{opacity:.5}}`,
-    `.${c}__gh:not([data-st=ok]) .${c}__gr{border-radius:4px;background:${tint(6)};animation:${c}-ld 1.2s ease-in-out infinite}`,
-    `.${c}__gx{display:flex;flex-direction:column;gap:2px}`,
-    `.${c}__gn{font-size:24px;font-weight:600;line-height:1.1;font-variant-numeric:tabular-nums}`,
-    `.${c}__gl,.${c}__ga{color:var(${v}tn);font-size:12px}`,
-    `.${c}__gu{margin-top:6px;font-size:13px;font-weight:500}`,
-    `.${c}__gu:hover,.${c}__ge a:hover{text-decoration:underline}`,
-    `.${c}__ge{display:none;color:var(${v}tn)}`,
-    `.${c}__ge a{color:var(${v}tb)}`,
-    `.${c}__gh[data-st=error] .${c}__gb{display:none}`,
-    `.${c}__gh[data-st=error] .${c}__ge{display:block}`,
+    `.${c}__gh:not([data-st=ok]) .${c}__gr{background:${tint(6)};animation:${c}-ld 1.2s ease-in-out infinite}`,
+    // No activity to show: no section.
+    `.${c}__gh[data-st=error]{display:none}`,
     // Projects.
     `.${c}__mj{display:flex;flex-direction:column;gap:8px}`,
     `.${c}__mc{position:relative;display:flex;flex-direction:column;gap:2px;padding:12px 40px 12px 14px;border-radius:${inner}px;background:${tint(5)};box-shadow:inset 0 0 0 1px var(${v}bd);transition:${transition(ctx, 'background-color', 'fast')}}`,
@@ -796,7 +789,6 @@ function profileHtml(c: string, config: BadgeConfig, avatar: ResolvedAvatar, ope
   const newTab = config.click.link.newTab
   const name = config.text.bold.trim() || config.text.normal.trim()
   const role = config.text.role.trim()
-  const bio = config.click.profile.bio.trim()
   const portfolio = config.click.link.url.trim()
   const arrow = strokeSvg(`${c}__mi`, 14, ARROW_ICON)
   const link = (cls: string, url: string, name: string, inside: string) => {
@@ -818,7 +810,6 @@ function profileHtml(c: string, config: BadgeConfig, avatar: ResolvedAvatar, ope
     `<form method="dialog"><button class="${c}__x" aria-label="Close">${strokeSvg(`${c}__xi`, 16, CLOSE_ICON)}</button></form>`,
     `<div class="${c}__mh">${faceHtml}<div><h2 id="${c}-dlg-t" class="${c}__mn">${escapeHtml(name)}</h2>${role ? `<p class="${c}__mr">${escapeHtml(role)}</p>` : ''}</div></div>`,
   ]
-  if (bio) lines.push(`<p class="${c}__mb">${escapeHtml(bio)}</p>`)
 
   const links: string[] = []
   if (isValidUrl(portfolio)) links.push(link('mp', portfolio, newTab ? 'Portfolio' : '', `Portfolio${arrow}`))
@@ -831,8 +822,8 @@ function profileHtml(c: string, config: BadgeConfig, avatar: ResolvedAvatar, ope
     lines.push(
       `<section class="${c}__sec ${c}__gh" data-user="${user}" aria-labelledby="${c}-gh-t">`,
       `<h3 id="${c}-gh-t" class="${c}__mt">GitHub activity</h3>`,
-      `<div class="${c}__gb"><div class="${c}__gr" aria-hidden="true"></div><p class="${c}__gx"><span class="${c}__gn">–</span><span class="${c}__gl">public events, last 12 weeks</span><span class="${c}__ga"></span>${link('gu', profile, '', `@${user}`)}</p></div>`,
-      `<p class="${c}__ge">Activity unavailable right now. ${link('', profile, '', `See @${user} on GitHub`)}</p>`,
+      // Only the bricks; the whole grid links to the profile (its name gets the total once loaded).
+      link('gr', profile, `GitHub profile of @${user}`, ''),
       '</section>',
     )
   }
@@ -841,7 +832,7 @@ function profileHtml(c: string, config: BadgeConfig, avatar: ResolvedAvatar, ope
   if (projects.length) {
     const items = projects.map((p) => {
       const inside = `<span class="${c}__mcn">${escapeHtml(p.name)}</span>${p.description ? `<span class="${c}__mcd">${escapeHtml(p.description)}</span>` : ''}`
-      return `<li>${p.url ? link('mc', p.url, '', inside + arrow) : `<div class="${c}__mc">${inside}</div>`}</li>`
+      return `<li>${link('mc', p.url, '', inside + arrow)}</li>`
     })
     lines.push(`<section class="${c}__sec" aria-labelledby="${c}-pj-t"><h3 id="${c}-pj-t" class="${c}__mt">Projects</h3><ul class="${c}__mj">${items.join('')}</ul></section>`)
   }

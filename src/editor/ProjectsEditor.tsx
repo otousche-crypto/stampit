@@ -10,7 +10,7 @@ import { useEditor } from './EditorProvider'
 type RowProps = {
   project: Project
   index: number
-  error?: string
+  error?: { field: 'name' | 'url'; message: string }
   shown: boolean
   onChange: (patch: Partial<Project>) => void
   onRemove: () => void
@@ -38,7 +38,7 @@ function ProjectRow({ project, index, error, shown, onChange, onRemove }: RowPro
             placeholder="Stampit"
             maxLength={40}
             value={project.name}
-            error={touched || shown ? error : undefined}
+            error={(touched || shown) && error?.field === 'name' ? error.message : undefined}
             onChange={(value) => onChange({ name: value })}
           />
           <InputField
@@ -49,6 +49,7 @@ function ProjectRow({ project, index, error, shown, onChange, onRemove }: RowPro
             inputMode="url"
             placeholder="stampit.app"
             value={project.url}
+            error={(touched || shown) && error?.field === 'url' ? error.message : undefined}
             onChange={(url) => onChange({ url })}
           />
           <InputField

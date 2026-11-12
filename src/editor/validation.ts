@@ -4,8 +4,8 @@ import { SOCIALS, type BadgeConfig, type SocialNetwork } from '@/badge/schema'
 export type EditorErrors = {
   text?: string
   linkUrl?: string
-  /** Profile projects, by id. */
-  project: Record<string, string>
+  /** Profile projects, by id: which field is wrong, and why. */
+  project: Record<string, { field: 'name' | 'url'; message: string }>
   social: Partial<Record<SocialNetwork, string>>
 }
 
@@ -20,12 +20,13 @@ export function validate(config: BadgeConfig): EditorErrors {
     if (!url) errors.linkUrl = 'Add the address the badge links to.'
     else if (!isValidUrl(url)) errors.linkUrl = "This address doesn't look right."
   } else {
-    // Profile: the portfolio is optional; a project needs a name, and a valid address if it has one.
+    // Profile: the portfolio is optional; a project needs a name and an address (it is a link).
     if (url && !isValidUrl(url)) errors.linkUrl = "This address doesn't look right."
     for (const project of config.click.profile.projects) {
       const projectUrl = project.url.trim()
-      if (!project.name.trim()) errors.project[project.id] = 'Give this project a name.'
-      else if (projectUrl && !isValidUrl(projectUrl)) errors.project[project.id] = "This address doesn't look right."
+      if (!project.name.trim()) errors.project[project.id] = { field: 'name', message: 'Give this project a name.' }
+      else if (!projectUrl) errors.project[project.id] = { field: 'url', message: 'Add the address it links to.' }
+      else if (!isValidUrl(projectUrl)) errors.project[project.id] = { field: 'url', message: "This address doesn't look right." }
     }
   }
   for (const network of SOCIALS) {

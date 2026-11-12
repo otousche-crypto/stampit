@@ -109,13 +109,11 @@ function profileSpec(config: BadgeConfig): string[] {
   const projects = profileProjects(config)
   const lines = [
     '- Mode: Profile. The badge is a button; clicking it opens a modal profile card. Hovering does nothing more than the hover effect.',
-    "- Modal: a native <dialog>, 400px wide (at most the viewport minus 32px), centered, 24px padding, scrolls inside when taller than the viewport. Same background, bold/normal text colors, border ring and font as the badge, corner radius 12 + 12 × the badge's roundness (px), shadow 0 24px 64px rgba(0,0,0,.24). Backdrop rgba(0,0,0,.4). The page does not scroll behind it.",
+    "- Modal: a native <dialog>, 400px wide (at most the viewport minus 32px), centered, 24px padding; on screens up to 480px wide, a full-width sheet docked to the bottom edge (top corners rounded, max 88dvh, safe-area padding at the bottom), rising 24px as it opens; scrolls inside when taller than the viewport. Same background, bold/normal text colors, border ring and font as the badge, corner radius 12 + 12 × the badge's roundness (px), shadow 0 24px 64px rgba(0,0,0,.24). Backdrop rgba(0,0,0,.4). The page does not scroll behind it.",
     '- Opening: fade in and rise from translateY(8px) scale(.97) (slow spring, @starting-style); closing: the reverse (slow exit). Reduced motion: fade only.',
     '- Close: a 32px round "×" button in the top-right corner (a <form method="dialog"> so it works without JS), Escape, or a click on the backdrop.',
     `- Head: a 56px avatar (initials when there is no photo), then the name "${config.text.bold.trim() || config.text.normal.trim()}" (18px, as an <h2>)${config.text.role.trim() ? ` and the role "${config.text.role.trim()}" under it in the normal text color` : ''}.`,
   ]
-  const bio = config.click.profile.bio.trim()
-  if (bio) lines.push(`- Bio under the head, in the normal text color: "${bio}".`)
   if (isValidUrl(portfolio) || socials.length) {
     lines.push(`- Links row (wraps), links open ${newTab ? 'in a new tab' : 'in the same tab'}:`)
     if (isValidUrl(portfolio)) lines.push(`  - "Portfolio" ${portfolio}: a 36px capsule filled with the bold text color, its text black or white (whichever reads), with a small up-right arrow.`)
@@ -123,12 +121,12 @@ function profileSpec(config: BadgeConfig): string[] {
   }
   if (user) {
     lines.push(
-      `- "GitHub activity" section for @${user}: fetch https://api.github.com/users/${user}/events/public?per_page=100 (up to 3 pages, only while the 12-week window is not covered) the first time the modal opens, cache it in sessionStorage for 30 minutes. Draw one 10px cell per day for the last 12 weeks plus the current one (Sunday-first columns, 3px gaps), tinted with the bold text color by daily count (0, 1, 2–3, 4–6, 7+). Beside it: the total, "public events, last 12 weeks", "Last active Nd ago", and a link to the GitHub profile. A pulsing placeholder while loading; on error, "Activity unavailable right now." with the profile link.`,
+      `- "GitHub activity" section for @${user}: fetch https://api.github.com/users/${user}/events/public?per_page=100 (up to 3 pages, only while the 12-week window is not covered) the first time the modal opens, cache it in sessionStorage for 30 minutes. Draw only the bricks: one per day for the last 12 weeks plus the current one, 13 Sunday-first columns spanning the modal's width (square cells, 3px gaps), tinted with the bold text color by daily count (0, 1, 2–3, 4–6, 7+). No numbers or labels: the grid is one link to the GitHub profile, named "GitHub profile of @${user}: N public events in the last 12 weeks". A pulsing placeholder while loading; on error, hide the section.`,
     )
   }
   if (projects.length) {
     lines.push('- "Projects" section, a list of cards (faint tint of the bold text color, 1px border ring), each with the name and a short description in the normal text color, the whole card a link with an up-right arrow:')
-    projects.forEach((p, i) => lines.push(`  ${i + 1}. ${p.name}${p.url ? ` — ${p.url}` : ''}${p.description ? ` — "${p.description}"` : ''}`))
+    projects.forEach((p, i) => lines.push(`  ${i + 1}. ${p.name} — ${p.url}${p.description ? ` — "${p.description}"` : ''}`))
   }
   lines.push('- Section titles: 12px, upper-case, letter-spacing .04em, normal text color.')
   return lines
