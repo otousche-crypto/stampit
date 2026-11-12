@@ -1,4 +1,4 @@
-import { handleEmbed, storeFromEnv } from '../src/embed/server'
+import { handleEmbed, storeFromEnv } from '../src/embed/server.js'
 
 /** GET /e/{id}.js (rewritten to /api/embed?id={id}) — the hosted badge. */
 export async function GET(request: Request): Promise<Response> {

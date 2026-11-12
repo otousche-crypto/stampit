@@ -1,4 +1,4 @@
-import { handleGithub } from '../src/embed/github'
+import { handleGithub } from '../src/embed/github.js'
 
 /** GET /api/github?user={login} — the contribution calendar for the profile modal. */
 export async function GET(request: Request): Promise<Response> {

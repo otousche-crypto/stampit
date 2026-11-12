@@ -1,4 +1,4 @@
-import { handlePublish, storeFromEnv } from '../src/embed/server'
+import { handlePublish, storeFromEnv } from '../src/embed/server.js'
 
 /** POST /api/publish — the owner publishes the badge from the editor. */
 export async function POST(request: Request): Promise<Response> {
