@@ -1,8 +1,8 @@
-import { useMemo, useState, type ReactNode } from 'react'
+import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { Link2 } from 'lucide-react'
 import { InputField, InputGroup } from '@/components/ui/input-group'
 import { normalizeUrl } from '@/badge/channels'
-import { PROFILE_STAGE_ATTR, generateBadge } from '@/badge/export/generateHtml'
+import { PROFILE_STAGE_ATTR, generateBadge, githubUser } from '@/badge/export/generateHtml'
 import { BadgePreview } from '@/badge/render/BadgePreview'
 import type { BadgeConfig } from '@/badge/schema'
 import { siteOrigin } from '@/config/site'
@@ -18,6 +18,63 @@ type Click = BadgeConfig['click']
 /** A group of settings, separated from the next by a hairline (as in the badge settings). */
 function Group({ children }: { children: ReactNode }) {
   return <div className="flex flex-col gap-2 border-b border-border px-2 py-3 last:border-b-0">{children}</div>
+}
+
+/** GitHub's help page on contributions that don't show up. */
+const MISSING_CONTRIBUTIONS_HELP =
+  'https://docs.github.com/en/account-and-profile/setting-up-and-managing-your-github-profile/managing-contribution-settings-on-your-profile/why-are-my-contributions-not-showing-up-on-my-profile'
+
+/** Below this many contributions a year, the graph looks empty: say why it may be. */
+const FEW_CONTRIBUTIONS = 30
+
+/** Lets the address settle before asking for its graph. Not an animation timing. */
+const LOOKUP_DELAY_MS = 400
+
+type GithubState = { user: string } & ({ status: 'loading' } | { status: 'ok'; total: number | null } | { status: 'error'; message: string })
+
+/** Under the social links: the year's total as visitors will see it, and help when it looks empty. */
+function GithubStatus({ user }: { user: string | null }) {
+  const [state, setState] = useState<GithubState | null>(null)
+
+  useEffect(() => {
+    if (!user) return
+    let cancelled = false
+    const timer = window.setTimeout(async () => {
+      setState({ user, status: 'loading' })
+      try {
+        const res = await fetch(`/api/github?user=${encodeURIComponent(user)}`)
+        const body = (await res.json()) as { total?: number | null }
+        if (cancelled) return
+        if (res.ok) setState({ user, status: 'ok', total: body.total ?? null })
+        else setState({ user, status: 'error', message: res.status === 404 ? `No GitHub user @${user}.` : "Couldn't load your GitHub activity right now." })
+      } catch {
+        if (!cancelled) setState({ user, status: 'error', message: "Couldn't load your GitHub activity right now." })
+      }
+    }, LOOKUP_DELAY_MS)
+    return () => {
+      cancelled = true
+      window.clearTimeout(timer)
+    }
+  }, [user])
+
+  if (!user) return <Hint>Add your GitHub link to show your activity.</Hint>
+  if (!state || state.user !== user || state.status === 'loading') return <Hint>Loading your GitHub activity…</Hint>
+  if (state.status === 'error') return <Hint tone="error">{state.message}</Hint>
+  const few = state.total !== null && state.total < FEW_CONTRIBUTIONS
+  return (
+    <Hint>
+      {state.total === null ? 'Your GitHub graph, as on your profile.' : `${state.total.toLocaleString('en')} contributions in the last year, as on your profile.`}
+      {few && (
+        <>
+          {' '}
+          Activity missing? Link your commit email to GitHub and show private contributions on your profile.{' '}
+          <a href={MISSING_CONTRIBUTIONS_HELP} target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 hover:text-foreground">
+            Learn more
+          </a>
+        </>
+      )}
+    </Hint>
+  )
 }
 
 /**
@@ -77,7 +134,7 @@ export function ProfilePanel() {
               </div>
             </InputGroup>
             <SocialLinks collapsible={false} />
-            {!config.socials.github.trim() && <Hint>Add your GitHub link to show your activity.</Hint>}
+            <GithubStatus user={githubUser(config)} />
           </Group>
           <Group>
             <ProjectsEditor />

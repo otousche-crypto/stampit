@@ -1,9 +1,10 @@
 /**
  * The GitHub contribution calendar, as the profile page shows it (a year,
- * private contributions included when the user shows them). GitHub has no
- * public API for it without a token, and its page can't be read from the
- * browser (CORS): this server route reads it and hands the modal one level
- * (0–4) per day.
+ * private contributions included when the user shows them), one level
+ * (0–4) per day for the modal. Read through the official GraphQL API with
+ * Stampit's own token (GITHUB_TOKEN: a fine-grained token, no permission
+ * needed); without one, or if the API fails, from the profile page itself
+ * (which the browser can't read: CORS).
  *
  * Runs in Vercel functions and the Vite dev server: relative imports only.
  */
@@ -11,7 +12,7 @@
 export type Contributions = {
   /** First day shown, a Sunday ("YYYY-MM-DD"). */
   start: string
-  /** One digit per day from `start`: GitHub's own level, 0 (none) to 4 (most). */
+  /** One character per day from `start`: GitHub's own level, 0 (none) to 4 (most); "-" before the year starts. */
   levels: string
   /** "N contributions in the last year", when the page says it. */
   total: number | null
@@ -40,15 +41,75 @@ export function parseContributions(html: string): Contributions | null {
   }
 }
 
-const json = (status: number, body: unknown, cache = 'no-store') =>
+const json = (status: number, body: unknown, cache = 'no-store', source?: string) =>
   new Response(JSON.stringify(body), {
     status,
-    headers: { 'content-type': 'application/json', 'access-control-allow-origin': '*', 'cache-control': cache },
+    headers: {
+      'content-type': 'application/json',
+      'access-control-allow-origin': '*',
+      'cache-control': cache,
+      ...(source && { 'x-stampit-source': source }),
+    },
   })
 
+const LEVELS: Record<string, string> = {
+  NONE: '0',
+  FIRST_QUARTILE: '1',
+  SECOND_QUARTILE: '2',
+  THIRD_QUARTILE: '3',
+  FOURTH_QUARTILE: '4',
+}
+
+type Calendar = {
+  totalContributions: number
+  weeks: { contributionDays: { date: string; contributionLevel: string }[] }[]
+}
+
+/** The GraphQL calendar in the modal's shape. Starts on a Sunday, like the profile graph: earlier days are "-". */
+export function fromCalendar(calendar: Calendar): Contributions | null {
+  const days = calendar.weeks.flatMap((w) => w.contributionDays)
+  if (!days.length) return null
+  const lead = new Date(`${days[0].date}T00:00:00Z`).getUTCDay()
+  const start = new Date(Date.parse(`${days[0].date}T00:00:00Z`) - lead * 86_400_000).toISOString().slice(0, 10)
+  return {
+    start,
+    levels: '-'.repeat(lead) + days.map((d) => LEVELS[d.contributionLevel] ?? '0').join(''),
+    total: calendar.totalContributions,
+  }
+}
+
+const QUERY =
+  'query($login:String!){user(login:$login){contributionsCollection{contributionCalendar{totalContributions weeks{contributionDays{date contributionLevel}}}}}}'
+
+/** `null`: no such user. Throws when the API can't answer. */
+async function viaGraphql(user: string, token: string): Promise<Contributions | null> {
+  const res = await fetch('https://api.github.com/graphql', {
+    method: 'POST',
+    headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json', 'user-agent': 'Stampit' },
+    body: JSON.stringify({ query: QUERY, variables: { login: user } }),
+  })
+  if (!res.ok) throw new Error(`GraphQL ${res.status}`)
+  const body = (await res.json()) as {
+    data?: { user: { contributionsCollection: { contributionCalendar: Calendar } } | null }
+    errors?: { type?: string }[]
+  }
+  if (body.errors?.some((e) => e.type === 'NOT_FOUND') || body.data?.user === null) return null
+  const calendar = body.data?.user?.contributionsCollection.contributionCalendar
+  if (!calendar) throw new Error('GraphQL: no calendar')
+  return fromCalendar(calendar)
+}
+
 /** GET /api/github?user={login} — read by the profile modal, from any site. */
-export async function handleGithub(user: string): Promise<Response> {
+export async function handleGithub(user: string, token?: string): Promise<Response> {
   if (!USER_RE.test(user)) return json(400, { error: 'Not a GitHub username.' })
+  if (token) {
+    try {
+      const data = await viaGraphql(user, token)
+      return data ? json(200, data, GITHUB_CACHE, 'graphql') : json(404, { error: 'No such GitHub user.' }, 'public, s-maxage=3600')
+    } catch {
+      // Rate limit, revoked token, outage: the profile page still has it.
+    }
+  }
   let res: Response
   try {
     res = await fetch(`https://github.com/users/${user}/contributions`, {
@@ -60,5 +121,5 @@ export async function handleGithub(user: string): Promise<Response> {
   if (res.status === 404) return json(404, { error: 'No such GitHub user.' }, 'public, s-maxage=3600')
   if (!res.ok) return json(502, { error: `GitHub answered ${res.status}.` })
   const data = parseContributions(await res.text())
-  return data ? json(200, data, GITHUB_CACHE) : json(502, { error: "Couldn't read the contribution graph." })
+  return data ? json(200, data, GITHUB_CACHE, 'page') : json(502, { error: "Couldn't read the contribution graph." })
 }

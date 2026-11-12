@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { parseContributions } from './github'
+import { fromCalendar, parseContributions } from './github'
 
 const day = (date: string, level: number) =>
   `<td tabindex="0" style="width: 11px" data-date="${date}" id="contribution-day-component-0-0" data-level="${level}" role="gridcell" class="ContributionCalendar-day"></td>`
@@ -14,5 +14,19 @@ describe('GitHub contributions', () => {
 
   it('gives up on a page without a calendar', () => {
     expect(parseContributions('<html>Not found</html>')).toBeNull()
+  })
+})
+
+describe('GitHub contributions through GraphQL', () => {
+  it('maps the levels and starts on a Sunday', () => {
+    // 2025-11-12 is a Wednesday: Sunday to Tuesday come before the year.
+    const data = fromCalendar({
+      totalContributions: 9,
+      weeks: [
+        { contributionDays: [{ date: '2025-11-12', contributionLevel: 'NONE' }, { date: '2025-11-13', contributionLevel: 'FOURTH_QUARTILE' }] },
+        { contributionDays: [{ date: '2025-11-16', contributionLevel: 'FIRST_QUARTILE' }] },
+      ],
+    })
+    expect(data).toEqual({ start: '2025-11-09', levels: '---041', total: 9 })
   })
 })

@@ -753,6 +753,7 @@ function profileRules(
     `.${c}__gr i[data-l="2"]{background:${tint(50)}}`,
     `.${c}__gr i[data-l="3"]{background:${tint(75)}}`,
     `.${c}__gr i[data-l="4"]{background:var(${v}tb)}`,
+    `.${c}__gr i[data-l="-"]{visibility:hidden}`,
     `@keyframes ${c}-ld{50%{opacity:.5}}`,
     // Empty while loading: a placeholder about the grid's size.
     `.${c}__gh:not([data-st=ok]) .${c}__gr{aspect-ratio:53/8;background:${tint(6)};animation:${c}-ld 1.2s ease-in-out infinite}`,

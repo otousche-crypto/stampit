@@ -12,7 +12,11 @@ export default defineConfig(({ mode }) => ({
     react(),
     tailwindcss(),
     // The embed API (/api/publish, /e/{id}.js) without Vercel.
-    embedDevServer({ root, token: loadEnv(mode, root, '').STAMPIT_PUBLISH_TOKEN }),
+    embedDevServer({
+      root,
+      token: loadEnv(mode, root, '').STAMPIT_PUBLISH_TOKEN,
+      githubToken: loadEnv(mode, root, '').GITHUB_TOKEN,
+    }),
   ],
   resolve: {
     alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) },

@@ -1,7 +1,8 @@
 /**
  * The embed and GitHub API in `npm run dev`, without Vercel: same handlers, badges kept
  * in `.stampit-dev/embeds.json`. The publish key is STAMPIT_PUBLISH_TOKEN
- * from `.env.local`, or "dev" when it is not set.
+ * from `.env.local`, or "dev" when it is not set; GITHUB_TOKEN, if there, reads
+ * the GitHub calendar through the API.
  */
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import type { IncomingMessage, ServerResponse } from 'node:http'
@@ -44,14 +45,14 @@ async function send(res: ServerResponse, response: Response): Promise<void> {
   res.end(Buffer.from(await response.arrayBuffer()))
 }
 
-export function embedDevServer({ root, token }: { root: string; token?: string }): Plugin {
+export function embedDevServer({ root, token, githubToken }: { root: string; token?: string; githubToken?: string }): Plugin {
   const store = fileStore(`${root}/.stampit-dev`)
   return {
     name: 'stampit-embed-dev',
     configureServer(server) {
       server.middlewares.use(async (req, res, next) => {
         const path = req.url?.split('?')[0] ?? ''
-        if (path === '/api/github') return send(res, await handleGithub(new URL(req.url ?? '', 'http://localhost').searchParams.get('user') ?? ''))
+        if (path === '/api/github') return send(res, await handleGithub(new URL(req.url ?? '', 'http://localhost').searchParams.get('user') ?? '', githubToken))
         if (path === '/api/publish') return send(res, await handlePublish(await toRequest(req), store, token || 'dev'))
         const match = path.match(/^\/e\/([A-Za-z0-9]+)\.js$/)
         if (match) return send(res, await handleEmbed(match[1], store))
