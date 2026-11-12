@@ -1,4 +1,4 @@
-import { CHANNELS, channelLabel } from '../channels'
+import { CHANNELS } from '../channels'
 import type { BadgeConfig, Palette } from '../schema'
 import {
   STAMP_SIZES,
@@ -14,7 +14,6 @@ import {
   stampFontSize,
   teamMembers,
   teamNames,
-  usesBubbles,
   type GenerateHtmlOptions,
 } from './generateHtml'
 import TEMPLATE from './flutter/stampit_badge.dart?raw'
@@ -75,7 +74,6 @@ function spec(config: BadgeConfig, options: GenerateHtmlOptions): string {
   const radius = layout === 'card' ? Math.round(8 + config.shape.radius * 12) : (config.shape.radius * size.height) / 2
   const inner = Math.max(0, radius - size.padLeft)
   const avatarRadius = inner >= size.avatar / 2 ? size.avatar / 2 : inner
-  const bubbles = usesBubbles(config)
   const bold = layout === 'team' ? teamNames(config) : config.text.bold.trim()
   const newTab = config.click.link.newTab
 
@@ -114,29 +112,16 @@ function spec(config: BadgeConfig, options: GenerateHtmlOptions): string {
   if (config.shape.borderWidth) lines.push(`borderWidth: ${config.shape.borderWidth},`)
   lines.push(`softShadow: ${config.shape.shadow === 'soft'},`)
   if (config.shape.showIcon && layout !== 'stamp') {
-    lines.push(`icon: ${icon(ICON_PATHS[bubbles ? 'plus' : config.shape.iconStyle])},`)
-    if (!bubbles) lines.push(`iconHover: _IconHover.${config.shape.iconStyle},`)
+    lines.push(`icon: ${icon(ICON_PATHS[config.shape.iconStyle])},`, `iconHover: _IconHover.${config.shape.iconStyle},`)
   }
   const { entrance, repeat, hover } = config.motion
   if (entrance !== 'none') lines.push(`entrance: _Effect.${entrance},`)
   if (repeat !== 'none') lines.push(`repeat: _Effect.${repeat},`)
   if (hover !== 'none') lines.push(`hover: _Hover.${hover},`)
 
-  if (bubbles) {
-    const channels = config.click.bubbles.channels.map((ch) => {
-      const name = channelLabel(ch)
-      const isMail = ch.type === 'email' || ch.url.startsWith('mailto:')
-      const blank = newTab && !isMail
-      const aria = isMail ? `Email${bold ? ` ${bold}` : ''}` : blank ? `${name}, opens in a new tab` : name
-      const ic = CHANNELS[ch.type].icon
-      return `_Link(${str(name)}, ${str(ch.url)}, ${icon({ d: ic.d, filled: ic.kind === 'fill' })}, newTab: ${blank}, semantics: ${str(aria)}),`
-    })
-    lines.push('bubbles: [', ...channels.map((c) => `  ${c}`), '],')
-    if (config.click.bubbles.labels === 'icon-label') lines.push('bubbleLabels: true,')
-  } else {
-    const { url } = config.click.link
-    lines.push(`url: ${str(url)},`, `newTab: ${newTab && !url.startsWith('mailto:')},`)
-  }
+  // Profile mode has no native modal yet: the badge links to the portfolio.
+  const { url } = config.click.link
+  lines.push(`url: ${str(url)},`, `newTab: ${newTab && !url.startsWith('mailto:')},`)
 
   const socials = activeSocials(config).map(({ network, url }) => {
     const ic = CHANNELS[network].icon

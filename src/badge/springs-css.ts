@@ -17,14 +17,14 @@ export const CSS_SPRINGS = {
     easing:
       'linear(0,.08,.24,.409,.558,.678,.77,.838,.887,.922,.947,.964,.976,.984,.989,.993,.995,.997,.998,.999,1)',
   },
-  /** 0.16 s, bounce 0 — the "+" icon, closing. */
+  /** 0.16 s, bounce 0 — closing. */
   moderate: {
     name: 'moderate',
     duration: '.16s',
     easing:
       'linear(0,.08,.238,.406,.554,.674,.767,.835,.885,.921,.946,.963,.975,.983,.989,.993,.995,.997,.998,.999,1)',
   },
-  /** 0.24 s, bounce 0.12 — bubbles opening. */
+  /** 0.24 s, bounce 0.12 — the social links and the profile modal opening. */
   slow: {
     name: 'slow',
     duration: '.24s',
@@ -62,8 +62,5 @@ export const CSS_SPRINGS = {
 
 export type CssSpringName = keyof typeof CSS_SPRINGS
 
-/** Stagger between bubbles on open, centre outwards (§8.4). */
-export const BUBBLE_STAGGER_MS = 30
-
-/** Hover delay before a bubble tooltip appears (§8.4). */
-export const TOOLTIP_DELAY = '.3s'
+/** Stagger between the social links as they slide in, left to right. */
+export const SOCIAL_STAGGER_MS = 30

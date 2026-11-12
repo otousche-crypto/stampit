@@ -1,6 +1,6 @@
-import { CHANNELS, channelLabel } from '../channels'
+import { CHANNELS, isValidUrl } from '../channels'
 import type { BadgeConfig, Palette } from '../schema'
-import { BUBBLE_STAGGER_MS, CSS_SPRINGS, TOOLTIP_DELAY } from '../springs-css'
+import { SOCIAL_STAGGER_MS, CSS_SPRINGS } from '../springs-css'
 import {
   FONT_STACKS,
   SIZES,
@@ -12,7 +12,9 @@ import {
   generateHtml,
   initialsColor,
   resolveAvatar,
-  usesBubbles,
+  githubUser,
+  profileProjects,
+  usesProfile,
   type GenerateHtmlOptions,
 } from './generateHtml'
 
@@ -98,12 +100,46 @@ const LAYOUT_SPEC: Record<BadgeConfig['layout'], string> = {
   team: 'Team. Overlapping round avatars (yours on top, then up to two teammates as initials on colored circles, each ringed with the surface color), then the normal text and the names: "Olivier, Camille & Lucas", or "… & N others" beyond three.',
 }
 
+/** Behavior lines for Profile mode: what the modal holds and how it moves. */
+function profileSpec(config: BadgeConfig): string[] {
+  const newTab = config.click.link.newTab
+  const portfolio = config.click.link.url.trim()
+  const socials = activeSocials(config)
+  const user = githubUser(config)
+  const projects = profileProjects(config)
+  const lines = [
+    '- Mode: Profile. The badge is a button; clicking it opens a modal profile card. Hovering does nothing more than the hover effect.',
+    "- Modal: a native <dialog>, 400px wide (at most the viewport minus 32px), centered, 24px padding, scrolls inside when taller than the viewport. Same background, bold/normal text colors, border ring and font as the badge, corner radius 12 + 12 × the badge's roundness (px), shadow 0 24px 64px rgba(0,0,0,.24). Backdrop rgba(0,0,0,.4). The page does not scroll behind it.",
+    '- Opening: fade in and rise from translateY(8px) scale(.97) (slow spring, @starting-style); closing: the reverse (slow exit). Reduced motion: fade only.',
+    '- Close: a 32px round "×" button in the top-right corner (a <form method="dialog"> so it works without JS), Escape, or a click on the backdrop.',
+    `- Head: a 56px avatar (initials when there is no photo), then the name "${config.text.bold.trim() || config.text.normal.trim()}" (18px, as an <h2>)${config.text.role.trim() ? ` and the role "${config.text.role.trim()}" under it in the normal text color` : ''}.`,
+  ]
+  const bio = config.click.profile.bio.trim()
+  if (bio) lines.push(`- Bio under the head, in the normal text color: "${bio}".`)
+  if (isValidUrl(portfolio) || socials.length) {
+    lines.push(`- Links row (wraps), links open ${newTab ? 'in a new tab' : 'in the same tab'}:`)
+    if (isValidUrl(portfolio)) lines.push(`  - "Portfolio" ${portfolio}: a 36px capsule filled with the bold text color, its text black or white (whichever reads), with a small up-right arrow.`)
+    for (const { network, url } of socials) lines.push(`  - ${CHANNELS[network].label} ${url}: a 36px round icon button, a faint tint of the bold text color with a 1px border ring, the logo in the icon color.`)
+  }
+  if (user) {
+    lines.push(
+      `- "GitHub activity" section for @${user}: fetch https://api.github.com/users/${user}/events/public?per_page=100 (up to 3 pages, only while the 12-week window is not covered) the first time the modal opens, cache it in sessionStorage for 30 minutes. Draw one 10px cell per day for the last 12 weeks plus the current one (Sunday-first columns, 3px gaps), tinted with the bold text color by daily count (0, 1, 2–3, 4–6, 7+). Beside it: the total, "public events, last 12 weeks", "Last active Nd ago", and a link to the GitHub profile. A pulsing placeholder while loading; on error, "Activity unavailable right now." with the profile link.`,
+    )
+  }
+  if (projects.length) {
+    lines.push('- "Projects" section, a list of cards (faint tint of the bold text color, 1px border ring), each with the name and a short description in the normal text color, the whole card a link with an up-right arrow:')
+    projects.forEach((p, i) => lines.push(`  ${i + 1}. ${p.name}${p.url ? ` — ${p.url}` : ''}${p.description ? ` — "${p.description}"` : ''}`))
+  }
+  lines.push('- Section titles: 12px, upper-case, letter-spacing .04em, normal text color.')
+  return lines
+}
+
 /** Pure: config → plain-text brief for an AI coding agent (§11.2). */
 export function generatePrompt(config: BadgeConfig, options: GeneratePromptOptions = {}): string {
   const size = SIZES[config.text.size]
   const { palettes, adaptToSite, base } = config.theme
   const radiusPx = Math.round(((config.shape.radius * size.height) / 2) * 100) / 100
-  const bubbles = usesBubbles(config)
+  const profile = usesProfile(config)
   const text = badgeText(config)
   const avatar = resolveAvatar(config, options)
   const hasAvatar = config.avatar.source !== 'none'
@@ -148,9 +184,7 @@ export function generatePrompt(config: BadgeConfig, options: GeneratePromptOptio
   )
   if (config.shape.showIcon) {
     out.push(
-      bubbles
-        ? `- Icon: a "+" (two 2px strokes, round caps), ${size.icon}px, in the icon color. It rotates 45° into "×" while the menu is open.`
-        : `- Icon: ${ICON_TEXT[config.shape.iconStyle]}, ${size.icon}px, 2px stroke, currentColor, in the icon color, aria-hidden (exact SVG in the reference).`,
+      `- Icon: ${ICON_TEXT[config.shape.iconStyle]}, ${size.icon}px, 2px stroke, currentColor, in the icon color, aria-hidden (exact SVG in the reference).`,
     )
   } else {
     out.push('- Icon: none.')
@@ -187,40 +221,23 @@ export function generatePrompt(config: BadgeConfig, options: GeneratePromptOptio
   out.push(
     `- Motion uses springs, expressed in CSS as linear() easings (values in the reference): ${springs.join('; ')}. Never hard-code other durations.`,
   )
-  if (!bubbles) {
+  if (!profile) {
     const url = config.click.link.url
     const mail = url.startsWith('mailto:')
     out.push(
       `- Mode: Link. The whole badge is one <a href="${url || '(missing)'}">${config.click.link.newTab && !mail ? ' opening in a new tab (target="_blank" rel="noopener noreferrer")' : ''}.`,
     )
-    if (config.shape.showIcon) out.push(`- Hover and keyboard focus: ${ICON_HOVER_TEXT[config.shape.iconStyle]} (fast spring).`)
-    if (config.shape.shadow === 'soft') out.push('- Hover: the shadow grows as specified (fast spring).')
   } else {
-    const { channels, labels } = config.click.bubbles
-    out.push(
-      '- Mode: Bubbles. Clicking the badge toggles a small menu of links ("bubbles"). Hovering does not open it.',
-      '- Links, in this order:',
-      ...channels.map((ch, i) => `  ${i + 1}. ${channelLabel(ch)}: ${ch.url}`),
-      `- Links open ${config.click.link.newTab ? 'in a new tab, except email links (mailto:, never target="_blank")' : 'in the same tab'}.`,
-      `- Bubbles: circles of ${size.bubble}px${labels === 'icon-label' ? ' that become capsules with icon + label (label in the bold text color)' : ''}; same background, border and shadow as the badge; corner radius scaled like the badge; inline SVG icon 18px in the icon color. Touch target at least 44 × 44px.`,
-      labels === 'icon'
-        ? `- Icon only: a tooltip with the channel name appears after ${seconds(TOOLTIP_DELAY)} of hover and at once on keyboard focus. On touch screens (hover: none), show the names under the bubbles at 11px instead.`
-        : '- Labels are always visible.',
-      '- Placement: one row centered on the badge, 12px above it, 8px between bubbles, in a gentle arc (the middle sits 8px higher than the ends).',
-      '- If there is less room above than the menu height + 16px, open below with the arc inverted.',
-      '- Keep the row at least 8px from the viewport edges. If it is wider than the viewport minus 16px, use 2 rows, the longer one nearest the badge.',
-      '- Reposition on scroll and resize (requestAnimationFrame); close if the badge leaves the viewport.',
-      `- Opening: each bubble travels from the badge center to its place, scale 0.6 → 1, opacity 0 → 1 (slow spring), staggered ${BUBBLE_STAGGER_MS}ms from the center outwards. Closing: all together, back into the badge with a fade (slow exit). Bubble hover: scale 1.08 (fast).`,
-      '- Use the native popover API (<ul popover="auto"> + popovertarget on the button) so the menu renders in the top layer: never clipped by overflow: hidden or a transform. Fall back to a class toggle + outside click + Escape where popover is unsupported. Without JS the popover opens centered and stays usable.',
-      '- Hide the menu when printing.',
-    )
+    out.push(...profileSpec(config))
   }
+  if (config.shape.showIcon) out.push(`- Hover and keyboard focus: ${ICON_HOVER_TEXT[config.shape.iconStyle]} (fast spring).`)
+  if (config.shape.shadow === 'soft') out.push('- Hover: the shadow grows as specified (fast spring).')
   const socials = activeSocials(config)
-  if (socials.length) {
+  if (socials.length && !profile) {
     out.push(
       `- Social links: ${socials.length} round icon link${socials.length > 1 ? 's' : ''} right of the badge, 6px apart, in this order:`,
       ...socials.map(({ network, url }, i) => `  ${i + 1}. ${CHANNELS[network].label}: ${url}`),
-      `  Each is a ${SIZES[config.text.size].height}px square with the badge's background, border, shadow and corner radius, the network logo in the icon color. They sit outside the layout (absolutely positioned right of the badge) and stay hidden until the badge is hovered or focused: then they slide in from 6px left and scale 0.8 → 1 with a fade (slow spring), ${BUBBLE_STAGGER_MS}ms apart, left to right, and leave together (slow exit). Always visible on touch screens (hover: none). Hovering one scales it to 1.06 (fast spring). Accessible name "{Network}${config.click.link.newTab ? ', opens in a new tab' : ''}".`,
+      `  Each is a ${SIZES[config.text.size].height}px square with the badge's background, border, shadow and corner radius, the network logo in the icon color. They sit outside the layout (absolutely positioned right of the badge) and stay hidden until the badge is hovered or focused: then they slide in from 6px left and scale 0.8 → 1 with a fade (slow spring), ${SOCIAL_STAGGER_MS}ms apart, left to right, and leave together (slow exit). Always visible on touch screens (hover: none). Hovering one scales it to 1.06 (fast spring). Accessible name "{Network}${config.click.link.newTab ? ', opens in a new tab' : ''}".`,
     )
   }
   const { entrance, repeat, hover } = config.motion
@@ -251,12 +268,11 @@ export function generatePrompt(config: BadgeConfig, options: GeneratePromptOptio
   )
 
   section('Accessibility')
-  if (bubbles) {
+  if (profile) {
     out.push(
-      `- Disclosure pattern, not role="menu": the badge is a <button> named "${text ? `${text}, show links` : 'Show links'}" with aria-expanded and aria-controls; the bubbles are a <ul> of <a>.`,
-      '- Each bubble is named "{Channel}, opens in a new tab" (email: "Email {bold text}").',
-      '- Keyboard: Tab reaches the badge; Enter/Space opens and focuses the first bubble; arrow keys move between bubbles and wrap; Home/End jump to the first/last; Enter follows the link; Escape closes and returns focus to the badge; Tab from a bubble closes the menu and continues the tab order.',
-      '- Touch: tap to open, tap a bubble to navigate, tap outside to close.',
+      `- The badge is a <button type="button"> named "${text ? `${text}, open profile` : 'Open profile'}", with aria-haspopup="dialog" and aria-controls pointing at the dialog.`,
+      '- The modal is a native <dialog> opened with showModal(): focus moves into it and stays there, Escape closes it, and focus returns to the badge. It is labelled by the name heading.',
+      '- The close button is named "Close". Links that open in a new tab say so in their name.',
     )
   } else {
     out.push(
@@ -270,17 +286,17 @@ export function generatePrompt(config: BadgeConfig, options: GeneratePromptOptio
   )
 
   section('Reference implementation')
-  out.push('Standalone HTML/CSS' + (bubbles ? '/JS' : '') + ', tested in Chrome, Safari and Firefox:', '', '```html', reference.trimEnd(), '```')
+  out.push('Standalone HTML/CSS' + (profile ? '/JS' : '') + ', tested in Chrome, Safari and Firefox:', '', '```html', reference.trimEnd(), '```')
 
   section('Acceptance criteria')
   out.push(
     `1. Rendering: the page shows the badge at ${size.height}px high with the exact colors, radius, border and shadow above, in ${adaptToSite ? 'both light and dark site themes' : 'the page'}.`,
-    `2. Hover: ${bubbles ? 'the "+" nudges and the shadow grows; the menu does not open on hover' : 'the arrow slides 2px up-right and the shadow grows'}, with no layout shift.`,
-    bubbles
-      ? '3. Open/close: a click opens the bubbles above the badge (below near the top of the screen), inside the viewport; outside click, Escape and a second click close them.'
+    '2. Hover: the arrow slides 2px up-right and the shadow grows, with no layout shift.',
+    profile
+      ? '3. Open/close: a click opens the profile modal centered over a dimmed page; the close button, Escape and a click on the backdrop close it.'
       : `3. Click: the badge opens ${config.click.link.url || 'its link'}${config.click.link.newTab ? ' in a new tab' : ''}.`,
-    bubbles
-      ? '4. Keyboard: Tab, Enter/Space, arrows, Home/End and Escape work as specified, focus returns to the badge, and the focus ring is visible.'
+    profile
+      ? '4. Keyboard: Tab reaches the badge, Enter/Space opens the modal, focus stays inside it until Escape, then returns to the badge; the focus ring is visible.'
       : '4. Keyboard: Tab reaches the badge, the focus ring is visible, Enter follows the link.',
     '5. Reduced motion: with prefers-reduced-motion enabled, nothing moves; changes are instant or fades.',
   )

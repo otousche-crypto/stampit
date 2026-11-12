@@ -11,7 +11,7 @@ describe('generatePrompt', () => {
   }
 
   it('has the six sections', () => {
-    const prompt = generatePrompt(FIXTURES['bubbles-2'])
+    const prompt = generatePrompt(FIXTURES['profile-full'])
     for (const title of ['Goal', 'Visual spec', 'Behavior', 'Accessibility', 'Reference implementation', 'Acceptance criteria']) {
       expect(prompt).toContain(`## ${title}`)
     }

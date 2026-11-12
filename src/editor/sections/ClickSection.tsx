@@ -1,32 +1,42 @@
-import { useEffect, useState } from 'react'
-import { Link2 } from 'lucide-react'
+import { useState } from 'react'
+import { Link2, UserRound } from 'lucide-react'
 import { InputField, InputGroup } from '@/components/ui/input-group'
 import { normalizeUrl } from '@/badge/channels'
 import type { BadgeConfig } from '@/badge/schema'
-import { SwitchRow } from '../controls'
+import { Hint, SelectRow, SwitchRow, WELL_FIELD, type SelectRowOption } from '../controls'
 import { SocialLinks } from '../SocialLinks'
+import { ProjectsEditor } from '../ProjectsEditor'
 import { useEditor } from '../EditorProvider'
 
 type Click = BadgeConfig['click']
 
+const MODES: SelectRowOption<Click['mode']>[] = [
+  { value: 'link', label: 'Link', icon: Link2 },
+  { value: 'profile', label: 'Profile', icon: UserRound },
+]
+
 /**
- * The badge is always a link; more links go in the social bubbles. (The
- * Bubbles menu mode stays in the generator but is no longer offered.)
+ * Link: the badge goes to one address, the social links slide out beside it.
+ * Profile: the badge opens a modal with the bio, portfolio, social links,
+ * GitHub activity and projects.
  */
 export function ClickSection() {
   const { config, update, errors, errorsShown } = useEditor()
   const click = config.click
+  const profile = click.mode === 'profile'
   const [touched, setTouched] = useState(false)
   const setLink = (patch: Partial<Click['link']>) =>
     update((c) => ({ ...c, click: { ...c.click, link: { ...c.click.link, ...patch } } }))
-
-  // Badges saved in Bubbles mode come back as a link.
-  useEffect(() => {
-    if (click.mode !== 'link') update((c) => ({ ...c, click: { ...c.click, mode: 'link' } }))
-  }, [click.mode, update])
+  const setBio = (bio: string) => update((c) => ({ ...c, click: { ...c.click, profile: { ...c.click.profile, bio } } }))
 
   return (
     <div className="flex flex-col gap-2">
+      <SelectRow
+        label="On click"
+        options={MODES}
+        value={click.mode}
+        onChange={(mode) => update((c) => ({ ...c, click: { ...c.click, mode } }))}
+      />
       <InputGroup size="compact" className="w-full">
         <div
           data-field="linkUrl"
@@ -38,7 +48,7 @@ export function ClickSection() {
         >
           <InputField
             index={0}
-            label="URL"
+            label={profile ? 'Portfolio' : 'URL'}
             type="url"
             inputMode="url"
             autoComplete="url"
@@ -50,7 +60,22 @@ export function ClickSection() {
           />
         </div>
       </InputGroup>
+      {profile && (
+        <InputGroup size="compact" className="w-full">
+          <InputField
+            index={0}
+            label="Bio"
+            className={WELL_FIELD}
+            placeholder="Designer shipping small, useful tools."
+            maxLength={160}
+            value={click.profile.bio}
+            onChange={setBio}
+          />
+        </InputGroup>
+      )}
       <SocialLinks />
+      {profile && !config.socials.github.trim() && <Hint>Add your GitHub link to show your activity.</Hint>}
+      {profile && <ProjectsEditor />}
       <SwitchRow label="Open in new tab" checked={click.link.newTab} onToggle={() => setLink({ newTab: !click.link.newTab })} />
     </div>
   )

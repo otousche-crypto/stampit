@@ -21,9 +21,9 @@ describe('url storage', () => {
   it('keeps the hash short', async () => {
     const defaults = await encodeConfig(createDefaultConfig({ id: 'abc12345' }))
     expect(defaults.length).toBeLessThan(80)
-    // Typical badges land in the 200–500 target; 8 full links run a bit over.
-    expect((await encodeConfig(FIXTURES['bubbles-2'])).length).toBeLessThan(500)
-    expect((await encodeConfig(FIXTURES['bubbles-8'])).length).toBeLessThan(700)
+    // Typical badges land in the 200–500 target; a full profile runs a bit over.
+    expect((await encodeConfig(FIXTURES['link-socials'])).length).toBeLessThan(500)
+    expect((await encodeConfig(FIXTURES['profile-full'])).length).toBeLessThan(800)
   })
 
   it('strips defaults but keeps schemaVersion and id', () => {

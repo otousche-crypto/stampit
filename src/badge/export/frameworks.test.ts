@@ -6,7 +6,7 @@ import { generateBadge } from './generateHtml'
 import { CODE_LANGUAGES, toFramework, toJsx } from './frameworks'
 import { FIXTURES } from './fixtures'
 
-const SAMPLES = ['link-socials', 'bubbles-2', 'layout-stamp', 'layout-card'] as const
+const SAMPLES = ['link-socials', 'profile-full', 'layout-stamp', 'layout-card'] as const
 
 /** Compiles the React output and renders it, as a project would. */
 function renderReact(source: string): string {

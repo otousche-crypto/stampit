@@ -1,7 +1,7 @@
 import { bestOn, contrastRatio, parseHex, relativeLuminance } from '../contrast'
 import { SOCIALS, type BadgeConfig, type BadgeSize, type Layout, type Palette, type SocialNetwork } from '../schema'
-import { CHANNELS, channelLabel, isValidUrl } from '../channels'
-import { BUBBLE_STAGGER_MS, CSS_SPRINGS, TOOLTIP_DELAY, type CssSpringName } from '../springs-css'
+import { CHANNELS, domainMatches, isValidUrl } from '../channels'
+import { SOCIAL_STAGGER_MS, CSS_SPRINGS, type CssSpringName } from '../springs-css'
 import { badgeRuntime } from './runtime'
 
 /** §7.1 — badge metrics per size, in px. */
@@ -78,9 +78,9 @@ const NEEDS_AVATAR: ReadonlySet<Layout> = new Set(['stamp', 'card', 'team'])
 /** Team members' initials sit on these colors, in order. */
 export const TEAM_COLORS = ['#5B8DEF', '#3BB273', '#E15A97', '#F2A541', '#8E6CEF']
 
-/** The bubble menu only exists on the classic pill. */
-export function usesBubbles(config: BadgeConfig): boolean {
-  return config.click.mode === 'bubbles' && config.layout === 'pill'
+/** Profile mode: the badge is a button that opens the profile modal. */
+export function usesProfile(config: BadgeConfig): boolean {
+  return config.click.mode === 'profile'
 }
 
 // ---------------------------------------------------------------------------
@@ -189,7 +189,8 @@ export const LINK_ICONS: Record<BadgeConfig['shape']['iconStyle'], { body: strin
   link: { body: LINK_ICON, hover: 'rotate(-15deg)' },
 }
 
-export const PLUS_ICON = '<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>'
+/** Lucide "x", the modal's close button. */
+export const CLOSE_ICON = '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>'
 
 function strokeSvg(cls: string, size: number, body: string): string {
   return `<svg class="${cls}" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${body}</svg>`
@@ -208,14 +209,17 @@ export function sheenColor(p: Palette): string {
   return bg.a < 0.5 || relativeLuminance(bg) < 0.4 ? 'rgba(255,255,255,.55)' : 'rgba(0,0,0,.12)'
 }
 
-function paletteVars(p: Palette, prefix: string): string {
-  return [
+function paletteVars(p: Palette, prefix: string, profile = false): string {
+  const vars = [
     `${prefix}bg:${css(p.background)}`,
     `${prefix}bd:${css(p.border)}`,
     `${prefix}tn:${css(p.textNormal)}`,
     `${prefix}tb:${css(p.textBold)}`,
     `${prefix}ic:${css(p.icon)}`,
-  ].join(';')
+  ]
+  // Text on a bold-colored surface (the modal's Portfolio button).
+  if (profile) vars.push(`${prefix}on:${css(bestOn(p.textBold.slice(0, 7)))}`)
+  return vars.join(';')
 }
 
 type CssContext = {
@@ -260,7 +264,7 @@ function buildCss(
   const border = config.shape.borderWidth
   const soft = config.shape.shadow === 'soft'
   const showIcon = config.shape.showIcon
-  const bubbles = usesBubbles(config)
+  const profile = usesProfile(config)
   const layout = config.layout
   const anyBlur = adaptToSite ? palettes.light.blur > 0 || palettes.dark.blur > 0 : lightOrBase.blur > 0
 
@@ -272,7 +276,7 @@ function buildCss(
   rules.push(
     `.${c},.${c} *,.${c} *::before,.${c} *::after{box-sizing:border-box;margin:0;padding:0;border:0;font:inherit;line-height:inherit;letter-spacing:normal;text-transform:none;text-decoration:none;list-style:none;background:none;color:inherit;max-width:none;min-width:0;float:none}`,
   )
-  const vars = [paletteVars(lightOrBase, v)]
+  const vars = [paletteVars(lightOrBase, v, profile)]
   if (anyBlur) vars.push(`${v}blur:${lightOrBase.blur}px`)
   const shine = config.motion.entrance === 'shine' || config.motion.repeat === 'shine'
   if (shine) vars.push(`${v}sh:${sheenColor(lightOrBase)}`)
@@ -306,7 +310,7 @@ function buildCss(
   if (soft) rules.push(`.${c}__pill:hover{box-shadow:${shadow(SOFT_SHADOW_HOVER)}}`)
   rules.push(...motionRules(ctx))
   rules.push(`.${c}__pill:focus-visible{outline:2px solid var(${v}tb);outline-offset:2px}`)
-  if (bubbles) rules.push(`.${c}__pill{-webkit-appearance:none;appearance:none;text-align:left}`)
+  if (profile) rules.push(`.${c}__pill,.${c}__lk{-webkit-appearance:none;appearance:none;text-align:left}`)
 
   if (hasAvatar) {
     // Concentric with the pill corner; a full capsule gives a round avatar.
@@ -339,33 +343,29 @@ function buildCss(
   rules.push(`.${c}__n{color:var(${v}tn)}`)
   rules.push(`.${c}__b{color:var(${v}tb);font-weight:${config.text.boldWeight}}`)
 
-  if (showIcon && !bubbles) {
-    // Link: the icon nudges on hover and focus (arrow: 2px up-right).
+  if (showIcon) {
+    // The icon nudges on hover and focus (arrow: 2px up-right).
     rules.push(`.${c}__ic{flex:none;display:block;color:var(${v}ic);transition:${transition(ctx, 'transform', 'fast')}}`)
     rules.push(
       `.${c}__pill:hover .${c}__ic,.${c}__pill:focus-visible .${c}__ic{transform:${LINK_ICONS[config.shape.iconStyle].hover}}`,
     )
   }
-  if (showIcon && bubbles) {
-    // Bubbles: the "+" nudges on hover and turns into "×" when open.
-    rules.push(`.${c}__ic{flex:none;display:block;color:var(${v}ic);transition:${transition(ctx, 'transform', 'moderate')}}`)
-    rules.push(`.${c}__pill:hover .${c}__ic{transform:rotate(15deg)}`)
-    rules.push(`.${c}__pill[aria-expanded=true] .${c}__ic{transform:rotate(45deg)}`)
-  }
-  if (bubbles) rules.push(...bubbleRules(ctx, { radius: config.shape.radius, ring, soft, anyBlur }))
-  if (activeSocials(config).length) rules.push(...socialRules(ctx, { radius, ring, soft, anyBlur }))
+  // Profile mode: the social links move into the modal.
+  if (profile) rules.push(...profileRules(ctx, { avatar, ring, anyBlur }))
+  else if (activeSocials(config).length) rules.push(...socialRules(ctx, { radius, ring, soft, anyBlur }))
   rules.push(...layoutRules(ctx, { padLeft }))
 
   if (adaptToSite) {
     const dark = palettes.dark
-    const darkVars = [paletteVars(dark, v)]
+    const darkVars = [paletteVars(dark, v, profile)]
     if (anyBlur) darkVars.push(`${v}blur:${dark.blur}px`)
     if (shine && sheenColor(dark) !== sheenColor(palettes.light)) darkVars.push(`${v}sh:${sheenColor(dark)}`)
     let darkRules = `.${c}{${darkVars.join(';')}}`
-    if (hasAvatar && avatar.kind === 'initials') {
+    // The modal shows initials even when the badge has no avatar.
+    if (avatar.kind === 'initials' || (profile && avatar.kind === 'none')) {
       const lightInitials = initialsColor(config, palettes.light)
       const darkInitials = initialsColor(config, dark)
-      if (lightInitials !== darkInitials) darkRules += `.${c}__av{color:${css(darkInitials)}}`
+      if (lightInitials !== darkInitials) darkRules += `.${c}__av${profile ? `,.${c}__mav` : ''}{color:${css(darkInitials)}}`
     }
     if (previewScheme === 'dark') rules.push(darkRules)
     else if (previewScheme !== 'light') rules.push(`@media (prefers-color-scheme:dark){${darkRules}}`)
@@ -378,17 +378,10 @@ function buildCss(
   }
   if (layout === 'stamp') reduced.push(`.${c} .${c}__ring{animation:none}`)
 
-  if (!bubbles) {
-    reduced.push(`.${c} .${c}__pill:hover .${c}__ic,.${c} .${c}__pill:focus-visible .${c}__ic{transform:none}`)
-  } else {
-    reduced.push(
-      `.${c} .${c}__pill[aria-expanded=false]:hover .${c}__ic{transform:none}`,
-      `.${c}[data-js] .${c}__menu li,.${c}[data-js] .${c}__menu[data-open] li{transform:none;transition-property:opacity;transition-delay:0s}`,
-      `.${c} .${c}__bub,.${c} .${c}__bub:hover{transform:none;transition:none}`,
-    )
-  }
+  reduced.push(`.${c} .${c}__pill:hover .${c}__ic,.${c} .${c}__pill:focus-visible .${c}__ic{transform:none}`)
+  // The modal fades in place.
+  if (profile) reduced.push(`.${c} .${c}__dlg,.${c} .${c}__dlg[open]{transform:none}`)
   rules.push(`@media (prefers-reduced-motion:reduce){${reduced.join('')}}`)
-  if (bubbles) rules.push(`@media print{.${c}__menu{display:none}}`)
 
   // Custom properties for the springs actually used, declared once.
   if (ctx.springs.size > 0) {
@@ -632,84 +625,139 @@ function socialsHtml(c: string, config: BadgeConfig): string {
     if (newTab) attrs.push('target="_blank"', 'rel="noopener noreferrer"')
     attrs.push(`aria-label="${escapeHtml(newTab ? `${name}, opens in a new tab` : name)}"`)
     // --d staggers the reveal, left to right.
-    return `\n    <a ${attrs.join(' ')} style="--d:${i * BUBBLE_STAGGER_MS}ms">${channelIconSvg(network)}</a>`
+    return `\n    <a ${attrs.join(' ')} style="--d:${i * SOCIAL_STAGGER_MS}ms">${channelIconSvg(network)}</a>`
   })
   return links.length ? `\n  <span class="${c}__sos">${links.join('')}\n  </span>` : ''
 }
 
-/** §8 — the bubble menu. Only emitted in Bubbles mode. */
-function bubbleRules(
+/** GitHub username from the GitHub social link, when it is a profile address. */
+export function githubUser(config: BadgeConfig): string | null {
+  const url = config.socials.github.trim()
+  if (!isValidUrl(url) || !domainMatches(url, 'github')) return null
+  const first = new URL(url).pathname.split('/').filter(Boolean)[0] ?? ''
+  return /^[A-Za-z0-9][A-Za-z0-9-]{0,38}$/.test(first) ? first : null
+}
+
+/** Projects with a name, in order; the link only when the address is valid. */
+export function profileProjects(config: BadgeConfig): { name: string; url: string | null; description: string }[] {
+  return config.click.profile.projects
+    .map((p) => ({ name: p.name.trim(), url: isValidUrl(p.url.trim()) ? p.url.trim() : null, description: p.description.trim() }))
+    .filter((p) => p.name)
+}
+
+/** The modal always shows a face: initials when the badge itself has no avatar. */
+function modalAvatar(config: BadgeConfig, avatar: ResolvedAvatar): ResolvedAvatar {
+  return avatar.kind === 'none' ? { kind: 'initials', initials: deriveInitials(config) } : avatar
+}
+
+/**
+ * The profile modal: a native <dialog> on the badge's own palette, corner
+ * and font. Surfaces inside it are tints of the bold text color, so they
+ * read on any background.
+ */
+function profileRules(
   ctx: CssContext,
-  { radius, ring, soft, anyBlur }: { radius: number; ring: string; soft: boolean; anyBlur: boolean },
+  { avatar, ring, anyBlur }: { avatar: ResolvedAvatar; ring: string; anyBlur: boolean },
 ): string[] {
   const { c, v, config } = ctx
-  const size = SIZES[config.text.size]
-  const b = size.bubble
-  const withLabels = config.click.bubbles.labels === 'icon-label'
-  const bubbleRadius = Math.round(((radius * b) / 2) * 100) / 100
-  const shadow = [ring, soft ? SOFT_SHADOW : ''].filter(Boolean).join(',') || 'none'
-  const hit = Math.max(0, (44 - b) / 2)
-  const rules: string[] = []
+  const round = config.shape.radius >= 0.5
+  const r = Math.round(12 + config.shape.radius * 12)
+  const inner = Math.max(6, r - 10)
+  const tint = (pct: number) => `color-mix(in srgb,var(${v}tb) ${pct}%,transparent)`
+  const shadow = [ring, '0 24px 64px rgba(0,0,0,.24)'].filter(Boolean).join(',')
+  const hidden = 'opacity:0;transform:translateY(8px) scale(.97)'
+  const discrete = `display ${CSS_SPRINGS.slowExit.duration} allow-discrete,overlay ${CSS_SPRINGS.slowExit.duration} allow-discrete`
+  const face = modalAvatar(config, avatar)
+  const { palettes, adaptToSite, base } = config.theme
 
-  // Closed by default; the popover (or the fallback class) shows it. Without
-  // JS the UA centres it on screen as a plain row.
-  rules.push(
-    `.${c}__menu{display:none;position:fixed;inset:0;width:fit-content;height:fit-content;max-width:calc(100vw - 16px);margin:auto;padding:8px;overflow:visible;background:none;border:0;color:inherit;flex-wrap:wrap;justify-content:center;gap:8px;transition:display ${CSS_SPRINGS.slowExit.duration} allow-discrete,overlay ${CSS_SPRINGS.slowExit.duration} allow-discrete}`,
-  )
-  rules.push(`.${c}__menu:popover-open{display:flex}`)
-  rules.push(`.${c}__menu.is-open{display:flex}`)
-  rules.push(`.${c}__menu li{position:relative;display:flex;flex-direction:column;align-items:center}`)
-
-  // With JS: a viewport-sized, click-through layer; each bubble placed by the script.
-  rules.push(
-    `.${c}[data-js] .${c}__menu{width:auto;height:auto;max-width:none;margin:0;padding:0;pointer-events:none}`,
-  )
-  rules.push(
-    `.${c}[data-js] .${c}__menu li{position:absolute;pointer-events:auto;opacity:0;transform:translate(var(--dx,0),var(--dy,0)) scale(.6);transition:${transition(ctx, 'transform', 'slowExit')},${transition(ctx, 'opacity', 'slowExit')}}`,
-  )
-  rules.push(
-    `.${c}[data-js] .${c}__menu[data-open] li{opacity:1;transform:none;transition:${transition(ctx, 'transform', 'slow', 'var(--d,0s)')},${transition(ctx, 'opacity', 'slow', 'var(--d,0s)')}}`,
-  )
-
-  const bub = [
-    'position:relative',
-    'display:flex',
-    'align-items:center',
-    'justify-content:center',
-    `gap:${size.gap - 2}px`,
-    `min-width:${b}px`,
-    `height:${b}px`,
-    withLabels ? `padding:0 ${size.padRight + 2}px 0 ${size.padRight}px` : 'padding:0',
-    `border-radius:${bubbleRadius}px`,
+  const dlg = [
+    'position:fixed',
+    'inset:0',
+    'margin:auto',
+    'width:min(400px,calc(100vw - 32px))',
+    'height:fit-content',
+    'max-height:calc(100dvh - 32px)',
+    'overflow:auto',
+    'overscroll-behavior:contain',
+    'padding:24px',
+    `border-radius:${r}px`,
     `background:var(${v}bg)`,
     `box-shadow:${shadow}`,
-    `color:var(${v}ic)`,
-    'white-space:nowrap',
+    `color:var(${v}tb)`,
+    'font-size:14px',
+    'line-height:1.45',
+    'white-space:normal',
+    'text-align:left',
     'outline:none',
-    '-webkit-tap-highlight-color:transparent',
-    `transition:${transition(ctx, 'transform', 'fast')}`,
+    hidden,
+    `transition:${transition(ctx, 'opacity', 'slowExit')},${transition(ctx, 'transform', 'slowExit')},${discrete}`,
   ]
-  if (anyBlur) bub.push(`-webkit-backdrop-filter:blur(var(${v}blur))`, `backdrop-filter:blur(var(${v}blur))`)
-  rules.push(`.${c}__bub{${bub.join(';')}}`)
-  if (hit > 0) rules.push(`.${c}__bub::before{content:"";position:absolute;inset:-${hit}px}`)
-  rules.push(`.${c}__bub:hover{transform:scale(1.08)}`)
-  rules.push(`.${c}__bub:focus-visible{outline:2px solid var(${v}tb);outline-offset:2px}`)
-  rules.push(`.${c}__bub svg{display:block;flex:none;width:18px;height:18px}`)
+  if (anyBlur) dlg.push('-webkit-backdrop-filter:blur(24px)', 'backdrop-filter:blur(24px)')
 
-  if (withLabels) {
-    rules.push(`.${c}__lb{color:var(${v}tb);font-size:${size.text - 1}px}`)
+  const rules = [
+    // The page behind stays put while the modal is open.
+    `:root:has(.${c}__dlg[open]){overflow:hidden}`,
+    `.${c}__dlg{${dlg.join(';')}}`,
+    `.${c}__dlg[open]{opacity:1;transform:none;transition:${transition(ctx, 'opacity', 'slow')},${transition(ctx, 'transform', 'slow')},${discrete}}`,
+    `@starting-style{.${c}__dlg[open]{${hidden}}}`,
+    `.${c}__dlg::backdrop{background:rgba(0,0,0,0);transition:background-color ${CSS_SPRINGS.slowExit.duration},${discrete}}`,
+    `.${c}__dlg[open]::backdrop{background:rgba(0,0,0,.4)}`,
+    `@starting-style{.${c}__dlg[open]::backdrop{background:rgba(0,0,0,0)}}`,
+    `.${c}__dlg a,.${c}__x{cursor:pointer;outline:none;-webkit-tap-highlight-color:transparent}`,
+    `.${c}__dlg a:focus-visible,.${c}__x:focus-visible{outline:2px solid var(${v}tb);outline-offset:2px}`,
+    // Close button, top right.
+    `.${c}__x{position:absolute;top:12px;right:12px;display:grid;place-items:center;width:32px;height:32px;border-radius:50%;color:var(${v}ic);transition:${transition(ctx, 'background-color', 'fast')}}`,
+    `.${c}__x:hover{background:${tint(8)}}`,
+    // Head: avatar, name, role.
+    `.${c}__mh{display:flex;align-items:center;gap:14px;padding-right:32px}`,
+    `.${c}__mav{flex:none;display:grid;place-items:center;width:56px;height:56px;border-radius:${round ? '50%' : `${inner}px`};overflow:hidden;background:${css(config.avatar.background)}}`,
+    `.${c}__mn{display:block;font-size:18px;font-weight:${Math.max(500, config.text.boldWeight)};line-height:1.25}`,
+    `.${c}__mr{display:block;margin-top:2px;color:var(${v}tn)}`,
+    `.${c}__mb{margin-top:16px;color:var(${v}tn)}`,
+    // Links: Portfolio first, then the networks.
+    `.${c}__ml{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:18px}`,
+    `.${c}__mp{display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 14px;border-radius:${round ? '18px' : `${inner}px`};background:var(${v}tb);color:var(${v}on);font-weight:500}`,
+    `.${c}__ms{display:grid;place-items:center;width:36px;height:36px;border-radius:${round ? '50%' : `${inner}px`};background:${tint(6)};box-shadow:inset 0 0 0 1px var(${v}bd);color:var(${v}ic);transition:${transition(ctx, 'transform', 'fast')}}`,
+    `.${c}__ms:hover{transform:scale(1.06)}`,
+    `.${c}__ms svg{display:block;width:16px;height:16px}`,
+    `.${c}__mi{flex:none;display:block;color:var(${v}ic);transition:${transition(ctx, 'transform', 'fast')}}`,
+    `.${c}__mp .${c}__mi{color:inherit}`,
+    `.${c}__dlg a:hover>.${c}__mi,.${c}__dlg a:focus-visible>.${c}__mi{transform:translate(2px,-2px)}`,
+    // Sections.
+    `.${c}__sec{margin-top:22px}`,
+    `.${c}__mt{margin-bottom:10px;color:var(${v}tn);font-size:12px;font-weight:500;letter-spacing:.04em;text-transform:uppercase}`,
+    // GitHub: a 13-week grid, one cell per day, and the totals beside it.
+    `.${c}__gb{display:flex;flex-wrap:wrap;align-items:flex-end;gap:12px 20px}`,
+    `.${c}__gr{display:grid;grid-template-rows:repeat(7,10px);grid-auto-flow:column;grid-auto-columns:10px;gap:3px;min-width:166px;min-height:88px}`,
+    `.${c}__gr i{display:block;border-radius:2px;background:${tint(8)}}`,
+    `.${c}__gr i[data-l="1"]{background:${tint(28)}}`,
+    `.${c}__gr i[data-l="2"]{background:${tint(50)}}`,
+    `.${c}__gr i[data-l="3"]{background:${tint(75)}}`,
+    `.${c}__gr i[data-l="4"]{background:var(${v}tb)}`,
+    `@keyframes ${c}-ld{50%{opacity:.5}}`,
+    `.${c}__gh:not([data-st=ok]) .${c}__gr{border-radius:4px;background:${tint(6)};animation:${c}-ld 1.2s ease-in-out infinite}`,
+    `.${c}__gx{display:flex;flex-direction:column;gap:2px}`,
+    `.${c}__gn{font-size:24px;font-weight:600;line-height:1.1;font-variant-numeric:tabular-nums}`,
+    `.${c}__gl,.${c}__ga{color:var(${v}tn);font-size:12px}`,
+    `.${c}__gu{margin-top:6px;font-size:13px;font-weight:500}`,
+    `.${c}__gu:hover,.${c}__ge a:hover{text-decoration:underline}`,
+    `.${c}__ge{display:none;color:var(${v}tn)}`,
+    `.${c}__ge a{color:var(${v}tb)}`,
+    `.${c}__gh[data-st=error] .${c}__gb{display:none}`,
+    `.${c}__gh[data-st=error] .${c}__ge{display:block}`,
+    // Projects.
+    `.${c}__mj{display:flex;flex-direction:column;gap:8px}`,
+    `.${c}__mc{position:relative;display:flex;flex-direction:column;gap:2px;padding:12px 40px 12px 14px;border-radius:${inner}px;background:${tint(5)};box-shadow:inset 0 0 0 1px var(${v}bd);transition:${transition(ctx, 'background-color', 'fast')}}`,
+    `a.${c}__mc:hover{background:${tint(9)}}`,
+    `.${c}__mc .${c}__mi{position:absolute;top:14px;right:14px}`,
+    `.${c}__mcn{font-weight:500}`,
+    `.${c}__mcd{color:var(${v}tn);font-size:13px}`,
+    `@media (prefers-reduced-motion:reduce){.${c} .${c}__ms:hover,.${c} .${c}__dlg a:hover>.${c}__mi{transform:none}.${c} .${c}__gr{animation:none}}`,
+  ]
+  if (face.kind === 'initials') {
+    rules.push(`.${c}__mav{color:${css(initialsColor(config, adaptToSite ? palettes.light : palettes[base]))};font-size:21px;font-weight:600;line-height:1}`)
   } else {
-    // Tooltip: after a hover delay, at once on keyboard focus.
-    rules.push(
-      `.${c}__tip{position:absolute;left:50%;bottom:calc(100% + 6px);transform:translateX(-50%);padding:4px 8px;border-radius:6px;background:rgba(0,0,0,.85);color:#fff;font-size:12px;line-height:16px;white-space:nowrap;pointer-events:none;opacity:0;transition:${transition(ctx, 'opacity', 'fast')}}`,
-    )
-    rules.push(`.${c}__menu[data-side=bottom] .${c}__tip{bottom:auto;top:calc(100% + 6px)}`)
-    rules.push(`.${c}__bub:hover+.${c}__tip{opacity:1;transition-delay:${TOOLTIP_DELAY}}`)
-    rules.push(`.${c}__bub:focus-visible+.${c}__tip{opacity:1;transition-delay:0s}`)
-    // Touch screens: no hover, so the names sit under the bubbles.
-    rules.push(
-      `@media (hover:none){.${c}__tip,.${c}__menu[data-side=bottom] .${c}__tip{position:static;transform:none;margin-top:4px;padding:0;background:none;color:var(${v}tb);font-size:11px;line-height:14px;opacity:1}}`,
-    )
+    rules.push(`.${c}__mav img{display:block;width:100%;height:100%;object-fit:cover}`)
   }
   return rules
 }
@@ -725,26 +773,62 @@ function channelIconSvg(type: keyof typeof CHANNELS): string {
     : `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="${icon.d}"/></svg>`
 }
 
-function bubblesHtml(c: string, config: BadgeConfig): string {
-  const { channels, labels } = config.click.bubbles
+/** The profile modal's markup. Closed until the badge is clicked. */
+function profileHtml(c: string, config: BadgeConfig, avatar: ResolvedAvatar): string {
   const newTab = config.click.link.newTab
-  const bold = config.text.bold.trim()
-  const items = channels.map((ch) => {
-    const name = channelLabel(ch)
-    const isMail = ch.type === 'email' || ch.url.startsWith('mailto:')
-    const blank = newTab && !isMail
-    const aria = isMail ? `Email${bold ? ` ${bold}` : ''}` : blank ? `${name}, opens in a new tab` : name
-    const attrs = [`class="${c}__bub"`, `href="${escapeHtml(ch.url || '#')}"`]
+  const name = config.text.bold.trim() || config.text.normal.trim()
+  const role = config.text.role.trim()
+  const bio = config.click.profile.bio.trim()
+  const portfolio = config.click.link.url.trim()
+  const arrow = strokeSvg(`${c}__mi`, 14, ARROW_ICON)
+  const link = (cls: string, url: string, name: string, inside: string) => {
+    const blank = newTab && !url.startsWith('mailto:')
+    const attrs = [cls ? `class="${c}__${cls}" ` : '', `href="${escapeHtml(url)}"`]
     if (blank) attrs.push('target="_blank"', 'rel="noopener noreferrer"')
-    attrs.push(`aria-label="${escapeHtml(aria)}"`)
-    const inside =
-      labels === 'icon-label'
-        ? `${channelIconSvg(ch.type)}<span class="${c}__lb">${escapeHtml(name)}</span>`
-        : channelIconSvg(ch.type)
-    const tip = labels === 'icon' ? `<span class="${c}__tip" aria-hidden="true">${escapeHtml(name)}</span>` : ''
-    return `    <li><a ${attrs.join(' ')}>${inside}</a>${tip}</li>`
-  })
-  return `  <ul id="${c}-menu" popover="auto" class="${c}__menu">\n${items.join('\n')}\n  </ul>`
+    if (name) attrs.push(`aria-label="${escapeHtml(blank ? `${name}, opens in a new tab` : name)}"`)
+    return `<a ${attrs[0]}${attrs.slice(1).join(' ')}>${inside}</a>`
+  }
+
+  const face = modalAvatar(config, avatar)
+  const faceHtml =
+    face.kind === 'image'
+      ? `<span class="${c}__mav" aria-hidden="true"><img src="${escapeHtml(face.src)}" alt="" width="56" height="56" decoding="async"></span>`
+      : face.kind === 'initials'
+        ? `<span class="${c}__mav" aria-hidden="true">${escapeHtml(face.initials)}</span>`
+        : ''
+  const lines: string[] = [
+    `<form method="dialog"><button class="${c}__x" aria-label="Close">${strokeSvg(`${c}__xi`, 16, CLOSE_ICON)}</button></form>`,
+    `<div class="${c}__mh">${faceHtml}<div><h2 id="${c}-dlg-t" class="${c}__mn">${escapeHtml(name)}</h2>${role ? `<p class="${c}__mr">${escapeHtml(role)}</p>` : ''}</div></div>`,
+  ]
+  if (bio) lines.push(`<p class="${c}__mb">${escapeHtml(bio)}</p>`)
+
+  const links: string[] = []
+  if (isValidUrl(portfolio)) links.push(link('mp', portfolio, newTab ? 'Portfolio' : '', `Portfolio${arrow}`))
+  for (const { network, url } of activeSocials(config)) links.push(link('ms', url, CHANNELS[network].label, channelIconSvg(network)))
+  if (links.length) lines.push(`<div class="${c}__ml">${links.join('')}</div>`)
+
+  const user = githubUser(config)
+  if (user) {
+    const profile = `https://github.com/${user}`
+    lines.push(
+      `<section class="${c}__sec ${c}__gh" data-user="${user}" aria-labelledby="${c}-gh-t">`,
+      `<h3 id="${c}-gh-t" class="${c}__mt">GitHub activity</h3>`,
+      `<div class="${c}__gb"><div class="${c}__gr" aria-hidden="true"></div><p class="${c}__gx"><span class="${c}__gn">–</span><span class="${c}__gl">public events, last 12 weeks</span><span class="${c}__ga"></span>${link('gu', profile, '', `@${user}`)}</p></div>`,
+      `<p class="${c}__ge">Activity unavailable right now. ${link('', profile, '', `See @${user} on GitHub`)}</p>`,
+      '</section>',
+    )
+  }
+
+  const projects = profileProjects(config)
+  if (projects.length) {
+    const items = projects.map((p) => {
+      const inside = `<span class="${c}__mcn">${escapeHtml(p.name)}</span>${p.description ? `<span class="${c}__mcd">${escapeHtml(p.description)}</span>` : ''}`
+      return `<li>${p.url ? link('mc', p.url, '', inside + arrow) : `<div class="${c}__mc">${inside}</div>`}</li>`
+    })
+    lines.push(`<section class="${c}__sec" aria-labelledby="${c}-pj-t"><h3 id="${c}-pj-t" class="${c}__mt">Projects</h3><ul class="${c}__mj">${items.join('')}</ul></section>`)
+  }
+
+  return `  <dialog id="${c}-dlg" class="${c}__dlg" aria-labelledby="${c}-dlg-t">\n    ${lines.join('\n    ')}\n  </dialog>`
 }
 
 function avatarHtml(c: string, avatar: ResolvedAvatar, size: number): string {
@@ -755,11 +839,9 @@ function avatarHtml(c: string, avatar: ResolvedAvatar, size: number): string {
   return `<span class="${c}__av" aria-hidden="true"><img src="${escapeHtml(avatar.src)}" alt="" width="${size}" height="${size}" decoding="async"></span>`
 }
 
-function iconHtml(c: string, config: BadgeConfig, bubbles: boolean): string {
+function iconHtml(c: string, config: BadgeConfig): string {
   const size = SIZES[config.text.size]
-  return config.shape.showIcon
-    ? strokeSvg(`${c}__ic`, size.icon, bubbles ? PLUS_ICON : LINK_ICONS[config.shape.iconStyle].body)
-    : ''
+  return config.shape.showIcon ? strokeSvg(`${c}__ic`, size.icon, LINK_ICONS[config.shape.iconStyle].body) : ''
 }
 
 /** Stamp: the text runs around a circle, sized so it fills the whole turn. */
@@ -769,10 +851,10 @@ function ringHtml(c: string, config: BadgeConfig): string {
 }
 
 /** The inside of the clickable element, per layout. */
-function innerHtml(c: string, config: BadgeConfig, avatar: ResolvedAvatar, bubbles: boolean): string[] {
+function innerHtml(c: string, config: BadgeConfig, avatar: ResolvedAvatar): string[] {
   const size = SIZES[config.text.size]
   const av = avatarHtml(c, avatar, size.avatar)
-  const icon = iconHtml(c, config, bubbles)
+  const icon = iconHtml(c, config)
   const normal = config.text.normal.trim()
   const bold = config.text.bold.trim()
   const span = (cls: string, text: string) => (text ? `<span class="${c}__${cls}">${escapeHtml(text)}</span>` : '')
@@ -831,30 +913,32 @@ export function generateBadge(config: BadgeConfig, options: GenerateHtmlOptions 
   const avatar = resolveAvatar(config, options)
   const label = badgeText(config)
   const cssText = buildCss(config, avatar, options.previewScheme, options.hoverDemoAttr)
-  const bubbles = usesBubbles(config)
-  const inner = innerHtml(c, config, avatar, bubbles).filter(Boolean)
+  const profile = usesProfile(config)
+  const inner = innerHtml(c, config, avatar).filter(Boolean)
   const body = `\n    ${inner.join('\n    ')}\n  `
+  const card = config.layout === 'card'
 
   let html: string
   let js: string | null = null
-  if (bubbles) {
-    // Disclosure pattern: a button that shows a list of links (§8.1).
-    const menuId = `${c}-menu`
+  if (profile) {
+    // A button that opens a modal dialog with the profile.
     const attrs = [
       'type="button"',
-      `class="${c}__pill"`,
-      `popovertarget="${menuId}"`,
-      'aria-expanded="false"',
-      `aria-controls="${menuId}"`,
-      `aria-label="${escapeHtml(label ? `${label}, show links` : 'Show links')}"`,
+      `class="${c}__${card ? 'lk' : 'pill'}"`,
+      'aria-haspopup="dialog"',
+      `aria-controls="${c}-dlg"`,
+      `aria-label="${escapeHtml(label ? `${label}, open profile` : 'Open profile')}"`,
     ]
-    html = `<div class="${c}">\n  <button ${attrs.join(' ')}>${body}</button>\n${bubblesHtml(c, config)}${socialsHtml(c, config)}\n</div>`
+    const button = `<button ${attrs.join(' ')}>${body}</button>`
+    const dialog = profileHtml(c, config, avatar)
+    html = card
+      ? `<div class="${c}">\n  <div class="${c}__pill">\n  ${button}\n  </div>\n${dialog}\n</div>`
+      : `<div class="${c}">\n  ${button}\n${dialog}\n</div>`
     js = badgeRuntime(c)
   } else {
     const { url, newTab } = config.click.link
     const isMail = url.startsWith('mailto:')
     const blank = newTab && !isMail
-    const card = config.layout === 'card'
     const attrs = [`class="${c}__${card ? 'lk' : 'pill'}"`, `href="${escapeHtml(url || '#')}"`]
     if (blank) attrs.push('target="_blank"', 'rel="noopener noreferrer"')
     // The stamp's text is drawn in an SVG: the link carries it as its name.

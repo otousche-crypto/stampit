@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { generateBadge, generateHtml, deriveInitials, badgeText, teamNames } from './generateHtml'
+import { generateBadge, generateHtml, deriveInitials, badgeText, githubUser, teamNames } from './generateHtml'
 import { FIXTURES } from './fixtures'
 import { createDefaultConfig, mergeDeep } from '../schema'
 
@@ -48,27 +48,47 @@ describe('generateHtml', () => {
     const oneTheme = mergeDeep(FIXTURES['link-initials'], { theme: { adaptToSite: false } })
     expect(generateBadge(oneTheme).css).not.toContain('prefers-color-scheme')
     expect(link.css).not.toContain('backdrop-filter')
-    expect(link.css).not.toContain('__menu')
+    expect(link.css).not.toContain('__dlg')
     expect(link.js).toBeNull()
     expect(generateBadge(FIXTURES.glass).css).toContain('backdrop-filter:blur(')
     expect(generateBadge(FIXTURES.adaptive).css).toContain('@media (prefers-color-scheme:dark)')
   })
 
-  it('emits the bubble menu only in Bubbles mode', () => {
-    const b = generateBadge(FIXTURES['bubbles-2'])
-    expect(b.js).not.toBeNull()
-    expect(b.html).toContain('popover="auto"')
-    expect(b.html).toContain('popovertarget="sp-test1234-menu"')
-    expect(b.html).toContain('aria-label="Launched by Olivier Tousche, show links"')
-    expect(b.html).toContain('aria-label="LinkedIn, opens in a new tab"')
-    expect(b.css).toContain(':popover-open')
-    expect(b.css).toContain('--sp-test1234-slow:linear(')
-    const eight = generateBadge(FIXTURES['bubbles-8'])
-    expect(eight.html.match(/<li>/g)).toHaveLength(8)
-    expect(eight.html).toContain('aria-label="Email Eight Links"')
-    expect(eight.html).not.toContain('target="_blank"')
-    // Only the icons of channels in use.
-    expect(generateBadge(FIXTURES['bubbles-2']).html.match(/<path /g)).toHaveLength(2)
+  it('emits the profile modal only in Profile mode', () => {
+    const p = generateBadge(FIXTURES['profile-full'])
+    expect(p.js).not.toBeNull()
+    expect(p.html).toContain('<button type="button" class="sp-test1234__pill" aria-haspopup="dialog" aria-controls="sp-test1234-dlg"')
+    expect(p.html).toContain('aria-label="Launched by Olivier Tousche, open profile"')
+    expect(p.html).toContain('<dialog id="sp-test1234-dlg" class="sp-test1234__dlg" aria-labelledby="sp-test1234-dlg-t">')
+    expect(p.html).toContain('<form method="dialog">')
+    expect(p.html).toContain('I design and ship small, useful tools.')
+    expect(p.html).toContain('aria-label="Portfolio, opens in a new tab"')
+    expect(p.html).toContain('aria-label="LinkedIn, opens in a new tab"')
+    expect(p.html).toContain('data-user="olivier"')
+    // Named projects only; an invalid address shows the project without a link.
+    expect(p.html).toContain('href="https://stampit.app"')
+    expect(p.html).toContain('<div class="sp-test1234__mc"><span class="sp-test1234__mcn">Décadi</span></div>')
+    expect(p.html).not.toContain('ignored.example')
+    // The social links live in the modal, not beside the badge.
+    expect(p.html).not.toContain('__sos')
+    expect(p.css).toContain('@starting-style')
+    expect(p.css).toContain('--sp-test1234-on:#fff')
+
+    const minimal = generateBadge(FIXTURES['profile-minimal'])
+    expect(minimal.html).not.toContain('__gh')
+    expect(minimal.html).not.toContain('__mj')
+    expect(minimal.html).not.toContain('target="_blank"')
+    // No avatar on the badge, initials in the modal.
+    expect(minimal.html).toContain('<span class="sp-test1234__mav" aria-hidden="true">EL</span>')
+  })
+
+  it('reads the GitHub user from profile links only', () => {
+    const at = (github: string) => githubUser(mergeDeep(FIXTURES['profile-minimal'], { socials: { github } }))
+    expect(at('https://github.com/ada-l')).toBe('ada-l')
+    expect(at('https://www.github.com/ada/repo')).toBe('ada')
+    expect(at('https://gitlab.com/ada')).toBeNull()
+    expect(at('https://github.com/')).toBeNull()
+    expect(at('')).toBeNull()
   })
 
   it('reproduces the Décadi badge in Light / M', () => {
@@ -112,10 +132,9 @@ describe('generateHtml', () => {
 
 describe('reduced motion', () => {
   it('cancels every movement with selectors that win', () => {
-    const { css } = generateBadge(FIXTURES['bubbles-2'])
+    const { css } = generateBadge(FIXTURES['profile-full'])
     const media = css.slice(css.indexOf('@media (prefers-reduced-motion:reduce)'))
-    expect(media).toContain('.sp-test1234[data-js] .sp-test1234__menu[data-open] li{transform:none;transition-property:opacity;transition-delay:0s}')
-    expect(media).toContain('.sp-test1234__bub:hover{transform:none')
+    expect(media).toContain('.sp-test1234 .sp-test1234__dlg,.sp-test1234 .sp-test1234__dlg[open]{transform:none}')
     const link = generateBadge(FIXTURES['link-initials']).css
     expect(link).toContain('.sp-test1234 .sp-test1234__pill:hover .sp-test1234__ic,.sp-test1234 .sp-test1234__pill:focus-visible .sp-test1234__ic{transform:none}')
   })

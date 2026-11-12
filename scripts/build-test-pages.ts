@@ -16,14 +16,14 @@ mkdirSync(dir, { recursive: true })
 const page = (title: string, body: string, head = '') =>
   `<!doctype html>\n<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${title}</title>${head}</head>\n<body>\n${body}\n</body></html>\n`
 
-const bubbles = mergeDeep(FIXTURES['bubbles-2'], { id: 'qa2' })
-const eight = mergeDeep(FIXTURES['bubbles-8'], { id: 'qa8' })
+const profile = mergeDeep(FIXTURES['profile-full'], { id: 'qa2' })
+const eight = mergeDeep(FIXTURES['profile-minimal'], { id: 'qa8' })
 
 writeFileSync(
   dir + 'empty.html',
   page(
     'Empty page',
-    `<footer style="position:fixed;bottom:24px;left:0;right:0;text-align:center">\n${generateHtml(bubbles)}</footer>`,
+    `<footer style="position:fixed;bottom:24px;left:0;right:0;text-align:center">\n${generateHtml(profile)}</footer>`,
   ),
 )
 
@@ -31,7 +31,7 @@ writeFileSync(
   dir + 'twice.html',
   page(
     'Same snippet twice',
-    `<div style="margin:200px 0 0;text-align:center">${generateHtml(bubbles)}</div>\n<div style="text-align:center;margin-top:120px">${generateHtml(bubbles)}</div>\n<div style="text-align:center;margin-top:120px">${generateHtml(DEMO_CONFIG)}</div>`,
+    `<div style="margin:200px 0 0;text-align:center">${generateHtml(profile)}</div>\n<div style="text-align:center;margin-top:120px">${generateHtml(profile)}</div>\n<div style="text-align:center;margin-top:120px">${generateHtml(DEMO_CONFIG)}</div>`,
   ),
 )
 

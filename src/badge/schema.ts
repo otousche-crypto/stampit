@@ -43,11 +43,14 @@ export const ICON_STYLES = ['arrow', 'triangle', 'link'] as const
 /** Badge models (editor "Style"). Same config, a different rendering. */
 export const LAYOUTS = ['pill', 'stamp', 'split', 'card', 'team'] as const
 
-export const channelSchema = z.object({
+/** Profile mode: the projects listed in the modal, entered by hand. */
+export const MAX_PROJECTS = 4
+
+export const projectSchema = z.object({
   id: z.string().min(1).max(32),
-  type: z.enum(CHANNEL_TYPES),
+  name: z.string().max(40),
   url: z.string().max(2048),
-  label: z.string().max(20).optional(),
+  description: z.string().max(90),
 })
 
 /** Ids end up in class names: keep them to safe characters. */
@@ -96,7 +99,7 @@ export const badgeConfigSchema = z.object({
     borderWidth: z.union([z.literal(0), z.literal(1), z.literal(2)]),
     shadow: z.enum(['none', 'soft']),
     showIcon: z.boolean(),
-    /** Link mode's icon when `showIcon` is on. Bubbles mode always uses "+". */
+    /** The badge's icon when `showIcon` is on. */
     iconStyle: z.enum(ICON_STYLES),
   }),
 
@@ -109,11 +112,16 @@ export const badgeConfigSchema = z.object({
   }),
 
   click: z.object({
-    mode: z.enum(['link', 'bubbles']),
+    /**
+     * Link: the badge goes to `link.url`. Profile: it opens a modal with the
+     * bio, links (`link.url` is the portfolio), GitHub activity and projects.
+     * Retired Bubbles badges come back as links.
+     */
+    mode: z.enum(['link', 'profile']).catch('link'),
     link: z.object({ url: z.string().max(2048), newTab: z.boolean() }),
-    bubbles: z.object({
-      labels: z.enum(['icon', 'icon-label']),
-      channels: z.array(channelSchema).max(8),
+    profile: z.object({
+      bio: z.string().max(160),
+      projects: z.array(projectSchema).max(MAX_PROJECTS),
     }),
   }),
 
@@ -129,7 +137,7 @@ export const badgeConfigSchema = z.object({
 export type Hex = string
 export type Palette = z.infer<typeof paletteSchema>
 export type ChannelType = (typeof CHANNEL_TYPES)[number]
-export type Channel = z.infer<typeof channelSchema>
+export type Project = z.infer<typeof projectSchema>
 export type BadgeConfig = z.infer<typeof badgeConfigSchema>
 export type PaletteKey = 'light' | 'dark'
 export type PresetName = BadgeConfig['preset']
@@ -143,7 +151,7 @@ export type Layout = (typeof LAYOUTS)[number]
 export const CURRENT_SCHEMA_VERSION = 1
 
 export const newBadgeId = customAlphabet('abcdefghijklmnopqrstuvwxyz0123456789', 8)
-export const newChannelId = customAlphabet('abcdefghijklmnopqrstuvwxyz0123456789', 10)
+export const newProjectId = customAlphabet('abcdefghijklmnopqrstuvwxyz0123456789', 10)
 
 export const LIGHT_PALETTE: Palette = {
   background: '#FFFFFF',
@@ -195,7 +203,7 @@ export function createDefaultConfig(overrides?: { id?: string; updatedAt?: strin
     click: {
       mode: 'link',
       link: { url: '', newTab: true },
-      bubbles: { labels: 'icon', channels: [] },
+      profile: { bio: '', projects: [] },
     },
     socials: { github: '', linkedin: '', x: '', instagram: '', dribbble: '' },
   }

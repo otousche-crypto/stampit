@@ -154,6 +154,7 @@ export function EditorProvider({
     const order = [
       errors.text && 'text',
       errors.linkUrl && 'linkUrl',
+      ...Object.keys(errors.project).map((id) => `project-${id}`),
       ...Object.keys(errors.social).map((network) => `social-${network}`),
     ].filter(Boolean) as string[]
     const target = order[0]

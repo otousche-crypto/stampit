@@ -9,8 +9,7 @@ describe('badge runtime', () => {
     const js = badgeRuntime('sp-test1234')
     expect(() => new Function(js)).not.toThrow()
     expect(js).not.toContain('__C__')
-    expect(js).not.toContain('__S__')
-    expect(js).toContain('sp-test1234__menu')
+    expect(js).toContain('sp-test1234__dlg')
     expect(js.length).toBeLessThan(3500)
   })
 

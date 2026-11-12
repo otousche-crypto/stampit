@@ -2,8 +2,7 @@ import type { BadgeConfig } from './schema'
 
 /**
  * §9.3 — Olivier Tousche's badge, as on Décadi ("Crafted by" instead of "Par").
- * Link mode to LinkedIn; switch to Bubbles (LinkedIn first) once a second
- * channel is known.
+ * Link mode to LinkedIn.
  */
 export const DEMO_CONFIG: BadgeConfig = {
   schemaVersion: 1,
@@ -37,7 +36,7 @@ export const DEMO_CONFIG: BadgeConfig = {
   click: {
     mode: 'link',
     link: { url: 'https://www.linkedin.com/in/olivier-tousche-a6160b122/', newTab: true },
-    bubbles: { labels: 'icon', channels: [] },
+    profile: { bio: '', projects: [] },
   },
   socials: { github: '', linkedin: '', x: '', instagram: '', dribbble: '' },
 }

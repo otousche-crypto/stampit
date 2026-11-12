@@ -51,6 +51,14 @@ export function BadgePreview({ code, interceptLinks = false, hoverDemo = false, 
     }
   }, [code])
 
+  // The profile modal sits in the badge's markup and would inherit the
+  // preview's zoom: undo it so the modal shows at its real size.
+  useLayoutEffect(() => {
+    hostRef.current?.querySelectorAll<HTMLElement>('dialog').forEach((dialog) => {
+      dialog.style.zoom = String(1 / scale)
+    })
+  }, [code, scale])
+
   // Set a frame after the snippet is in, so a freshly injected badge starts
   // at rest and its hover effect transitions in rather than appearing.
   useEffect(() => {

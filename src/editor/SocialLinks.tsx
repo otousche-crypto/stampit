@@ -21,7 +21,7 @@ const LOGOS = Object.fromEntries(
 
 /**
  * One field per network. Each filled address adds a round logo link to the
- * right of the badge.
+ * right of the badge, or to the profile modal in Profile mode.
  */
 export function SocialLinks() {
   const { config, update, errors, errorsShown, revealKey } = useEditor()

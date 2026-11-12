@@ -34,14 +34,6 @@ export const CHANNELS: Record<ChannelType, ChannelDef> = {
   custom: { type: 'custom', label: 'Custom', icon: stroke('M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7'), placeholder: 'example.com', domains: [] },
 }
 
-/** Combobox order (§6.3). */
-export const CHANNEL_ORDER: ChannelType[] = [
-  'x', 'linkedin', 'website', 'instagram', 'github', 'dribbble', 'behance', 'email', 'threads', 'bluesky', 'youtube', 'custom',
-]
-
-export const MIN_CHANNELS = 2
-export const MAX_CHANNELS = 8
-
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 /** Add `https://` when missing; email addresses become `mailto:`. */
@@ -79,8 +71,4 @@ export function domainMatches(url: string, type: ChannelType): boolean {
   } catch {
     return true
   }
-}
-
-export function channelLabel(channel: { type: ChannelType; label?: string }): string {
-  return channel.type === 'custom' ? channel.label?.trim() || 'Link' : CHANNELS[channel.type].label
 }
