@@ -121,7 +121,7 @@ function profileSpec(config: BadgeConfig): string[] {
   }
   if (user) {
     lines.push(
-      `- "GitHub activity" section for @${user}: fetch https://api.github.com/users/${user}/events/public?per_page=100 (up to 3 pages, only while the 12-week window is not covered) the first time the modal opens, cache it in sessionStorage for 30 minutes. Draw only the bricks: one per day for the last 12 weeks plus the current one, 13 Sunday-first columns spanning the modal's width (square cells, 3px gaps), tinted with the bold text color by daily count (0, 1, 2–3, 4–6, 7+). No numbers or labels: the grid is one link to the GitHub profile, named "GitHub profile of @${user}: N public events in the last 12 weeks". A pulsing placeholder while loading; on error, hide the section.`,
+      `- GitHub contributions of @${user}, 18px under the links, untitled: the first time the modal opens, fetch the profile's contribution calendar from ${'`'}/api/github?user=${user}${'`'} on the Stampit site (JSON { start, levels, total }: one level 0–4 per day from start, a Sunday), cache it in sessionStorage for 30 minutes. Draw only the bricks: 53 Sunday-first week columns spanning the modal's width, 2px gaps, tinted with the bold text color by level (8%, 28%, 50%, 75%, 100%). No numbers or labels: the grid is one link to the GitHub profile, named "GitHub contributions of @${user}: N contributions in the last year". A pulsing placeholder while loading; on error, hide it.`,
     )
   }
   if (projects.length) {

@@ -745,15 +745,17 @@ function profileRules(
     // Sections.
     `.${c}__sec{margin-top:22px}`,
     `.${c}__mt{margin-bottom:10px;color:var(${v}tn);font-size:12px;font-weight:500;letter-spacing:.04em;text-transform:uppercase}`,
-    // GitHub: a 13-week grid, one brick per day, as wide as the modal.
-    `.${c}__gr{display:grid;grid-template-columns:repeat(13,1fr);grid-template-rows:repeat(7,1fr);grid-auto-flow:column;gap:3px;aspect-ratio:13/7;border-radius:4px}`,
-    `.${c}__gr i{display:block;border-radius:2px;background:${tint(8)}}`,
+    // GitHub: the year as on the profile, 53 weeks of tiny bricks across the modal.
+    `.${c}__gh{margin-top:18px}`,
+    `.${c}__gr{display:grid;grid-template-columns:repeat(53,1fr);grid-template-rows:repeat(7,auto);grid-auto-flow:column;gap:2px;border-radius:3px}`,
+    `.${c}__gr i{display:block;aspect-ratio:1;border-radius:1px;background:${tint(8)}}`,
     `.${c}__gr i[data-l="1"]{background:${tint(28)}}`,
     `.${c}__gr i[data-l="2"]{background:${tint(50)}}`,
     `.${c}__gr i[data-l="3"]{background:${tint(75)}}`,
     `.${c}__gr i[data-l="4"]{background:var(${v}tb)}`,
     `@keyframes ${c}-ld{50%{opacity:.5}}`,
-    `.${c}__gh:not([data-st=ok]) .${c}__gr{background:${tint(6)};animation:${c}-ld 1.2s ease-in-out infinite}`,
+    // Empty while loading: a placeholder about the grid's size.
+    `.${c}__gh:not([data-st=ok]) .${c}__gr{aspect-ratio:53/8;background:${tint(6)};animation:${c}-ld 1.2s ease-in-out infinite}`,
     // No activity to show: no section.
     `.${c}__gh[data-st=error]{display:none}`,
     // Projects.
@@ -785,7 +787,7 @@ function channelIconSvg(type: keyof typeof CHANNELS): string {
 }
 
 /** The profile modal's markup. Closed until the badge is clicked. */
-function profileHtml(c: string, config: BadgeConfig, avatar: ResolvedAvatar, open = false): string {
+function profileHtml(c: string, config: BadgeConfig, avatar: ResolvedAvatar, open = false, apiOrigin = ''): string {
   const newTab = config.click.link.newTab
   const name = config.text.bold.trim() || config.text.normal.trim()
   const role = config.text.role.trim()
@@ -820,11 +822,8 @@ function profileHtml(c: string, config: BadgeConfig, avatar: ResolvedAvatar, ope
   if (user) {
     const profile = `https://github.com/${user}`
     lines.push(
-      `<section class="${c}__sec ${c}__gh" data-user="${user}" aria-labelledby="${c}-gh-t">`,
-      `<h3 id="${c}-gh-t" class="${c}__mt">GitHub activity</h3>`,
-      // Only the bricks; the whole grid links to the profile (its name gets the total once loaded).
-      link('gr', profile, `GitHub profile of @${user}`, ''),
-      '</section>',
+      // Only the bricks, untitled: the whole grid links to the profile (its name gets the total once loaded).
+      `<div class="${c}__gh" data-user="${user}" data-api="${escapeHtml(apiOrigin)}">${link('gr', profile, `GitHub contributions of @${user}`, '')}</div>`,
     )
   }
 
@@ -939,7 +938,8 @@ export function generateBadge(config: BadgeConfig, options: GenerateHtmlOptions 
       `aria-label="${escapeHtml(label ? `${label}, open profile` : 'Open profile')}"`,
     ]
     const button = `<button ${attrs.join(' ')}>${body}</button>`
-    const dialog = profileHtml(c, config, avatar, options.profileOnly)
+    // The GitHub graph comes from Stampit's own API: the snippet runs on other sites.
+    const dialog = profileHtml(c, config, avatar, options.profileOnly, options.assetOrigin)
     html = card
       ? `<div class="${c}">\n  <div class="${c}__pill">\n  ${button}\n  </div>\n${dialog}\n</div>`
       : `<div class="${c}">\n  ${button}\n${dialog}\n</div>`

@@ -29,6 +29,7 @@
     "scripts",
     "api",
     "src/embed/server.ts",
+    "src/embed/github.ts",
     "src/embed/devServer.ts",
     "src/**/*.test.ts",
     "src/types"

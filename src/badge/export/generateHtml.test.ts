@@ -65,7 +65,7 @@ describe('generateHtml', () => {
     expect(p.html).toContain('aria-label="LinkedIn, opens in a new tab"')
     expect(p.html).toContain('data-user="olivier"')
     // GitHub: only the bricks, as one link to the profile.
-    expect(p.html).toContain('aria-label="GitHub profile of @olivier, opens in a new tab"')
+    expect(p.html).toContain('aria-label="GitHub contributions of @olivier, opens in a new tab"')
     expect(p.css).toContain('@media (max-width:480px){.sp-test1234__dlg:modal{')
     // Projects are links: named, with a valid address.
     expect(p.html).toContain('href="https://stampit.app"')
