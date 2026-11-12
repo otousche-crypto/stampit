@@ -111,7 +111,6 @@ function PhoneBottom({ children }: { children: ReactNode }) {
 }
 
 export function Home() {
-  const editorRef = useRef<HTMLElement>(null)
   const demoRef = useRef<HTMLDivElement>(null)
   useDemoCycle(demoRef, DEMO_WORDS, DEMO_FIRST, DEMO_PEOPLE)
   // The demo follows the site's Light / Dark.
@@ -159,7 +158,7 @@ export function Home() {
               trailingIcon={ArrowDown}
               className="h-12 gap-2 pl-6 pr-5 text-[16px] leading-6 [&_svg]:size-[18px]"
               onClick={() =>
-                editorRef.current?.scrollIntoView({
+                document.getElementById('create')?.scrollIntoView({
                   behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
                   block: 'start',
                 })
@@ -170,11 +169,10 @@ export function Home() {
           </div>
         </main>
       </div>
-      <section ref={editorRef} id="create" aria-label="Badge editor" className="h-dvh snap-start snap-always">
-        <Suspense fallback={<div className="h-dvh bg-background" aria-busy="true" />}>
-          <Create embedded />
-        </Suspense>
-      </section>
+      {/* The badge editor, then the profile editor: one scroll each. */}
+      <Suspense fallback={<div className="h-dvh snap-start bg-background" aria-busy="true" />}>
+        <Create embedded />
+      </Suspense>
     </>
   )
 }

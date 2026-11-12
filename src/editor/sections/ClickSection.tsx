@@ -1,14 +1,22 @@
 import { useState } from 'react'
-import { Link2, UserRound } from 'lucide-react'
+import { ArrowDown, Link2, UserRound } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 import { InputField, InputGroup } from '@/components/ui/input-group'
 import { normalizeUrl } from '@/badge/channels'
 import type { BadgeConfig } from '@/badge/schema'
-import { Hint, SelectRow, SwitchRow, WELL_FIELD, type SelectRowOption } from '../controls'
+import { Hint, SelectRow, SwitchRow, type SelectRowOption } from '../controls'
 import { SocialLinks } from '../SocialLinks'
-import { ProjectsEditor } from '../ProjectsEditor'
 import { useEditor } from '../EditorProvider'
 
 type Click = BadgeConfig['click']
+
+/** Smooth scroll to one of the editor screens (`create`, `profile`). */
+export function scrollToSection(id: string) {
+  document.getElementById(id)?.scrollIntoView({
+    behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+    block: 'start',
+  })
+}
 
 const MODES: SelectRowOption<Click['mode']>[] = [
   { value: 'link', label: 'Link', icon: Link2 },
@@ -17,8 +25,8 @@ const MODES: SelectRowOption<Click['mode']>[] = [
 
 /**
  * Link: the badge goes to one address, the social links slide out beside it.
- * Profile: the badge opens a modal with the bio, portfolio, social links,
- * GitHub activity and projects.
+ * Profile: the badge opens a modal, designed in the profile editor one
+ * scroll below.
  */
 export function ClickSection() {
   const { config, update, errors, errorsShown } = useEditor()
@@ -27,7 +35,6 @@ export function ClickSection() {
   const [touched, setTouched] = useState(false)
   const setLink = (patch: Partial<Click['link']>) =>
     update((c) => ({ ...c, click: { ...c.click, link: { ...c.click.link, ...patch } } }))
-  const setBio = (bio: string) => update((c) => ({ ...c, click: { ...c.click, profile: { ...c.click.profile, bio } } }))
 
   return (
     <div className="flex flex-col gap-2">
@@ -37,46 +44,42 @@ export function ClickSection() {
         value={click.mode}
         onChange={(mode) => update((c) => ({ ...c, click: { ...c.click, mode } }))}
       />
-      <InputGroup size="compact" className="w-full">
-        <div
-          data-field="linkUrl"
-          onBlur={() => {
-            setTouched(true)
-            const normalized = normalizeUrl(click.link.url)
-            if (normalized !== click.link.url) setLink({ url: normalized })
-          }}
-        >
-          <InputField
-            index={0}
-            label={profile ? 'Portfolio' : 'URL'}
-            type="url"
-            inputMode="url"
-            autoComplete="url"
-            icon={Link2}
-            placeholder="yoursite.com"
-            value={click.link.url}
-            error={touched || errorsShown ? errors.linkUrl : undefined}
-            onChange={(url) => setLink({ url })}
-          />
-        </div>
-      </InputGroup>
-      {profile && (
-        <InputGroup size="compact" className="w-full">
-          <InputField
-            index={0}
-            label="Bio"
-            className={WELL_FIELD}
-            placeholder="Designer shipping small, useful tools."
-            maxLength={160}
-            value={click.profile.bio}
-            onChange={setBio}
-          />
-        </InputGroup>
+      {profile ? (
+        <>
+          <Hint>Your bio, links, GitHub activity and projects are set in the profile editor.</Hint>
+          <Button variant="secondary" size="compact" trailingIcon={ArrowDown} className="self-start" onClick={() => scrollToSection('profile')}>
+            Edit profile
+          </Button>
+        </>
+      ) : (
+        <>
+          <InputGroup size="compact" className="w-full">
+            <div
+              data-field="linkUrl"
+              onBlur={() => {
+                setTouched(true)
+                const normalized = normalizeUrl(click.link.url)
+                if (normalized !== click.link.url) setLink({ url: normalized })
+              }}
+            >
+              <InputField
+                index={0}
+                label="URL"
+                type="url"
+                inputMode="url"
+                autoComplete="url"
+                icon={Link2}
+                placeholder="yoursite.com"
+                value={click.link.url}
+                error={touched || errorsShown ? errors.linkUrl : undefined}
+                onChange={(url) => setLink({ url })}
+              />
+            </div>
+          </InputGroup>
+          <SocialLinks />
+          <SwitchRow label="Open in new tab" checked={click.link.newTab} onToggle={() => setLink({ newTab: !click.link.newTab })} />
+        </>
       )}
-      <SocialLinks />
-      {profile && !config.socials.github.trim() && <Hint>Add your GitHub link to show your activity.</Hint>}
-      {profile && <ProjectsEditor />}
-      <SwitchRow label="Open in new tab" checked={click.link.newTab} onToggle={() => setLink({ newTab: !click.link.newTab })} />
     </div>
   )
 }

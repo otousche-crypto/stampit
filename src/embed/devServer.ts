@@ -6,7 +6,7 @@
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import type { IncomingMessage, ServerResponse } from 'node:http'
 import type { Plugin } from 'vite'
-import { handleEmbed, handlePublish, type EmbedStore, type PublishedBadge } from './server'
+import { handleEmbed, handlePublish, type EmbedStore, type PublishedBadge } from './server.ts'
 
 function fileStore(dir: string): EmbedStore {
   const file = `${dir}/embeds.json`

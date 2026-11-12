@@ -43,7 +43,15 @@ export type GenerateHtmlOptions = {
    * attribute, so the editor can show it without the pointer on the badge.
    */
   hoverDemoAttr?: string
+  /**
+   * Preview only: the profile modal drawn open, in the flow, without the
+   * badge or the close button (the profile editor's stage).
+   */
+  profileOnly?: boolean
 }
+
+/** Set on the element that hosts a `profileOnly` preview. */
+export const PROFILE_STAGE_ATTR = 'data-profile-stage'
 
 /** Stamp diameter per size, in px. */
 export const STAMP_SIZES: Record<BadgeSize, number> = { s: 96, m: 112, l: 128 }
@@ -251,6 +259,7 @@ function buildCss(
   avatar: ResolvedAvatar,
   previewScheme?: 'light' | 'dark',
   hoverDemoAttr?: string,
+  profileOnly = false,
 ): string {
   const id = config.id
   const ctx: CssContext = { c: `sp-${id}`, v: `--sp-${id}-`, config, springs: new Set(), hoverDemoAttr }
@@ -382,6 +391,15 @@ function buildCss(
   // The modal fades in place.
   if (profile) reduced.push(`.${c} .${c}__dlg,.${c} .${c}__dlg[open]{transform:none}`)
   rules.push(`@media (prefers-reduced-motion:reduce){${reduced.join('')}}`)
+
+  if (profile && profileOnly) {
+    // Scoped to the stage: the editor's badge preview shares these classes.
+    const s = `[${PROFILE_STAGE_ATTR}]`
+    rules.push(
+      `${s} .${c}{display:block;animation:none}${s} .${c}>:not(dialog){display:none}`,
+      `${s} .${c} .${c}__dlg{position:static;margin:0;max-height:none;opacity:1;transform:none}${s} .${c}__dlg form{display:none}`,
+    )
+  }
 
   // Custom properties for the springs actually used, declared once.
   if (ctx.springs.size > 0) {
@@ -696,7 +714,7 @@ function profileRules(
 
   const rules = [
     // The page behind stays put while the modal is open.
-    `:root:has(.${c}__dlg[open]){overflow:hidden}`,
+    `:root:has(.${c}__dlg:modal){overflow:hidden}`,
     `.${c}__dlg{${dlg.join(';')}}`,
     `.${c}__dlg[open]{opacity:1;transform:none;transition:${transition(ctx, 'opacity', 'slow')},${transition(ctx, 'transform', 'slow')},${discrete}}`,
     `@starting-style{.${c}__dlg[open]{${hidden}}}`,
@@ -774,7 +792,7 @@ function channelIconSvg(type: keyof typeof CHANNELS): string {
 }
 
 /** The profile modal's markup. Closed until the badge is clicked. */
-function profileHtml(c: string, config: BadgeConfig, avatar: ResolvedAvatar): string {
+function profileHtml(c: string, config: BadgeConfig, avatar: ResolvedAvatar, open = false): string {
   const newTab = config.click.link.newTab
   const name = config.text.bold.trim() || config.text.normal.trim()
   const role = config.text.role.trim()
@@ -828,7 +846,7 @@ function profileHtml(c: string, config: BadgeConfig, avatar: ResolvedAvatar): st
     lines.push(`<section class="${c}__sec" aria-labelledby="${c}-pj-t"><h3 id="${c}-pj-t" class="${c}__mt">Projects</h3><ul class="${c}__mj">${items.join('')}</ul></section>`)
   }
 
-  return `  <dialog id="${c}-dlg" class="${c}__dlg" aria-labelledby="${c}-dlg-t">\n    ${lines.join('\n    ')}\n  </dialog>`
+  return `  <dialog id="${c}-dlg" class="${c}__dlg" aria-labelledby="${c}-dlg-t"${open ? ' open' : ''}>\n    ${lines.join('\n    ')}\n  </dialog>`
 }
 
 function avatarHtml(c: string, avatar: ResolvedAvatar, size: number): string {
@@ -912,7 +930,7 @@ export function generateBadge(config: BadgeConfig, options: GenerateHtmlOptions 
   const c = `sp-${config.id}`
   const avatar = resolveAvatar(config, options)
   const label = badgeText(config)
-  const cssText = buildCss(config, avatar, options.previewScheme, options.hoverDemoAttr)
+  const cssText = buildCss(config, avatar, options.previewScheme, options.hoverDemoAttr, options.profileOnly)
   const profile = usesProfile(config)
   const inner = innerHtml(c, config, avatar).filter(Boolean)
   const body = `\n    ${inner.join('\n    ')}\n  `
@@ -930,7 +948,7 @@ export function generateBadge(config: BadgeConfig, options: GenerateHtmlOptions 
       `aria-label="${escapeHtml(label ? `${label}, open profile` : 'Open profile')}"`,
     ]
     const button = `<button ${attrs.join(' ')}>${body}</button>`
-    const dialog = profileHtml(c, config, avatar)
+    const dialog = profileHtml(c, config, avatar, options.profileOnly)
     html = card
       ? `<div class="${c}">\n  <div class="${c}__pill">\n  ${button}\n  </div>\n${dialog}\n</div>`
       : `<div class="${c}">\n  ${button}\n${dialog}\n</div>`

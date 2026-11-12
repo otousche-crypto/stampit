@@ -7,6 +7,7 @@ import { PreviewStage, useBackdropStyle } from './PreviewPanel'
 import { ExportPanel } from './ExportPanel'
 import { ExportSheet } from './ExportSheet'
 import { ResetButton } from './ResetButton'
+import { ProfilePanel, ProfileStage } from './ProfilePanel'
 
 
 /** A floating panel over the full-screen preview backdrop. */
@@ -95,6 +96,40 @@ export function EditorLayout({ autoFocus = true }: { autoFocus?: boolean }) {
             </Card>
           </div>
         )}
+      </div>
+    </div>
+  )
+}
+
+/**
+ * The profile editor, one scroll below the badge editor: its settings on the
+ * left, the modal on the preview backdrop. Mobile: the modal on top.
+ */
+export function ProfileLayout() {
+  const tablet = useMediaQuery('(min-width: 768px)')
+  const backdrop = useBackdropStyle()
+
+  if (!tablet) {
+    return (
+      <div className="flex h-dvh flex-col pt-14" style={backdrop}>
+        <ProfileStage className="h-[45dvh] min-h-56 shrink-0 border-b border-border" />
+        <Elevated offset={2} aria-label="Profile settings" role="region" className="min-h-0 flex-1 overflow-y-auto">
+          <ProfilePanel />
+        </Elevated>
+      </div>
+    )
+  }
+
+  return (
+    <div className="h-dvh overflow-hidden" style={backdrop}>
+      <div className="grid h-full grid-cols-[minmax(300px,360px)_1fr] gap-4 px-4 pb-4 pt-16 lg:grid-cols-[360px_1fr_300px]">
+        <Card label="Profile settings" className="h-full">
+          <div className="min-h-0 flex-1 overflow-y-auto">
+            <ProfilePanel />
+          </div>
+        </Card>
+        {/* The modal is 400 px wide: on desktop it takes the export column too. */}
+        <ProfileStage className="h-full lg:col-span-2" />
       </div>
     </div>
   )

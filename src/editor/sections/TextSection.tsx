@@ -56,8 +56,8 @@ export function TextSection({ autoFocusBold }: { autoFocusBold?: boolean }) {
       </div>
       <Suggestions label="Suggestions" items={NORMAL_SUGGESTIONS} onPick={(normal) => set({ normal })} />
 
-      {/* The card shows the role; so does the profile modal. */}
-      {(layout === 'card' || config.click.mode === 'profile') && (
+      {/* The card shows the role; the profile editor has it too. */}
+      {layout === 'card' && (
         <InputGroup size="compact" className="mt-2 w-full">
           <InputField
             index={0}

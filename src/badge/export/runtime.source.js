@@ -17,6 +17,8 @@
   if (n > 1) { id += "-" + n; d.id = id; b.setAttribute("aria-controls", id); }
   r.setAttribute("data-js", "");
   var g = d.querySelector(".__C____gh"), D = 864e5, W = 12;
+  /* Drawn open (the editor's profile stage): fill the activity right away. */
+  if (d.open && g) setTimeout(load);
 
   b.addEventListener("click", function () {
     if (d.open) return;

@@ -3,7 +3,7 @@ import { fileURLToPath, URL } from 'node:url'
 import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
-import { embedDevServer } from './src/embed/devServer'
+import { embedDevServer } from './src/embed/devServer.ts'
 
 const root = fileURLToPath(new URL('.', import.meta.url))
 
