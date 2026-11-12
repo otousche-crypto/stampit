@@ -8,7 +8,7 @@ import { validate, type EditorErrors } from './validation'
 import { setAppearance, useAppearance } from '@/app/appearance'
 
 export type PreviewBackground = 'light' | 'dark'
-export type EditorNotice = 'invalid-link' | 'missing-photo'
+export type EditorNotice = 'invalid-link'
 
 /** Preview backdrops: Décadi's panel grey, and a matching night. */
 export const PREVIEW_BACKDROPS: Record<PreviewBackground, string> = {
@@ -31,12 +31,10 @@ type EditorContextValue = {
   editingKey: PaletteKey
   editingPalette: Palette
 
-  uploadDataUrl: string | null
-  setUploadDataUrl: (dataUrl: string | null) => void
   avatarFailed: boolean
   setAvatarFailed: (failed: boolean) => void
 
-  /** Non-blocking notice from loading (bad link, photo not in the link). */
+  /** Non-blocking notice from loading (a bad link). */
   notice: EditorNotice | null
   dismissNotice: () => void
   /** Start over with a fresh default badge. */
@@ -98,19 +96,15 @@ export function useEditor(): EditorContextValue {
 
 type EditorProviderProps = {
   initialConfig: BadgeConfig
-  initialUpload?: string | null
   initialNotice?: EditorNotice | null
   onChange?: (config: BadgeConfig) => void
-  onUploadChange?: (id: string, dataUrl: string | null) => void
   children: ReactNode
 }
 
 export function EditorProvider({
   initialConfig,
-  initialUpload = null,
   initialNotice = null,
   onChange,
-  onUploadChange,
   children,
 }: EditorProviderProps) {
   const [config, setConfig] = useState(initialConfig)
@@ -122,7 +116,6 @@ export function EditorProvider({
   const [zoom] = useState<1 | 2>(() =>
     typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches ? 1 : 2,
   )
-  const [uploadDataUrl, setUploadState] = useState<string | null>(initialUpload)
   const [avatarFailed, setAvatarFailed] = useState(false)
 
   const update = useCallback((updater: (config: BadgeConfig) => BadgeConfig) => {
@@ -131,22 +124,11 @@ export function EditorProvider({
 
   const replace = useCallback((next: BadgeConfig) => setConfig(next), [])
 
-  const setUploadDataUrl = useCallback(
-    (dataUrl: string | null) => {
-      setUploadState(dataUrl)
-      onUploadChange?.(config.id, dataUrl)
-      if (dataUrl) setNotice((n) => (n === 'missing-photo' ? null : n))
-    },
-    [config.id, onUploadChange],
-  )
-
   const reset = useCallback(() => {
-    onUploadChange?.(config.id, null)
-    setUploadState(null)
     setAvatarFailed(false)
     setNotice(null)
     setConfig(createDefaultConfig())
-  }, [config.id, onUploadChange])
+  }, [])
 
   // Report changes (persistence), skipping the initial config.
   const onChangeRef = useRef(onChange)
@@ -283,13 +265,12 @@ export function EditorProvider({
   const preview = useMemo(
     () =>
       generateBadge(shown, {
-        uploadDataUrl,
         avatarFailed,
         previewScheme: shown.theme.adaptToSite ? previewBackground : undefined,
         skipEntrance: !entranceLive,
         hoverDemoAttr: HOVER_DEMO_ATTR,
       }),
-    [shown, uploadDataUrl, avatarFailed, previewBackground, entranceLive],
+    [shown, avatarFailed, previewBackground, entranceLive],
   )
 
   const value: EditorContextValue = {
@@ -301,8 +282,6 @@ export function EditorProvider({
     zoom,
     editingKey,
     editingPalette,
-    uploadDataUrl,
-    setUploadDataUrl,
     avatarFailed,
     setAvatarFailed,
     notice,

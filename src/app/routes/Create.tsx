@@ -2,10 +2,10 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { createDefaultConfig, parseConfig, type BadgeConfig } from '@/badge/schema'
 import { EditorProvider, type EditorNotice } from '@/editor/EditorProvider'
 import { EditorLayout } from '@/editor/EditorLayout'
-import { loadAvatar, loadStoredConfig, saveAvatar, saveConfig } from '@/storage/local'
+import { loadStoredConfig, saveConfig } from '@/storage/local'
 import { decodeConfig, encodeConfig, readHash } from '@/storage/url'
 
-type Initial = { config: BadgeConfig; upload: string | null; notice: EditorNotice | null }
+type Initial = { config: BadgeConfig; notice: EditorNotice | null }
 
 /** §6.2 — the hash first, then localStorage, then the defaults. */
 async function loadInitial(): Promise<Initial> {
@@ -26,10 +26,7 @@ async function loadInitial(): Promise<Initial> {
     }
   }
   config ??= createDefaultConfig()
-
-  const upload = loadAvatar(config.id)
-  if (config.avatar.source === 'upload' && !upload && notice === null) notice = 'missing-photo'
-  return { config, upload, notice }
+  return { config, notice }
 }
 
 /** Autosave delay (§6.2). Not an animation timing. */
@@ -70,10 +67,8 @@ export function Create({ embedded = false }: { embedded?: boolean }) {
   return (
     <EditorProvider
       initialConfig={initial.config}
-      initialUpload={initial.upload}
       initialNotice={initial.notice}
       onChange={persist}
-      onUploadChange={saveAvatar}
     >
       <EditorLayout autoFocus={!embedded} />
     </EditorProvider>

@@ -1,4 +1,5 @@
 import { useEffect, type RefObject } from 'react'
+import { AVATAR_BACKGROUND } from '@/badge/avatars'
 import { springCss } from './springCss'
 
 /** Rhythm of the home demo, in ms. A text effect, not a motion timing. */
@@ -13,8 +14,6 @@ const sleep = (ms: number) => new Promise((r) => window.setTimeout(r, ms))
 /** A demo person: a name and its avatar image. */
 export type DemoPerson = { name: string; avatar: string }
 
-/** Behind the transparent 3D avatars: a soft neutral that reads in light and dark. */
-const AVATAR_BACKGROUND = '#E9E9EE'
 
 /**
  * The home demo badge, alternating two effects:

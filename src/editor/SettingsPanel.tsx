@@ -12,7 +12,6 @@ import { LayoutSection } from './sections/LayoutSection'
 
 const NOTICES = {
   'invalid-link': "This link couldn't be read. We loaded a fresh badge.",
-  'missing-photo': "Your photo isn't stored in this link. Upload it again or use an image URL.",
 } as const
 
 const isDesktop = () => typeof window !== 'undefined' && window.matchMedia('(min-width: 1024px)').matches
@@ -30,7 +29,7 @@ export function SettingsPanel({ autoFocus: allowAutoFocus = true }: { autoFocus?
     <div className="flex flex-col pb-24 lg:pb-3">
       {notice && (
         <div className="px-3 pt-3">
-          <Banner status={notice === 'invalid-link' ? 'error' : 'warning'} size="compact" dismissible onDismiss={dismissNotice}>
+          <Banner status="error" size="compact" dismissible onDismiss={dismissNotice}>
             <BannerTitle>{NOTICES[notice]}</BannerTitle>
           </Banner>
         </div>

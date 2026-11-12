@@ -33,4 +33,4 @@ The domain is still a placeholder: `src/config/site.ts` and the meta tags in `in
 
 ## Credits
 
-The home page demo avatars (`public/avatars/`) are from [Fluent Emoji](https://github.com/microsoft/fluentui-emoji) by Microsoft, MIT License.
+The avatars (`public/avatars/`), shown in the home page demo and offered in the editor, are from [Fluent Emoji](https://github.com/microsoft/fluentui-emoji) by Microsoft, MIT License.

@@ -26,10 +26,8 @@ export const SOFT_SHADOW_HOVER = '0 2px 12px rgba(0,0,0,.12)'
 export type GenerateHtmlOptions = {
   /** Link back to the editor, written in the header comment. */
   editUrl?: string
-  /** Data URL of the uploaded photo (`avatar.source = "upload"`). */
-  uploadDataUrl?: string | null
-  /** Replace the uploaded photo by this path (used by the prompt). */
-  uploadPath?: string
+  /** Origin that site-relative avatar paths (`/avatars/…`) resolve against, so exports work on any site. */
+  assetOrigin?: string
   /** The editor saw the avatar image fail: render initials instead. */
   avatarFailed?: boolean
   /**
@@ -172,11 +170,9 @@ export function resolveAvatar(config: BadgeConfig, options: GenerateHtmlOptions 
   const initials = { kind: 'initials' as const, initials: deriveInitials(config) }
   if (source === 'none') return NEEDS_AVATAR.has(config.layout) ? initials : { kind: 'none' }
   if (source === 'initials' || options.avatarFailed) return initials
-  if (source === 'url') return url ? { kind: 'image', src: url } : initials
-  // upload
-  if (options.uploadPath) return { kind: 'image', src: options.uploadPath }
-  if (options.uploadDataUrl) return { kind: 'image', src: options.uploadDataUrl }
-  return initials
+  if (!url) return initials
+  const src = options.assetOrigin && url.startsWith('/') ? options.assetOrigin + url : url
+  return { kind: 'image', src }
 }
 
 export const ARROW_ICON =

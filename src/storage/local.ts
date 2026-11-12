@@ -1,7 +1,6 @@
 import type { BadgeConfig } from '@/badge/schema'
 
 export const CONFIG_KEY = 'stampit:config'
-export const avatarKey = (id: string) => `stampit:avatar:${id}`
 
 /** Private browsing or a full quota must never break the app: every access is guarded. */
 function read(key: string): string | null {
@@ -41,12 +40,4 @@ export function saveConfig(config: BadgeConfig): void {
 
 export function clearConfig(): void {
   write(CONFIG_KEY, null)
-}
-
-export function loadAvatar(id: string): string | null {
-  return read(avatarKey(id))
-}
-
-export function saveAvatar(id: string, dataUrl: string | null): void {
-  write(avatarKey(id), dataUrl)
 }

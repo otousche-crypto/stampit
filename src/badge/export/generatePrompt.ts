@@ -11,6 +11,7 @@ import {
   deriveInitials,
   generateHtml,
   initialsColor,
+  resolveAvatar,
   usesBubbles,
   type GenerateHtmlOptions,
 } from './generateHtml'
@@ -26,9 +27,6 @@ const ICON_HOVER_TEXT = {
   triangle: 'the triangle slides 2px right',
   link: 'the link icon tilts 15°',
 } as const
-
-/** Where the agent should put the uploaded photo. */
-export const UPLOAD_PUBLIC_PATH = '/stampit-avatar.webp'
 
 /** AI tools the prompt can be tuned for ("Optimized for" in the Prompt tab). */
 export const PROMPT_AGENTS = ['claude-code', 'codex', 'cursor', 'replit', 'lovable', 'bolt', 'v0'] as const
@@ -73,10 +71,7 @@ const AGENT_NOTES: Record<PromptAgent, string[]> = {
   ],
 }
 
-/** App builders take the photo as a chat attachment rather than a file in the repo. */
-const BUILDERS: ReadonlySet<PromptAgent> = new Set(['replit', 'lovable', 'bolt', 'v0'])
-
-export type GeneratePromptOptions = Pick<GenerateHtmlOptions, 'editUrl' | 'avatarFailed'> & {
+export type GeneratePromptOptions = Pick<GenerateHtmlOptions, 'editUrl' | 'avatarFailed' | 'assetOrigin'> & {
   /** Tune the brief for one tool. Omitted, it stays tool-neutral. */
   agent?: PromptAgent
 }
@@ -109,16 +104,15 @@ export function generatePrompt(config: BadgeConfig, options: GeneratePromptOptio
   const { palettes, adaptToSite, base } = config.theme
   const radiusPx = Math.round(((config.shape.radius * size.height) / 2) * 100) / 100
   const bubbles = usesBubbles(config)
-  const upload = config.avatar.source === 'upload'
   const text = badgeText(config)
+  const avatar = resolveAvatar(config, options)
   const hasAvatar = config.avatar.source !== 'none'
   const padLeft = hasAvatar ? size.padLeft : size.padRight
 
   const reference = generateHtml(config, {
     editUrl: options.editUrl,
     avatarFailed: options.avatarFailed,
-    // The base64 photo never goes in the prompt: the agent uses the file instead.
-    uploadPath: upload ? UPLOAD_PUBLIC_PATH : undefined,
+    assetOrigin: options.assetOrigin,
   })
 
   const out: string[] = []
@@ -164,17 +158,13 @@ export function generatePrompt(config: BadgeConfig, options: GeneratePromptOptio
 
   if (!hasAvatar) {
     out.push('- Avatar: none. Left and right padding are equal.')
-  } else if (config.avatar.source === 'initials' || options.avatarFailed) {
+  } else if (avatar.kind !== 'image') {
     out.push(
       `- Avatar: round, ${size.avatar}px, background ${config.avatar.background}, initials "${deriveInitials(config)}" in ${initialsColor(config, adaptToSite ? palettes.light : palettes[base])}, weight 600, ${Math.round(size.avatar * 0.4)}px.`,
     )
-  } else if (upload) {
-    out.push(
-      `- Avatar: round, ${size.avatar}px, the photo at ${UPLOAD_PUBLIC_PATH} (see "Avatar" below), object-fit: cover, background ${config.avatar.background} behind transparent pixels.`,
-    )
   } else {
     out.push(
-      `- Avatar: round, ${size.avatar}px, image ${config.avatar.url}, object-fit: cover, background ${config.avatar.background} behind transparent pixels. Decorative: alt="".`,
+      `- Avatar: round, ${size.avatar}px, image ${avatar.src}, object-fit: cover, background ${config.avatar.background} behind transparent pixels. Decorative: alt="".`,
     )
   }
 
@@ -278,15 +268,6 @@ export function generatePrompt(config: BadgeConfig, options: GeneratePromptOptio
     '- The avatar and icons are decorative (alt="" / aria-hidden).',
     '- Touch targets of at least 44 × 44px.',
   )
-
-  if (upload) {
-    section('Avatar')
-    out.push(
-      options.agent && BUILDERS.has(options.agent)
-        ? `The avatar is a photo the user downloaded from Stampit as "stampit-avatar.webp". Ask them to attach it to this chat if they haven't, save it as public${UPLOAD_PUBLIC_PATH} (or the app's static assets folder) and reference it as ${UPLOAD_PUBLIC_PATH}. The reference below already points there.`
-        : `The avatar is a photo the user downloaded from Stampit as "stampit-avatar.webp". Ask for it if it isn't in the project yet, place it at public${UPLOAD_PUBLIC_PATH} (or the project's static assets folder) and reference it as ${UPLOAD_PUBLIC_PATH}. The reference below already points there.`,
-    )
-  }
 
   section('Reference implementation')
   out.push('Standalone HTML/CSS' + (bubbles ? '/JS' : '') + ', tested in Chrome, Safari and Firefox:', '', '```html', reference.trimEnd(), '```')

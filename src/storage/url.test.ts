@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { FIXTURES } from '@/badge/export/fixtures'
-import { createDefaultConfig, mergeDeep } from '@/badge/schema'
+import { createDefaultConfig, mergeDeep, parseConfig } from '@/badge/schema'
 import { decodeConfig, encodeConfig, readHash, stripDefaults } from './url'
 
 describe('url storage', () => {
@@ -30,6 +30,11 @@ describe('url storage', () => {
     expect(stripDefaults(createDefaultConfig({ id: 'abc12345' }))).toEqual({ schemaVersion: 1, id: 'abc12345' })
     const changed = mergeDeep(createDefaultConfig({ id: 'abc12345' }), { text: { bold: 'Ada' } })
     expect(stripDefaults(changed)).toEqual({ schemaVersion: 1, id: 'abc12345', text: { bold: 'Ada' } })
+  })
+
+  it('turns an old uploaded-photo avatar into initials', () => {
+    const result = parseConfig(mergeDeep(createDefaultConfig({ id: 'abc12345' }), { avatar: { source: 'upload' } }))
+    expect(result.ok && result.config.avatar.source).toBe('initials')
   })
 
   it('rejects unreadable or invalid links', async () => {

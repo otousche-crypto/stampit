@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { ClipboardCopy, Code2, Download } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { ClipboardCopy, Code2 } from 'lucide-react'
 import { TabsSubtle, TabsSubtleItem, TabsSubtlePanel } from '@/components/ui/tabs-subtle'
 import { generateBadge } from '@/badge/export/generateHtml'
 import { PROMPT_AGENTS, PROMPT_AGENT_LABELS, generatePrompt, type PromptAgent } from '@/badge/export/generatePrompt'
@@ -11,7 +10,7 @@ import {
   toFramework,
   type CodeLanguage,
 } from '@/badge/export/frameworks'
-import { editorBaseUrl } from '@/config/site'
+import { editorBaseUrl, siteOrigin } from '@/config/site'
 import { encodeConfig } from '@/storage/url'
 import { typeClass } from '@/lib/type-scale'
 import { cn } from '@/lib/utils'
@@ -30,7 +29,7 @@ export function formatWeight(bytes: number): string {
 
 /** Right column: a Prompt tab and a Code tab, each a copy field. */
 export function ExportPanel({ className }: { className?: string }) {
-  const { config, errors, errorsShown, revealErrors, uploadDataUrl, avatarFailed } = useEditor()
+  const { config, errors, errorsShown, revealErrors, avatarFailed } = useEditor()
   const blocked = hasBlockingErrors(errors)
   const [tab, setTab] = useState(0)
   const [editUrl, setEditUrl] = useState<string | undefined>(undefined)
@@ -50,12 +49,12 @@ export function ExportPanel({ className }: { className?: string }) {
   }, [config])
 
   const badge = useMemo(
-    () => generateBadge(config, { editUrl, uploadDataUrl, avatarFailed }),
-    [config, editUrl, uploadDataUrl, avatarFailed],
+    () => generateBadge(config, { editUrl, avatarFailed, assetOrigin: siteOrigin() }),
+    [config, editUrl, avatarFailed],
   )
-  const promptFor = (a: PromptAgent | null) => generatePrompt(config, { editUrl, avatarFailed, agent: a ?? undefined })
+  const promptFor = (a: PromptAgent | null) => generatePrompt(config, { editUrl, avatarFailed, assetOrigin: siteOrigin(), agent: a ?? undefined })
   const codeFor = (lang: CodeLanguage | null) => toFramework(badge, lang ?? 'html')
-  const prompt = useMemo(() => generatePrompt(config, { editUrl, avatarFailed, agent: agent ?? undefined }), [config, editUrl, avatarFailed, agent])
+  const prompt = useMemo(() => generatePrompt(config, { editUrl, avatarFailed, assetOrigin: siteOrigin(), agent: agent ?? undefined }), [config, editUrl, avatarFailed, agent])
   const code = useMemo(() => toFramework(badge, language), [badge, language])
   const bytes = useMemo(() => new Blob([badge.code]).size, [badge.code])
 
@@ -70,8 +69,6 @@ export function ExportPanel({ className }: { className?: string }) {
       cancelled = true
     }
   }, [tab, code, language])
-
-  const isUpload = config.avatar.source === 'upload'
 
   return (
     <section aria-label="Export" className={cn('flex min-h-0 flex-col gap-2 p-3', className)}>
@@ -128,28 +125,6 @@ export function ExportPanel({ className }: { className?: string }) {
         <p role="alert" className={cn('px-1 text-destructive', typeClass('caption'))}>
           {blockingSummary(errors)}
         </p>
-      )}
-
-      {isUpload && uploadDataUrl && (
-        <div className="flex flex-col gap-1">
-          <Button
-            variant="ghost"
-            size="compact"
-            leadingIcon={Download}
-            className="self-start"
-            onClick={() => {
-              const a = document.createElement('a')
-              a.href = uploadDataUrl
-              a.download = 'stampit-avatar.webp'
-              a.click()
-            }}
-          >
-            Download avatar
-          </Button>
-          <p className={cn('px-1 text-muted-foreground', typeClass('caption'))}>
-            Your uploaded photo isn't included in the page link. Shared links will show your initials.
-          </p>
-        </div>
       )}
     </section>
   )

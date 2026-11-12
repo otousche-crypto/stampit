@@ -78,7 +78,8 @@ export const badgeConfigSchema = z.object({
   team: z.array(z.string().max(32)).max(5),
 
   avatar: z.object({
-    source: z.enum(['none', 'initials', 'upload', 'url']),
+    // Photo upload is gone: older links with 'upload' fall back to initials.
+    source: z.enum(['none', 'initials', 'url']).catch('initials'),
     initials: z.string().max(2).nullable(),
     url: z.string().max(2048).nullable(),
     background: hexSchema,

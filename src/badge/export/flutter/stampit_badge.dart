@@ -195,7 +195,7 @@ class _Spec {
   /// Corner radius of the badge, and of its avatar, in logical pixels.
   final double radius, avatarRadius;
 
-  /// Initials, or a photo (an http(s) or data: URL). Neither: no avatar.
+  /// Initials, or an avatar image (an http(s) URL). Neither: no avatar.
   final String? initials, image;
   final Color avatarBackground;
   final List<_Member> team;
@@ -1105,21 +1105,15 @@ class _Avatar extends StatelessWidget {
     Widget child = fallback;
     final src = image;
     if (src != null) {
-      Widget error(BuildContext context, Object error, StackTrace? stack) => fallback;
-      if (src.startsWith('data:')) {
-        final bytes = UriData.parse(src).contentAsBytes();
-        child = Image.memory(bytes, width: size, height: size, fit: BoxFit.cover, errorBuilder: error);
-      } else {
-        child = Image.network(
-          src,
-          width: size,
-          height: size,
-          fit: BoxFit.cover,
-          errorBuilder: error,
-          // Flutter web: photos from hosts without CORS still show, as an <img>.
-          webHtmlElementStrategy: WebHtmlElementStrategy.fallback,
-        );
-      }
+      child = Image.network(
+        src,
+        width: size,
+        height: size,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stack) => fallback,
+        // Flutter web: images from hosts without CORS still show, as an <img>.
+        webHtmlElementStrategy: WebHtmlElementStrategy.fallback,
+      );
     }
     return Container(
       width: size,

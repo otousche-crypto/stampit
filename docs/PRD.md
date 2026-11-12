@@ -64,7 +64,6 @@ Le modèle de données doit néanmoins préparer la V2 (`id`, `schemaVersion`).
 - **Motion** (`motion/react`) pour les animations du site (requis par Fluid)
 - **React Router** : 2 routes
 - **Zod** : validation de la config
-- **react-easy-crop** : recadrage de l'avatar
 - **Shiki** (bundle léger, chargé à la demande) : coloration du code dans « Show code »
 - **Vitest** : tests des générateurs d'export
 - **Vercel** : déploiement statique, rewrite SPA vers `index.html`
@@ -89,7 +88,6 @@ Composants à utiliser :
 | Preset, ordre, taille, mode, graisse, bordure | RadioGroup |
 | Ajout d'un canal | Combobox |
 | Palettes Light / Dark | TabsSubtle |
-| Recadrage avatar | Dialog |
 | Boutons | Button (primary / secondary / ghost) |
 | Alertes | Banner |
 | Infobulles | Tooltip |
@@ -221,15 +219,15 @@ Les générateurs `generateHtml` et `generatePrompt` sont des **fonctions pures*
 #### Avatar
 | Contrôle | Valeurs | Défaut |
 |---|---|---|
-| `Source` | None · Initials · Upload · URL | **Initials** |
-| `Initials` | 1 à 2 caractères ; vide = déduit du texte gras (initiales des 2 premiers mots) | auto |
-| `Upload` | PNG, JPG, WebP, 10 Mo max. Recadrage rond dans un Dialog (déplacement + zoom 1× à 3×). Sortie : WebP 96 × 96, qualité 0,75 | — |
-| `Image URL` | URL. Raccourci `Use GitHub username` qui génère `https://github.com/{user}.png` | — |
-| `Background` | ColorPicker, visible pour Initials et derrière les images transparentes | `#FF6B35` |
+| `Avatar` | Grille de vignettes rondes (radiogroup, flèches au clavier) : `Initials`, puis les 11 avatars de `public/avatars/` (amelie, camille, clara, daniel, hannah, jonas, lucas, mateo, olivier, sofia, yuki) | **Initials** |
+
+- Pas d'import de photo : l'utilisateur choisit uniquement parmi les avatars fournis (3D, Fluent Emoji, MIT).
+- Choisir un avatar écrit `source: "url"` et `url: "/avatars/{id}.png"`, fond `#E9E9EE` ; `Initials` remet `source: "initials"` sur `#FF6B35`.
+- Initiales : déduites du texte gras (initiales des 2 premiers mots).
+- Les exports réécrivent `/avatars/…` en URL absolue du site Stampit, pour que l'image s'affiche sur le site de l'utilisateur.
 
 - Initiales : couleur = `textBold` si le contraste avec le fond de l'avatar est suffisant, sinon blanc ou noir.
-- Si l'image d'URL ne charge pas : repli sur les initiales + avertissement `We couldn't load this image.`
-- Fichier refusé (format ou taille) : message d'erreur explicite, rien n'est modifié.
+- Si l'image ne charge pas : repli sur les initiales.
 
 #### Colors
 | Contrôle | Valeurs | Défaut |
@@ -290,9 +288,7 @@ Les générateurs `generateHtml` et `generatePrompt` sont des **fonctions pures*
 - `Copy code` : bouton **secondaire**.
 - Ligne de poids : `~7 KB · zero dependency` (poids réel du snippet, arrondi au Ko).
 - `Show code` : lien qui déplie le snippet avec coloration syntaxique (lecture seule). Replié par défaut.
-- `Download avatar` : visible uniquement si `avatar.source = "upload"`. Télécharge `stampit-avatar.webp`.
 - Après copie : toast `Copied`.
-- Si une photo téléversée existe : note `Your uploaded photo isn't included in the page link. Shared links will show your initials.`
 - Exports désactivés (avec explication) tant qu'une erreur bloquante subsiste.
 
 ---
@@ -456,7 +452,7 @@ type BadgeConfig = {
   };
 
   avatar: {
-    source: "none" | "initials" | "upload" | "url";
+    source: "none" | "initials" | "url"; // "upload" des anciens liens → "initials"
     initials: string | null;
     url: string | null;
     background: Hex;
@@ -488,7 +484,6 @@ type BadgeConfig = {
 
 - `theme.base` désigne la palette utilisée quand `adaptToSite = false`. Les presets Light/Dark/Glass/Brand écrivent dans `palettes[base]`.
 - Les deux palettes sont toujours stockées (bascule réversible).
-- La photo téléversée **n'est jamais dans la config** (voir §10).
 
 ### 9.2 Config par défaut
 Texte `Made by` / `Your Name`, preset **Light** (= pastille Décadi), avatar Initials sur `#FF6B35`, taille M, graisse 500, rayon 1, bordure 1, ombre soft, icône visible, mode Link sans URL, `adaptToSite: false`, `base: "light"`, palette dark = preset Dark.
@@ -530,7 +525,6 @@ Texte `Made by` / `Your Name`, preset **Light** (= pastille Décadi), avatar Ini
 | Clé | Contenu |
 |---|---|
 | `stampit:config` | Dernière `BadgeConfig` |
-| `stampit:avatar:{id}` | Data URL WebP 96 px de la photo téléversée |
 
 Toutes les lectures et écritures dans un `try/catch` (navigation privée, quota plein). En cas d'échec : l'app fonctionne sans persistance.
 
@@ -539,7 +533,6 @@ Toutes les lectures et écritures dans un `try/catch` (navigation privée, quota
 2. `JSON.stringify` → `CompressionStream("deflate-raw")` → base64url.
 3. Écrire dans `/create#c=…` avec `history.replaceState` (pas d'entrée d'historique à chaque frappe).
 4. Au chargement : décoder → fusionner avec les défauts → `migrate()` → valider avec Zod.
-5. Si `avatar.source = "upload"` et aucune image locale pour cet `id` : afficher les initiales + Banner `Your photo isn't stored in this link. Upload it again or use an image URL.`
 
 Taille cible du hash : 200 à 500 caractères.
 
@@ -562,12 +555,12 @@ Un seul bloc autonome :
 ```
 - Le commentaire d'en-tête contient le **lien d'édition**, pour retrouver sa config plus tard.
 - N'émettre que le CSS nécessaire : pas de `@media (prefers-color-scheme)` si `adaptToSite = false`, pas de `backdrop-filter` si `blur = 0`, pas de règles de bulles en mode Link.
-- Avatar `upload` : intégré en data URL base64. Avatar `url` : simple `src`.
+- Avatar `url` : simple `src` (absolu pour les avatars fournis).
 - Icônes : uniquement celles des canaux utilisés, tracés simplifiés (1 décimale).
 - CSS et JS minifiés ; HTML lisible.
 - Le snippet doit fonctionner collé n'importe où dans un `<body>`, plusieurs fois sur la même page (ids distincts).
 
-**Poids indicatifs** (minifié) : Link + initiales ~2 Ko · Link + photo ~7 Ko · Bubbles 4 canaux + photo ~11 Ko · 8 canaux + photo + thème adaptatif ~15 Ko.
+**Poids indicatifs** (minifié) : Link + initiales ~2 Ko ; un avatar n'ajoute qu'une URL d'image (plus de photo en base64).
 
 ### 11.2 Copy prompt (`generatePrompt`)
 Texte en anglais, structuré ainsi :
@@ -576,8 +569,7 @@ Texte en anglais, structuré ainsi :
 3. **Behavior** : mode, liens et URL, animations (durées, rebonds, décalage), positionnement des bulles, `prefers-reduced-motion`.
 4. **Accessibility** : checklist §8.5 (disclosure, clavier, focus visible, ARIA, zones tactiles 44 px).
 5. **Reference implementation** : le snippet HTML/CSS/JS complet, comme source de vérité à adapter (pas forcément à copier tel quel).
-6. **Avatar** : si `upload`, instruction de placer le fichier téléchargé dans `public/stampit-avatar.webp` et de l'utiliser (le base64 est retiré de la référence et remplacé par ce chemin).
-7. **Acceptance criteria** : 5 points vérifiables (rendu, survol, ouverture/fermeture, clavier, mouvement réduit).
+6. **Acceptance criteria** : 5 points vérifiables (rendu, survol, ouverture/fermeture, clavier, mouvement réduit).
 
 ---
 
@@ -614,11 +606,11 @@ Texte en anglais, structuré ainsi :
 2. `schema.ts` (types, Zod, défauts, `migrate`), `presets.ts`, `contrast.ts`, `channels.ts`.
 3. `generateHtml` en mode Link + tests.
 4. Éditeur : layout 3 colonnes, sections Text, Colors, Shape, aperçu branché sur `generateHtml`.
-5. Avatar (initiales, URL, upload + recadrage).
+5. Avatar (initiales ou avatar choisi dans la liste).
 6. Mode Bubbles : générateur, JS de positionnement et de clavier, éditeur des canaux.
 7. Adapt to site theme + contrôle de contraste.
 8. Persistance (localStorage + hash).
-9. Export : `Copy code`, `generatePrompt`, `Copy prompt`, `Show code`, `Download avatar`.
+9. Export : `Copy code`, `generatePrompt`, `Copy prompt`, `Show code`.
 10. Page d'accueil + `build-demo.ts` + meta/OG.
 11. Responsive mobile (aperçu fixe, tiroir `Get code`).
 12. Passe accessibilité et tests navigateurs.
@@ -629,8 +621,8 @@ Texte en anglais, structuré ainsi :
 
 - [ ] Depuis `/`, `Create` mène à `/create` ; la pastille démo est interactive et fonctionne au clavier.
 - [ ] Chaque réglage de §6.3 modifie l'aperçu instantanément et respecte ses valeurs par défaut.
-- [ ] Recharger la page restaure la pastille ; ouvrir l'URL de l'éditeur dans un autre navigateur reproduit la pastille (photo téléversée exceptée, avec message).
-- [ ] Le snippet `Copy code`, collé dans un fichier HTML vide, rend une pastille identique à l'aperçu, sans aucune requête réseau (hors avatar par URL).
+- [ ] Recharger la page restaure la pastille ; ouvrir l'URL de l'éditeur dans un autre navigateur reproduit la pastille.
+- [ ] Le snippet `Copy code`, collé dans un fichier HTML vide, rend une pastille identique à l'aperçu, sans aucune requête réseau (hors image d'avatar).
 - [ ] Le snippet fonctionne deux fois sur la même page.
 - [ ] Les bulles s'ouvrent au-dessus, basculent en dessous près du haut de l'écran, restent dans le viewport, passent sur 2 rangées si nécessaire.
 - [ ] Clavier complet : Tab, Entrée, flèches, Origine/Fin, Échap avec retour du focus.
