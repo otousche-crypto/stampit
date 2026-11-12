@@ -219,7 +219,7 @@ Les générateurs `generateHtml` et `generatePrompt` sont des **fonctions pures*
 #### Avatar
 | Contrôle | Valeurs | Défaut |
 |---|---|---|
-| `Avatar` | Grille de vignettes rondes (radiogroup, flèches au clavier) : `Initials`, puis les 11 avatars de `public/avatars/` (amelie, camille, clara, daniel, hannah, jonas, lucas, mateo, olivier, sofia, yuki) | **Initials** |
+| `Avatar` | Carrousel horizontal de vignettes rondes (radiogroup, flèches au clavier, boutons précédent / suivant, bords en fondu) : `Initials`, puis les 17 avatars de `public/avatars/`, femmes et hommes alternés, toutes les teintes de peau (jaune, claire à foncée) | **Initials** |
 
 - Pas d'import de photo : l'utilisateur choisit uniquement parmi les avatars fournis (3D, Fluent Emoji, MIT).
 - Choisir un avatar écrit `source: "url"` et `url: "/avatars/{id}.png"`, fond `#E9E9EE` ; `Initials` remet `source: "initials"` sur `#FF6B35`.
