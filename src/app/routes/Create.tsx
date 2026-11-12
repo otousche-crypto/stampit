@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { createDefaultConfig, parseConfig, type BadgeConfig } from '@/badge/schema'
 import { EditorProvider, type EditorNotice } from '@/editor/EditorProvider'
-import { EditorLayout, ProfileLayout } from '@/editor/EditorLayout'
+import { EditorLayout } from '@/editor/EditorLayout'
 import { loadStoredConfig, saveConfig } from '@/storage/local'
 import { decodeConfig, encodeConfig, readHash } from '@/storage/url'
 
@@ -70,12 +70,8 @@ export function Create({ embedded = false }: { embedded?: boolean }) {
       initialNotice={initial.notice}
       onChange={persist}
     >
-      {/* Two screens, each a snap point on the home page: the badge, then its profile modal. */}
       <section id="create" aria-label="Badge editor" className="h-dvh snap-start snap-always">
         <EditorLayout autoFocus={!embedded} />
-      </section>
-      <section id="profile" aria-label="Profile editor" className="h-dvh snap-start snap-always">
-        <ProfileLayout />
       </section>
     </EditorProvider>
   )

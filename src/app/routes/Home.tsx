@@ -169,7 +169,7 @@ export function Home() {
           </div>
         </main>
       </div>
-      {/* The badge editor, then the profile editor: one scroll each. */}
+      {/* The editor, one scroll below. */}
       <Suspense fallback={<div className="h-dvh snap-start bg-background" aria-busy="true" />}>
         <Create embedded />
       </Suspense>

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type ReactNode } from 'react'
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { Link2 } from 'lucide-react'
 import { InputField, InputGroup } from '@/components/ui/input-group'
 import { normalizeUrl } from '@/badge/channels'
@@ -152,11 +152,23 @@ export function ProfilePanel() {
   )
 }
 
-/** The modal itself, drawn open on the preview backdrop. */
+/** The modal's width, plus the stage's padding on both sides. */
+const MODAL_ROOM = 400 + 48
+
+/** The modal itself, drawn open on the preview backdrop, scaled down when the column is narrower. */
 export function ProfileStage({ className }: { className?: string }) {
   const { config, avatarFailed, previewBackground } = useEditor()
   const on = config.click.mode === 'profile'
   const dark = previewBackground === 'dark'
+  const stageRef = useRef<HTMLElement>(null)
+  const [fit, setFit] = useState(1)
+  useEffect(() => {
+    const stage = stageRef.current
+    if (!stage) return
+    const ro = new ResizeObserver(([entry]) => setFit(Math.min(1, entry.contentRect.width / MODAL_ROOM)))
+    ro.observe(stage)
+    return () => ro.disconnect()
+  }, [])
   const code = useMemo(
     () =>
       on
@@ -172,6 +184,7 @@ export function ProfileStage({ className }: { className?: string }) {
   )
   return (
     <section
+      ref={stageRef}
       aria-label="Profile preview"
       {...{ [PROFILE_STAGE_ATTR]: '' }}
       className={cn('flex min-h-0 overflow-y-auto', className)}
@@ -179,7 +192,10 @@ export function ProfileStage({ className }: { className?: string }) {
       <div className="m-auto flex flex-col items-center gap-3 p-6">
         {on ? (
           <>
-            <BadgePreview code={code} interceptLinks />
+            {/* Zoom on a wrapper: BadgePreview's own scale is undone on dialogs. */}
+            <div style={{ zoom: fit }}>
+              <BadgePreview code={code} interceptLinks />
+            </div>
             <p className={cn(typeClass('caption'), dark ? 'text-white/60' : 'text-black/55')}>
               What visitors see when they click your badge.
             </p>

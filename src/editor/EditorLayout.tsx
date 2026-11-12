@@ -8,6 +8,47 @@ import { ExportPanel } from './ExportPanel'
 import { ExportSheet } from './ExportSheet'
 import { ResetButton } from './ResetButton'
 import { ProfilePanel, ProfileStage } from './ProfilePanel'
+import { TabsSubtle, TabsSubtleItem } from '@/components/ui/tabs-subtle'
+import { useEditor, type EditorPane } from './EditorProvider'
+
+const PANES: { value: EditorPane; label: string }[] = [
+  { value: 'stamp', label: 'Stamp' },
+  { value: 'pop', label: 'Pop' },
+]
+
+/** Stamp: the badge. Pop: the profile modal it opens. */
+function PaneTabs({ className }: { className?: string }) {
+  const { pane, setPane } = useEditor()
+  return (
+    <TabsSubtle
+      idPrefix="pane"
+      size="compact"
+      selectedIndex={PANES.findIndex((p) => p.value === pane)}
+      onSelect={(index) => setPane(PANES[index].value)}
+      className={className}
+    >
+      {PANES.map((p, index) => (
+        <TabsSubtleItem key={p.value} index={index} label={p.label} />
+      ))}
+    </TabsSubtle>
+  )
+}
+
+/** The open tab's settings. */
+function PaneSettings({ autoFocus }: { autoFocus: boolean }) {
+  const { pane } = useEditor()
+  return (
+    <div role="tabpanel" id={`pane-panel-${pane}`} aria-label={pane === 'stamp' ? 'Stamp' : 'Pop'}>
+      {pane === 'stamp' ? <SettingsPanel autoFocus={autoFocus} /> : <ProfilePanel />}
+    </div>
+  )
+}
+
+/** The badge on the backdrop, or the modal it opens. */
+function PaneStage({ showHint = true, className }: { showHint?: boolean; className?: string }) {
+  const { pane } = useEditor()
+  return pane === 'stamp' ? <PreviewStage showHint={showHint} className={className} /> : <ProfileStage className={className} />
+}
 
 
 /** A floating panel over the full-screen preview backdrop. */
@@ -45,11 +86,14 @@ export function EditorLayout({ autoFocus = true }: { autoFocus?: boolean }) {
       // The room left for the transparent header takes the preview grey, not white.
       <div ref={rootRef} className="flex h-dvh flex-col pt-14" style={backdrop}>
         <div className="flex h-[35dvh] min-h-44 shrink-0 flex-col overflow-hidden border-b border-border" style={backdrop}>
-          <PreviewStage showHint={false} className="flex-1" />
+          <PaneStage showHint={false} className="flex-1" />
         </div>
         {/* Same surface level as the desktop cards, so menus opened from it land on the same step. */}
         <Elevated offset={2} aria-label="Settings" role="region" className="min-h-0 flex-1 overflow-y-auto">
-          <SettingsPanel autoFocus={autoFocus} />
+          <div className="sticky top-0 z-10 border-b border-border bg-inherit px-3 py-2">
+            <PaneTabs />
+          </div>
+          <PaneSettings autoFocus={autoFocus} />
           <div className="flex justify-center px-3 pb-24 pt-2">
             <ResetButton />
           </div>
@@ -62,8 +106,11 @@ export function EditorLayout({ autoFocus = true }: { autoFocus?: boolean }) {
 
   const settings = (
     <Card label="Settings" className="h-full">
+      <div className="shrink-0 border-b border-border px-3 py-2">
+        <PaneTabs />
+      </div>
       <div className="min-h-0 flex-1 overflow-y-auto">
-        <SettingsPanel autoFocus={autoFocus} />
+        <PaneSettings autoFocus={autoFocus} />
       </div>
       <div className="flex shrink-0 justify-center border-t border-border px-3 py-2">
         <ResetButton />
@@ -73,7 +120,7 @@ export function EditorLayout({ autoFocus = true }: { autoFocus?: boolean }) {
 
   const center = (
     <div className="flex min-h-0 flex-1 flex-col">
-      <PreviewStage className="flex-1" />
+      <PaneStage className="flex-1" />
     </div>
   )
 
@@ -96,40 +143,6 @@ export function EditorLayout({ autoFocus = true }: { autoFocus?: boolean }) {
             </Card>
           </div>
         )}
-      </div>
-    </div>
-  )
-}
-
-/**
- * The profile editor, one scroll below the badge editor: its settings on the
- * left, the modal on the preview backdrop. Mobile: the modal on top.
- */
-export function ProfileLayout() {
-  const tablet = useMediaQuery('(min-width: 768px)')
-  const backdrop = useBackdropStyle()
-
-  if (!tablet) {
-    return (
-      <div className="flex h-dvh flex-col pt-14" style={backdrop}>
-        <ProfileStage className="h-[45dvh] min-h-56 shrink-0 border-b border-border" />
-        <Elevated offset={2} aria-label="Profile settings" role="region" className="min-h-0 flex-1 overflow-y-auto">
-          <ProfilePanel />
-        </Elevated>
-      </div>
-    )
-  }
-
-  return (
-    <div className="h-dvh overflow-hidden" style={backdrop}>
-      <div className="grid h-full grid-cols-[minmax(300px,360px)_1fr] gap-4 px-4 pb-4 pt-16 lg:grid-cols-[360px_1fr_300px]">
-        <Card label="Profile settings" className="h-full">
-          <div className="min-h-0 flex-1 overflow-y-auto">
-            <ProfilePanel />
-          </div>
-        </Card>
-        {/* The modal is 400 px wide: on desktop it takes the export column too. */}
-        <ProfileStage className="h-full lg:col-span-2" />
       </div>
     </div>
   )

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ArrowDown, Link2, UserRound } from 'lucide-react'
+import { ArrowRight, Link2, UserRound } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { InputField, InputGroup } from '@/components/ui/input-group'
 import { normalizeUrl } from '@/badge/channels'
@@ -10,13 +10,6 @@ import { useEditor } from '../EditorProvider'
 
 type Click = BadgeConfig['click']
 
-/** Smooth scroll to one of the editor screens (`create`, `profile`). */
-export function scrollToSection(id: string) {
-  document.getElementById(id)?.scrollIntoView({
-    behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
-    block: 'start',
-  })
-}
 
 const MODES: SelectRowOption<Click['mode']>[] = [
   { value: 'link', label: 'Link', icon: Link2 },
@@ -25,11 +18,10 @@ const MODES: SelectRowOption<Click['mode']>[] = [
 
 /**
  * Link: the badge goes to one address, the social links slide out beside it.
- * Profile: the badge opens a modal, designed in the profile editor one
- * scroll below.
+ * Profile: the badge opens a modal, designed in the Pop tab.
  */
 export function ClickSection() {
-  const { config, update, errors, errorsShown } = useEditor()
+  const { config, update, errors, errorsShown, setPane } = useEditor()
   const click = config.click
   const profile = click.mode === 'profile'
   const [touched, setTouched] = useState(false)
@@ -46,9 +38,9 @@ export function ClickSection() {
       />
       {profile ? (
         <>
-          <Hint>Your bio, links, GitHub activity and projects are set in the profile editor.</Hint>
-          <Button variant="secondary" size="compact" trailingIcon={ArrowDown} className="self-start" onClick={() => scrollToSection('profile')}>
-            Edit profile
+          <Hint>Your role, links, GitHub activity and projects are set in the Pop tab.</Hint>
+          <Button variant="secondary" size="compact" trailingIcon={ArrowRight} className="self-start" onClick={() => setPane('pop')}>
+            Edit the Pop
           </Button>
         </>
       ) : (

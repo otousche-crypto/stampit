@@ -66,7 +66,13 @@ type EditorContextValue = {
   contrastIssues: ContrastIssue[]
   /** What the preview renders (scheme forced to the preview background). */
   preview: GeneratedBadge
+
+  /** Settings tab: the badge itself ("Stamp") or the profile modal it opens ("Pop"). */
+  pane: EditorPane
+  setPane: (pane: EditorPane) => void
 }
+
+export type EditorPane = 'stamp' | 'pop'
 
 /** Long enough for the slowest appear animation (Shine: 0.2 s delay + 0.9 s). Not an animation timing. */
 const ENTRANCE_WINDOW_MS = 1500
@@ -147,6 +153,7 @@ export function EditorProvider({
   const errors = useMemo(() => validate(config), [config])
   const [errorsShown, setErrorsShown] = useState(false)
   const [revealKey, setRevealKey] = useState(0)
+  const [pane, setPane] = useState<EditorPane>('stamp')
   const revealErrors = useCallback(() => {
     setErrorsShown(true)
     setRevealKey((k) => k + 1)
@@ -159,6 +166,9 @@ export function EditorProvider({
     ].filter(Boolean) as string[]
     const target = order[0]
     if (!target) return
+    // The field may sit in the other tab: the modal's fields are in Pop.
+    const inPop = target.startsWith('project-') || (config.click.mode === 'profile' && target !== 'text')
+    setPane(inPop ? 'pop' : 'stamp')
     const smooth = !window.matchMedia('(prefers-reduced-motion: reduce)').matches
     const go = () => {
       const input = document.querySelector<HTMLInputElement>(`[data-field="${target}"] input`)
@@ -172,7 +182,7 @@ export function EditorProvider({
     requestAnimationFrame(() => {
       if (!go()) window.setTimeout(go, 250)
     })
-  }, [errors])
+  }, [errors, config.click.mode])
 
   const contrastIssues = useMemo(
     () =>
@@ -298,6 +308,8 @@ export function EditorProvider({
     revealKey,
     contrastIssues,
     preview,
+    pane,
+    setPane,
   }
 
   return <EditorContext.Provider value={value}>{children}</EditorContext.Provider>
