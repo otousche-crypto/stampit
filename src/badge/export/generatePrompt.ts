@@ -128,7 +128,10 @@ function profileSpec(config: BadgeConfig): string[] {
     lines.push('- "Projects" section, a list of cards (faint tint of the bold text color, 1px border ring), each with the name and a short description in the normal text color, the whole card a link with an up-right arrow:')
     projects.forEach((p, i) => lines.push(`  ${i + 1}. ${p.name} — ${p.url}${p.description ? ` — "${p.description}"` : ''}`))
   }
-  lines.push('- Section titles: 12px, upper-case, letter-spacing .04em, normal text color.')
+  lines.push(
+    '- Section titles: 12px, upper-case, letter-spacing .04em, normal text color.',
+    '- Last line, centered, 20px below: "Made with Stampit" (12px, normal text color, "Stampit" in the bold text color, weight 500), a link to the Stampit site opening in a new tab; it turns the bold text color on hover.',
+  )
   return lines
 }
 

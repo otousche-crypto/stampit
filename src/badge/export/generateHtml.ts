@@ -766,6 +766,11 @@ function profileRules(
     `.${c}__mc .${c}__mi{position:absolute;top:14px;right:14px}`,
     `.${c}__mcn{font-weight:500}`,
     `.${c}__mcd{color:var(${v}tn);font-size:13px}`,
+    // "Made with Stampit", small and quiet under everything.
+    `.${c}__mf{margin-top:20px;text-align:center;font-size:12px;color:var(${v}tn)}`,
+    `.${c}__mf a{color:inherit;transition:${transition(ctx, 'color', 'fast')}}`,
+    `.${c}__mf span{color:var(${v}tb);font-weight:500}`,
+    `.${c}__mf a:hover{color:var(${v}tb)}`,
     `@media (prefers-reduced-motion:reduce){.${c} .${c}__ms:hover,.${c} .${c}__dlg a:hover>.${c}__mi{transform:none}.${c} .${c}__gr{animation:none}}`,
   ]
   if (face.kind === 'initials') {
@@ -788,7 +793,7 @@ function channelIconSvg(type: keyof typeof CHANNELS): string {
 }
 
 /** The profile modal's markup. Closed until the badge is clicked. */
-function profileHtml(c: string, config: BadgeConfig, avatar: ResolvedAvatar, open = false, apiOrigin = ''): string {
+function profileHtml(c: string, config: BadgeConfig, avatar: ResolvedAvatar, open = false, stampitOrigin = ''): string {
   const newTab = config.click.link.newTab
   const name = config.text.bold.trim() || config.text.normal.trim()
   const role = config.text.role.trim()
@@ -824,7 +829,7 @@ function profileHtml(c: string, config: BadgeConfig, avatar: ResolvedAvatar, ope
     const profile = `https://github.com/${user}`
     lines.push(
       // Only the bricks, untitled: the whole grid links to the profile (its name gets the total once loaded).
-      `<div class="${c}__gh" data-user="${user}" data-api="${escapeHtml(apiOrigin)}">${link('gr', profile, `GitHub contributions of @${user}`, '')}</div>`,
+      `<div class="${c}__gh" data-user="${user}" data-api="${escapeHtml(stampitOrigin)}">${link('gr', profile, `GitHub contributions of @${user}`, '')}</div>`,
     )
   }
 
@@ -836,6 +841,11 @@ function profileHtml(c: string, config: BadgeConfig, avatar: ResolvedAvatar, ope
     })
     lines.push(`<section class="${c}__sec" aria-labelledby="${c}-pj-t"><h3 id="${c}-pj-t" class="${c}__mt">Projects</h3><ul class="${c}__mj">${items.join('')}</ul></section>`)
   }
+
+  // Signed at the bottom, like the badge it opens.
+  lines.push(
+    `<p class="${c}__mf"><a href="${escapeHtml(stampitOrigin)}/" target="_blank" rel="noopener noreferrer" aria-label="Made with Stampit, opens in a new tab">Made with <span>Stampit</span></a></p>`,
+  )
 
   return `  <dialog id="${c}-dlg" class="${c}__dlg" aria-labelledby="${c}-dlg-t"${open ? ' open' : ''}>\n    ${lines.join('\n    ')}\n  </dialog>`
 }
@@ -939,7 +949,7 @@ export function generateBadge(config: BadgeConfig, options: GenerateHtmlOptions 
       `aria-label="${escapeHtml(label ? `${label}, open profile` : 'Open profile')}"`,
     ]
     const button = `<button ${attrs.join(' ')}>${body}</button>`
-    // The GitHub graph comes from Stampit's own API: the snippet runs on other sites.
+    // The GitHub graph and the "Made with Stampit" link point to the Stampit site: the snippet runs on others.
     const dialog = profileHtml(c, config, avatar, options.profileOnly, options.assetOrigin)
     html = card
       ? `<div class="${c}">\n  <div class="${c}__pill">\n  ${button}\n  </div>\n${dialog}\n</div>`

@@ -71,6 +71,7 @@ describe('generateHtml', () => {
     expect(p.html).toContain('href="https://stampit.app"')
     expect(p.html).not.toContain('Décadi')
     expect(p.html).not.toContain('ignored.example')
+    expect(p.html).toContain('aria-label="Made with Stampit, opens in a new tab">Made with <span>Stampit</span></a>')
     // The social links live in the modal, not beside the badge.
     expect(p.html).not.toContain('__sos')
     expect(p.css).toContain('@starting-style')
@@ -79,7 +80,8 @@ describe('generateHtml', () => {
     const minimal = generateBadge(FIXTURES['profile-minimal'])
     expect(minimal.html).not.toContain('__gh')
     expect(minimal.html).not.toContain('__mj')
-    expect(minimal.html).not.toContain('target="_blank"')
+    // Only "Made with Stampit" leaves in a new tab when the profile's links don't.
+    expect(minimal.html.match(/target="_blank"/g)).toHaveLength(1)
     // No avatar on the badge, initials in the modal.
     expect(minimal.html).toContain('<span class="sp-test1234__mav" aria-hidden="true">EL</span>')
   })
