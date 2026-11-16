@@ -8,48 +8,127 @@ import { ExportPanel } from './ExportPanel'
 import { ExportSheet } from './ExportSheet'
 import { ResetButton } from './ResetButton'
 import { ProfilePanel, ProfileStage } from './ProfilePanel'
-import { TabsSubtle, TabsSubtleItem } from '@/components/ui/tabs-subtle'
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
+import { spring } from '@/lib/springs'
+import { typeClass } from '@/lib/type-scale'
 import { useEditor, type EditorPane } from './EditorProvider'
 
-const PANES: { value: EditorPane; label: string }[] = [
+const STEPS: { value: EditorPane; label: string }[] = [
   { value: 'stamp', label: 'Stamp' },
   { value: 'pop', label: 'Pop' },
 ]
 
-/** Stamp: the badge. Pop: the profile modal it opens. */
-function PaneTabs({ className }: { className?: string }) {
+/** Stamp, then Pop: the badge, then the modal it opens. Both steps stay clickable. */
+function PaneStepper({ className }: { className?: string }) {
   const { pane, setPane } = useEditor()
+  const current = STEPS.findIndex((s) => s.value === pane)
   return (
-    <TabsSubtle
-      idPrefix="pane"
-      size="compact"
-      selectedIndex={PANES.findIndex((p) => p.value === pane)}
-      onSelect={(index) => setPane(PANES[index].value)}
-      className={className}
-    >
-      {PANES.map((p, index) => (
-        <TabsSubtleItem key={p.value} index={index} label={p.label} />
-      ))}
-    </TabsSubtle>
+    <nav aria-label="Editor steps" className={className}>
+      <ol className="flex items-center gap-2">
+        {STEPS.map((step, index) => {
+          const active = index === current
+          const done = index < current
+          return (
+            <li key={step.value} className={cn('flex items-center gap-2', index > 0 && 'flex-1')}>
+              {index > 0 && (
+                // The track fills once Stamp is behind.
+                <span aria-hidden="true" className="relative h-px flex-1 overflow-hidden rounded-full bg-border">
+                  <motion.span
+                    className="absolute inset-0 origin-left bg-foreground"
+                    initial={false}
+                    animate={{ scaleX: current >= index ? 1 : 0 }}
+                    transition={spring.moderate}
+                  />
+                </span>
+              )}
+              <button
+                type="button"
+                aria-current={active ? 'step' : undefined}
+                onClick={() => setPane(step.value)}
+                className={cn(
+                  'flex h-8 items-center gap-2 rounded-full pl-1 pr-3 outline-none transition-colors focus-visible:ring-1 focus-visible:ring-[color:var(--focus-ring)]',
+                  typeClass('body'),
+                  active ? 'text-foreground' : 'text-muted-foreground hover:text-foreground',
+                )}
+              >
+                <span
+                  aria-hidden="true"
+                  className={cn(
+                    'flex size-6 items-center justify-center rounded-full tabular-nums transition-colors',
+                    typeClass('caption'),
+                    active || done ? 'bg-foreground text-background' : 'text-muted-foreground ring-1 ring-inset ring-border',
+                  )}
+                >
+                  {index + 1}
+                </span>
+                {step.label}
+              </button>
+            </li>
+          )
+        })}
+      </ol>
+    </nav>
   )
 }
 
-/** The open tab's settings. */
+/** The current step's settings, sliding in from the side the step comes from. */
 function PaneSettings({ autoFocus }: { autoFocus: boolean }) {
   const { pane } = useEditor()
+  const reduced = useReducedMotion()
+  // Each step starts at its top.
+  useEffect(() => {
+    document.querySelectorAll('[data-pane-scroll]').forEach((el) => el.scrollTo({ top: 0 }))
+  }, [pane])
+  // The first field takes the focus on load only, not on each return to Stamp.
+  const firstLoad = useRef(true)
+  useEffect(() => {
+    firstLoad.current = false
+  }, [])
+  const dir = pane === 'pop' ? 1 : -1
+  const offset = reduced ? 0 : 24
   return (
-    <div role="tabpanel" id={`pane-panel-${pane}`} aria-label={pane === 'stamp' ? 'Stamp' : 'Pop'}>
-      {pane === 'stamp' ? <SettingsPanel autoFocus={autoFocus} /> : <ProfilePanel />}
-    </div>
+    <AnimatePresence mode="wait" initial={false} custom={dir}>
+      <motion.div
+        key={pane}
+        role="region"
+        aria-label={pane === 'stamp' ? 'Stamp settings' : 'Pop settings'}
+        custom={dir}
+        variants={{
+          enter: (d: number) => ({ x: d * offset, opacity: 0 }),
+          center: { x: 0, opacity: 1 },
+          leave: (d: number) => ({ x: -d * offset, opacity: 0, transition: spring.moderate.exit }),
+        }}
+        initial="enter"
+        animate="center"
+        exit="leave"
+        transition={spring.moderate}
+      >
+        {pane === 'stamp' ? <SettingsPanel autoFocus={autoFocus && firstLoad.current} /> : <ProfilePanel />}
+      </motion.div>
+    </AnimatePresence>
   )
 }
 
-/** The badge on the backdrop, or the modal it opens. */
+/** The badge on the backdrop, or the modal it opens, grown out of the badge's place. */
 function PaneStage({ showHint = true, className }: { showHint?: boolean; className?: string }) {
   const { pane } = useEditor()
-  return pane === 'stamp' ? <PreviewStage showHint={showHint} className={className} /> : <ProfileStage className={className} />
+  const reduced = useReducedMotion()
+  const pop = pane === 'pop'
+  return (
+    <AnimatePresence mode="wait" initial={false}>
+      <motion.div
+        key={pane}
+        className={cn('flex min-h-0 flex-col', className)}
+        initial={reduced ? { opacity: 0 } : pop ? { opacity: 0, scale: 0.4 } : { opacity: 0, scale: 1.15 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={reduced ? { opacity: 0 } : pop ? { opacity: 0, scale: 0.4, transition: spring.slow.exit } : { opacity: 0, scale: 1.15, transition: spring.fast.exit }}
+        transition={pop ? spring.slow : spring.moderate}
+      >
+        {pop ? <ProfileStage className="flex-1" /> : <PreviewStage showHint={showHint} className="flex-1" />}
+      </motion.div>
+    </AnimatePresence>
+  )
 }
-
 
 /** A floating panel over the full-screen preview backdrop. */
 function Card({ children, className, label }: { children: ReactNode; className?: string; label: string }) {
@@ -89,9 +168,9 @@ export function EditorLayout({ autoFocus = true }: { autoFocus?: boolean }) {
           <PaneStage showHint={false} className="flex-1" />
         </div>
         {/* Same surface level as the desktop cards, so menus opened from it land on the same step. */}
-        <Elevated offset={2} aria-label="Settings" role="region" className="min-h-0 flex-1 overflow-y-auto">
+        <Elevated offset={2} aria-label="Settings" role="region" className="min-h-0 flex-1 overflow-y-auto" data-pane-scroll>
           <div className="sticky top-0 z-10 border-b border-border bg-inherit px-3 py-2">
-            <PaneTabs />
+            <PaneStepper />
           </div>
           <PaneSettings autoFocus={autoFocus} />
           <div className="flex justify-center px-3 pb-24 pt-2">
@@ -107,9 +186,9 @@ export function EditorLayout({ autoFocus = true }: { autoFocus?: boolean }) {
   const settings = (
     <Card label="Settings" className="h-full">
       <div className="shrink-0 border-b border-border px-3 py-2">
-        <PaneTabs />
+        <PaneStepper />
       </div>
-      <div className="min-h-0 flex-1 overflow-y-auto">
+      <div className="min-h-0 flex-1 overflow-y-auto" data-pane-scroll>
         <PaneSettings autoFocus={autoFocus} />
       </div>
       <div className="flex shrink-0 justify-center border-t border-border px-3 py-2">

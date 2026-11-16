@@ -7,11 +7,21 @@ import { PREVIEW_BACKDROPS, useEditor } from './EditorProvider'
 
 /** The badge itself, centred on the preview backdrop (which the layout paints). */
 export function PreviewStage({ showHint = true, className }: { showHint?: boolean; className?: string }) {
-  const { preview, previewBackground, zoom, config, replayEntrance, entranceKey, hoverDemo } = useEditor()
+  const { preview, previewBackground, zoom, config, replayEntrance, entranceKey, hoverDemo, setPane } = useEditor()
+  const profile = config.click.mode === 'profile'
   const dark = previewBackground === 'dark'
   return (
     <section aria-label="Preview" className={cn('relative flex min-h-0 items-center justify-center', className)}>
-      <BadgePreview key={entranceKey} code={preview.code} interceptLinks hoverDemo={hoverDemo} scale={zoom} />
+      <BadgePreview
+        key={entranceKey}
+        code={preview.code}
+        interceptLinks
+        hoverDemo={hoverDemo}
+        scale={zoom}
+        // A badge with a Pop: clicking it in the preview goes to the Pop step.
+        onBadgeClick={profile ? () => setPane('pop') : undefined}
+        className={profile ? 'cursor-pointer' : undefined}
+      />
       {config.motion.entrance !== 'none' && (
         <Button
           variant="secondary"
@@ -31,7 +41,7 @@ export function PreviewStage({ showHint = true, className }: { showHint?: boolea
             dark ? 'text-white/60' : 'text-black/55',
           )}
         >
-          Links are disabled in the preview.
+          {profile ? 'Click your badge to edit its Pop.' : 'Links are disabled in the preview.'}
         </p>
       )}
     </section>

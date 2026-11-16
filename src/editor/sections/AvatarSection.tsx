@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState, type KeyboardEvent } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
-import { AVATARS, AVATAR_BACKGROUND } from '@/badge/avatars'
+import { AVATARS, AVATAR_BACKGROUND, AVATAR_BACKGROUNDS } from '@/badge/avatars'
 import { deriveInitials, initialsColor } from '@/badge/export/generateHtml'
 import { DEFAULT_AVATAR_BACKGROUND } from '@/badge/schema'
 import { Button } from '@/components/ui/button'
@@ -64,13 +64,32 @@ export function AvatarSection() {
 
   const select = (index: number) => {
     const { src } = OPTIONS[index]
-    update((c) => ({
-      ...c,
-      avatar: src
-        ? { ...c.avatar, source: 'url', url: src, background: AVATAR_BACKGROUND }
-        : { ...c.avatar, source: 'initials', url: null, background: DEFAULT_AVATAR_BACKGROUND },
-    }))
+    update((c) => {
+      // A background picked by hand stays; the two defaults follow the kind of avatar.
+      const auto = c.avatar.background === AVATAR_BACKGROUND || c.avatar.background === DEFAULT_AVATAR_BACKGROUND
+      const background = auto ? (src ? AVATAR_BACKGROUND : DEFAULT_AVATAR_BACKGROUND) : c.avatar.background
+      return {
+        ...c,
+        avatar: src
+          ? { ...c.avatar, source: 'url', url: src, background }
+          : { ...c.avatar, source: 'initials', url: null, background },
+      }
+    })
     reveal(index, motionBehavior())
+  }
+
+  const setBackground = (background: string) => update((c) => ({ ...c, avatar: { ...c.avatar, background } }))
+  const swatches = useRef<(HTMLButtonElement | null)[]>([])
+  const backgroundIndex = AVATAR_BACKGROUNDS.findIndex((b) => b.value === config.avatar.background.toUpperCase())
+
+  // Radio group keyboard for the swatches.
+  const onSwatchKey = (e: KeyboardEvent<HTMLDivElement>) => {
+    const step = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[e.key]
+    if (!step) return
+    e.preventDefault()
+    const next = (Math.max(0, backgroundIndex) + step + AVATAR_BACKGROUNDS.length) % AVATAR_BACKGROUNDS.length
+    setBackground(AVATAR_BACKGROUNDS[next].value)
+    swatches.current[next]?.focus()
   }
 
   const page = (direction: 1 | -1) => {
@@ -139,7 +158,7 @@ export function AvatarSection() {
                   'focus-visible:ring-2 focus-visible:ring-[color:var(--focus-ring,#6B97FF)]',
                   selected ? 'ring-2 ring-foreground' : 'opacity-85 hover:opacity-100',
                 )}
-                style={{ background: option.src ? AVATAR_BACKGROUND : DEFAULT_AVATAR_BACKGROUND }}
+                style={{ background: config.avatar.background }}
               >
                 {option.src ? (
                   <img src={option.src} alt="" width={96} height={96} className="size-full object-cover" draggable={false} />
@@ -147,7 +166,7 @@ export function AvatarSection() {
                   <span
                     aria-hidden="true"
                     className={cn('font-semibold', typeClass('caption'))}
-                    style={{ color: initialsColor({ ...config, avatar: { ...config.avatar, background: DEFAULT_AVATAR_BACKGROUND } }, editingPalette) }}
+                    style={{ color: initialsColor(config, editingPalette) }}
                   >
                     {deriveInitials(config)}
                   </span>
@@ -166,6 +185,37 @@ export function AvatarSection() {
         >
           <ChevronRight />
         </Button>
+      </div>
+      <div className="flex min-h-9 items-center justify-between gap-2 pl-2 pr-1">
+        <span id="avatar-bg-label" className={cn('text-muted-foreground', typeClass('body'))}>
+          Background
+        </span>
+        <div role="radiogroup" aria-labelledby="avatar-bg-label" onKeyDown={onSwatchKey} className="flex items-center gap-1.5">
+          {AVATAR_BACKGROUNDS.map((swatch, index) => {
+            const selected = index === backgroundIndex
+            return (
+              <button
+                key={swatch.value}
+                ref={(node) => {
+                  swatches.current[index] = node
+                }}
+                type="button"
+                role="radio"
+                aria-checked={selected}
+                aria-label={swatch.name}
+                title={swatch.name}
+                tabIndex={index === Math.max(0, backgroundIndex) ? 0 : -1}
+                onClick={() => setBackground(swatch.value)}
+                className={cn(
+                  'size-5 shrink-0 cursor-pointer rounded-full outline-none ring-offset-2 ring-offset-background transition-[box-shadow,transform] duration-80 hover:scale-110',
+                  'focus-visible:ring-2 focus-visible:ring-[color:var(--focus-ring,#6B97FF)]',
+                  selected && 'ring-2 ring-foreground',
+                )}
+                style={{ background: swatch.value }}
+              />
+            )
+          })}
+        </div>
       </div>
     </div>
   )

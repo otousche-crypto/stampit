@@ -26,3 +26,13 @@ export const AVATARS = [
 
 /** Behind the transparent 3D avatars: a soft neutral that reads in light and dark. */
 export const AVATAR_BACKGROUND = '#E9E9EE'
+
+/** The avatar background swatches (editor "Background"): soft tints that suit the 3D avatars and initials alike. */
+export const AVATAR_BACKGROUNDS: { value: string; name: string }[] = [
+  { value: AVATAR_BACKGROUND, name: 'Mist' },
+  { value: '#FF6B35', name: 'Tangerine' },
+  { value: '#FFD166', name: 'Sun' },
+  { value: '#8FD9A8', name: 'Mint' },
+  { value: '#8EC9F2', name: 'Sky' },
+  { value: '#C2A8F5', name: 'Lavender' },
+]

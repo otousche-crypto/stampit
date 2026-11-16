@@ -12,6 +12,8 @@ type BadgePreviewProps = {
   scale?: number
   /** Editor: play the badge's hover effect without the pointer on it. */
   hoverDemo?: boolean
+  /** Editor: a click on a badge that opens a profile calls this instead of opening the modal. */
+  onBadgeClick?: () => void
   className?: string
   style?: CSSProperties
 }
@@ -26,7 +28,7 @@ const LINK_TIP_MS = 2400
  * Injects the generated snippet as-is, scripts included. This is the real
  * export, not a React re-implementation: what you see is what you copy.
  */
-export function BadgePreview({ code, interceptLinks = false, hoverDemo = false, scale = 1, className, style }: BadgePreviewProps) {
+export function BadgePreview({ code, interceptLinks = false, hoverDemo = false, onBadgeClick, scale = 1, className, style }: BadgePreviewProps) {
   const hostRef = useRef<HTMLDivElement>(null)
   const [tip, setTip] = useState<{ url: string; rect: DOMRect } | null>(null)
 
@@ -85,6 +87,21 @@ export function BadgePreview({ code, interceptLinks = false, hoverDemo = false, 
     host.addEventListener('click', onClick, true)
     return () => host.removeEventListener('click', onClick, true)
   }, [interceptLinks])
+
+  // Captured on the host, before the badge's own script opens its modal.
+  useEffect(() => {
+    const host = hostRef.current
+    if (!host || !onBadgeClick) return
+    const onClick = (event: MouseEvent) => {
+      const trigger = (event.target as Element | null)?.closest?.('[aria-haspopup=dialog]')
+      if (!trigger || !host.contains(trigger)) return
+      event.preventDefault()
+      event.stopPropagation()
+      onBadgeClick()
+    }
+    host.addEventListener('click', onClick, true)
+    return () => host.removeEventListener('click', onClick, true)
+  }, [onBadgeClick])
 
   useEffect(() => {
     if (!tip) return

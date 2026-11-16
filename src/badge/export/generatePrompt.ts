@@ -130,7 +130,7 @@ function profileSpec(config: BadgeConfig): string[] {
   }
   lines.push(
     '- Section titles: 12px, upper-case, letter-spacing .04em, normal text color.',
-    '- Last line, centered, 20px below: "Made with Stampit" (12px, normal text color, "Stampit" in the bold text color, weight 500), a link to the Stampit site opening in a new tab; it turns the bold text color on hover.',
+    '- Last line, centered, 12px below (and 8px into the bottom padding): "Made with Stampit" (11px, normal text color at 65% opacity, "Stampit" weight 500), a link to the Stampit site opening in a new tab; full opacity on hover and focus.',
   )
   return lines
 }

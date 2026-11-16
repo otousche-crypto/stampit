@@ -766,11 +766,11 @@ function profileRules(
     `.${c}__mc .${c}__mi{position:absolute;top:14px;right:14px}`,
     `.${c}__mcn{font-weight:500}`,
     `.${c}__mcd{color:var(${v}tn);font-size:13px}`,
-    // "Made with Stampit", small and quiet under everything.
-    `.${c}__mf{margin-top:20px;text-align:center;font-size:12px;color:var(${v}tn)}`,
-    `.${c}__mf a{color:inherit;transition:${transition(ctx, 'color', 'fast')}}`,
-    `.${c}__mf span{color:var(${v}tb);font-weight:500}`,
-    `.${c}__mf a:hover{color:var(${v}tb)}`,
+    // "Made with Stampit": a quiet signature, close under the content, brighter on hover.
+    `.${c}__mf{margin:12px 0 -8px;text-align:center;font-size:11px;line-height:1.3;color:var(${v}tn)}`,
+    `.${c}__mf a{color:inherit;opacity:.65;transition:${transition(ctx, 'opacity', 'fast')}}`,
+    `.${c}__mf span{font-weight:500}`,
+    `.${c}__mf a:hover,.${c}__mf a:focus-visible{opacity:1}`,
     `@media (prefers-reduced-motion:reduce){.${c} .${c}__ms:hover,.${c} .${c}__dlg a:hover>.${c}__mi{transform:none}.${c} .${c}__gr{animation:none}}`,
   ]
   if (face.kind === 'initials') {
