@@ -186,7 +186,7 @@ const MODAL_ROOM = 400 + 48
 
 /** The modal itself, drawn open on the preview backdrop, scaled down when the column is narrower. */
 export function ProfileStage({ className }: { className?: string }) {
-  const { config, avatarFailed, previewBackground } = useEditor()
+  const { config, avatarFailed, previewBackground, setPane } = useEditor()
   const on = config.click.mode === 'profile'
   const dark = previewBackground === 'dark'
   const stageRef = useRef<HTMLElement>(null)
@@ -223,7 +223,8 @@ export function ProfileStage({ className }: { className?: string }) {
           <>
             {/* Zoom on a wrapper: BadgePreview's own scale is undone on dialogs. */}
             <div style={{ zoom: fit }}>
-              <BadgePreview code={code} interceptLinks />
+              {/* Its close button goes back to the Stamp. */}
+              <BadgePreview code={code} interceptLinks onClose={() => setPane('stamp')} />
             </div>
             <p className={cn(typeClass('caption'), dark ? 'text-white/60' : 'text-black/55')}>
               What visitors see when they click your badge.

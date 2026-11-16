@@ -46,7 +46,8 @@ export type GenerateHtmlOptions = {
   hoverDemoAttr?: string
   /**
    * Preview only: the profile modal drawn open, in the flow, without the
-   * badge or the close button (the profile editor's stage).
+   * badge (the profile editor's stage). Its close button stays, for the
+   * editor to catch.
    */
   profileOnly?: boolean
 }
@@ -398,7 +399,7 @@ function buildCss(
     const s = `[${PROFILE_STAGE_ATTR}]`
     rules.push(
       `${s} .${c}{display:block;animation:none}${s} .${c}>:not(dialog){display:none}`,
-      `${s} .${c} .${c}__dlg{position:static;margin:0;max-height:none;opacity:1;transform:none}${s} .${c}__xf{display:none}`,
+      `${s} .${c} .${c}__dlg{position:relative;inset:auto;margin:0;max-height:none;opacity:1;transform:none}`,
     )
   }
 
