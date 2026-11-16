@@ -90,6 +90,9 @@ const LABELS: Record<Layout, string> = {
 
 const ORDER: Layout[] = ['pill', 'stamp', 'split', 'card', 'team']
 
+/** Shown but not selectable yet. */
+const COMING_SOON: ReadonlySet<Layout> = new Set(['team'])
+
 /**
  * The badge model, as a strip of thumbnails. Fluid's selection pattern (as in
  * TabsSubtle): one selected background and one hover background glide between
@@ -113,12 +116,15 @@ export function LayoutSection() {
   }, [registerItem])
 
   const selectedIndex = Math.max(0, ORDER.indexOf(config.layout))
-  const select = (index: number) => update((c) => ({ ...c, layout: ORDER[index] }))
+  const select = (index: number) => {
+    if (COMING_SOON.has(ORDER[index])) return
+    update((c) => ({ ...c, layout: ORDER[index] }))
+  }
 
   const selectedRect = isMeasured ? itemRects[selectedIndex] : undefined
   const hoverRect = isMeasured && hoveredIndex !== null ? itemRects[hoveredIndex] : undefined
   const focusRect = isMeasured && focusedIndex !== null ? itemRects[focusedIndex] : undefined
-  const isHovering = hoveredIndex !== null && hoveredIndex !== selectedIndex
+  const isHovering = hoveredIndex !== null && hoveredIndex !== selectedIndex && !COMING_SOON.has(ORDER[hoveredIndex])
 
   // Radio group keyboard: arrows move the selection and the focus, wrapping.
   const onKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
@@ -128,6 +134,8 @@ export function LayoutSection() {
     if (e.key === 'End') next = ORDER.length - 1
     if (next === null) return
     e.preventDefault()
+    // Skip the formats that aren't out yet.
+    while (COMING_SOON.has(ORDER[next])) next = (next + (step ?? -1) + ORDER.length) % ORDER.length
     select(next)
     buttons.current[next]?.focus()
   }
@@ -210,7 +218,8 @@ export function LayoutSection() {
 
       {ORDER.map((layout, index) => {
         const selected = index === selectedIndex
-        const active = selected || hoveredIndex === index
+        const soon = COMING_SOON.has(layout)
+        const active = !soon && (selected || hoveredIndex === index)
         return (
           <button
             key={layout}
@@ -220,11 +229,15 @@ export function LayoutSection() {
             type="button"
             role="radio"
             aria-checked={selected}
+            aria-disabled={soon || undefined}
+            aria-label={soon ? `${LABELS[layout]}, coming soon` : undefined}
+            title={soon ? 'Coming soon' : undefined}
             tabIndex={selected ? 0 : -1}
             data-fluid-hover-index={index}
             onClick={() => select(index)}
             className={cn(
-              'relative z-10 flex min-w-0 cursor-pointer flex-col items-center gap-1.5 overflow-hidden px-1 pb-2 pt-2.5 outline-none',
+              'relative z-10 flex min-w-0 flex-col items-center gap-1.5 overflow-hidden px-1 pb-2 pt-2.5 outline-none',
+              soon ? 'cursor-not-allowed' : 'cursor-pointer',
               shape.bg,
             )}
           >
@@ -232,12 +245,15 @@ export function LayoutSection() {
               aria-hidden="true"
               className={cn(
                 'flex h-7 items-center justify-center transition-opacity duration-80',
-                active ? 'text-foreground/70 opacity-100' : 'text-foreground/70 opacity-80',
+                soon ? 'text-foreground/70 opacity-30' : active ? 'text-foreground/70 opacity-100' : 'text-foreground/70 opacity-80',
               )}
             >
               {THUMBS[layout]}
             </span>
-            {/* The invisible semibold copy reserves the width: no shift on select. */}
+            {soon ? (
+              <span className="whitespace-nowrap text-[10px] leading-4 text-muted-foreground">Coming soon</span>
+            ) : (
+            /* The invisible semibold copy reserves the width: no shift on select. */
             <span className={cn('inline-grid whitespace-nowrap', typeClass('caption'))}>
               <span className="invisible col-start-1 row-start-1" style={{ fontVariationSettings: fontWeights.semibold }}>
                 {LABELS[layout]}
@@ -252,6 +268,7 @@ export function LayoutSection() {
                 {LABELS[layout]}
               </span>
             </span>
+            )}
           </button>
         )
       })}

@@ -114,10 +114,39 @@ export function AvatarSection() {
   const mask = `linear-gradient(to right, ${edges.start ? '#000' : 'transparent'}, #000 ${FADE}px, #000 calc(100% - ${FADE}px), ${edges.end ? '#000' : 'transparent'})`
 
   return (
-    <div className="mb-3 flex flex-col gap-1.5">
-      <span id="avatar-label" className={cn('pl-2 text-muted-foreground', typeClass('body'))}>
-        Avatar
-      </span>
+    <div className="mb-2 flex flex-col gap-1">
+      {/* The label and the background colors share one line. */}
+      <div className="flex items-center justify-between gap-2 pl-2 pr-1">
+        <span id="avatar-label" className={cn('text-muted-foreground', typeClass('body'))}>
+          Avatar
+        </span>
+        <div role="radiogroup" aria-label="Avatar background" onKeyDown={onSwatchKey} className="flex items-center gap-1.5">
+          {AVATAR_BACKGROUNDS.map((swatch, index) => {
+            const selected = index === backgroundIndex
+            return (
+              <button
+                key={swatch.value}
+                ref={(node) => {
+                  swatches.current[index] = node
+                }}
+                type="button"
+                role="radio"
+                aria-checked={selected}
+                aria-label={swatch.name}
+                title={swatch.name}
+                tabIndex={index === Math.max(0, backgroundIndex) ? 0 : -1}
+                onClick={() => setBackground(swatch.value)}
+                className={cn(
+                  'size-5 shrink-0 cursor-pointer rounded-full outline-none ring-offset-2 ring-offset-background transition-[box-shadow,transform] duration-80 hover:scale-110',
+                  'focus-visible:ring-2 focus-visible:ring-[color:var(--focus-ring,#6B97FF)]',
+                  selected && 'ring-2 ring-foreground',
+                )}
+                style={{ background: swatch.value }}
+              />
+            )
+          })}
+        </div>
+      </div>
       <div className="flex items-center gap-1">
         <Button
           variant="ghost"
@@ -185,37 +214,6 @@ export function AvatarSection() {
         >
           <ChevronRight />
         </Button>
-      </div>
-      <div className="flex min-h-9 items-center justify-between gap-2 pl-2 pr-1">
-        <span id="avatar-bg-label" className={cn('text-muted-foreground', typeClass('body'))}>
-          Background
-        </span>
-        <div role="radiogroup" aria-labelledby="avatar-bg-label" onKeyDown={onSwatchKey} className="flex items-center gap-1.5">
-          {AVATAR_BACKGROUNDS.map((swatch, index) => {
-            const selected = index === backgroundIndex
-            return (
-              <button
-                key={swatch.value}
-                ref={(node) => {
-                  swatches.current[index] = node
-                }}
-                type="button"
-                role="radio"
-                aria-checked={selected}
-                aria-label={swatch.name}
-                title={swatch.name}
-                tabIndex={index === Math.max(0, backgroundIndex) ? 0 : -1}
-                onClick={() => setBackground(swatch.value)}
-                className={cn(
-                  'size-5 shrink-0 cursor-pointer rounded-full outline-none ring-offset-2 ring-offset-background transition-[box-shadow,transform] duration-80 hover:scale-110',
-                  'focus-visible:ring-2 focus-visible:ring-[color:var(--focus-ring,#6B97FF)]',
-                  selected && 'ring-2 ring-foreground',
-                )}
-                style={{ background: swatch.value }}
-              />
-            )
-          })}
-        </div>
       </div>
     </div>
   )

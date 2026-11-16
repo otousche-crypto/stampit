@@ -1,9 +1,8 @@
 import { InputField, InputGroup } from '@/components/ui/input-group'
 import type { BadgeConfig } from '@/badge/schema'
-import { Suggestions, WELL_FIELD } from '../controls'
+import { WELL_FIELD } from '../controls'
 import { useEditor } from '../EditorProvider'
 
-const NORMAL_SUGGESTIONS = ['Made by', 'Launched by', 'Built by', 'Designed by']
 
 /** Up to five teammates after the bold text. */
 const MAX_TEAM = 5
@@ -54,7 +53,6 @@ export function TextSection({ autoFocusBold }: { autoFocusBold?: boolean }) {
           />
         </InputGroup>
       </div>
-      <Suggestions label="Suggestions" items={NORMAL_SUGGESTIONS} onPick={(normal) => set({ normal })} />
 
       {/* The card shows the role; the profile editor has it too. */}
       {layout === 'card' && (

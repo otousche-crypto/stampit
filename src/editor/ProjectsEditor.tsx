@@ -9,7 +9,7 @@ import { spring } from '@/lib/springs'
 import { fontWeights } from '@/lib/font-weight'
 import { typeClass } from '@/lib/type-scale'
 import { cn } from '@/lib/utils'
-import { FieldLabel, WELL_FIELD } from './controls'
+import { WELL_FIELD } from './controls'
 import { useEditor } from './EditorProvider'
 
 type CardProps = {
@@ -154,7 +154,6 @@ export function ProjectsEditor() {
 
   return (
     <div className="flex flex-col gap-2">
-      <FieldLabel>Projects</FieldLabel>
       {projects.length > 0 && (
         <Reorder.Group ref={listRef} axis="y" values={projects} onReorder={setProjects} className="flex flex-col gap-2" aria-label="Projects">
           {projects.map((project, index) => (

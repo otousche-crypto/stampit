@@ -36,7 +36,12 @@ export const DEMO_CONFIG: BadgeConfig = {
   click: {
     mode: 'link',
     link: { url: 'https://www.linkedin.com/in/olivier-tousche-a6160b122/', newTab: true },
-    profile: { projects: [] },
+    profile: {
+      sections: { github: true, projects: true, newsletter: false, donate: false },
+      projects: [],
+      newsletter: { url: '', title: '', description: '' },
+      donate: { url: '', label: '' },
+    },
   },
   socials: { github: '', linkedin: '', x: '', instagram: '', dribbble: '' },
 }

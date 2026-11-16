@@ -6,7 +6,6 @@ import { TextSection } from './sections/TextSection'
 import { AvatarSection } from './sections/AvatarSection'
 import { ColorsSection } from './sections/ColorsSection'
 import { ShapeSection } from './sections/ShapeSection'
-import { ClickSection } from './sections/ClickSection'
 import { AnimationSection } from './sections/AnimationSection'
 import { LayoutSection } from './sections/LayoutSection'
 
@@ -18,7 +17,7 @@ const isDesktop = () => typeof window !== 'undefined' && window.matchMedia('(min
 
 /** A group of settings, separated from the next by a hairline. No title: every option is in view. */
 function Group({ children }: { children: ReactNode }) {
-  return <div className="flex flex-col border-b border-border px-2 py-3 last:border-b-0">{children}</div>
+  return <div className="flex flex-col border-b border-border px-2 py-1.5 last:border-b-0">{children}</div>
 }
 
 export function SettingsPanel({ autoFocus: allowAutoFocus = true }: { autoFocus?: boolean }) {
@@ -26,7 +25,7 @@ export function SettingsPanel({ autoFocus: allowAutoFocus = true }: { autoFocus?
   const { notice, dismissNotice } = useEditor()
 
   return (
-    <div className="flex flex-col pb-24 lg:pb-3">
+    <div className="flex flex-col pb-24 md:pb-0">
       {notice && (
         <div className="px-3 pt-3">
           <Banner status="error" size="compact" dismissible onDismiss={dismissNotice}>
@@ -50,9 +49,6 @@ export function SettingsPanel({ autoFocus: allowAutoFocus = true }: { autoFocus?
       </Group>
       <Group>
         <AnimationSection />
-      </Group>
-      <Group>
-        <ClickSection />
       </Group>
     </div>
   )

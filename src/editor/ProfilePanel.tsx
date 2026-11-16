@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import { useEffect, useId, useMemo, useRef, useState, type ReactNode } from 'react'
 import { Link2 } from 'lucide-react'
 import { InputField, InputGroup } from '@/components/ui/input-group'
 import { normalizeUrl } from '@/badge/channels'
@@ -10,6 +10,8 @@ import { typeClass } from '@/lib/type-scale'
 import { cn } from '@/lib/utils'
 import { Hint, SwitchRow, WELL_FIELD } from './controls'
 import { ProjectsEditor } from './ProjectsEditor'
+import { LinkSettings } from './sections/LinkSettings'
+import { DonateFields, NewsletterFields, SectionToggle } from './PopSections'
 import { SocialLinks } from './SocialLinks'
 import { useEditor } from './EditorProvider'
 
@@ -18,6 +20,19 @@ type Click = BadgeConfig['click']
 /** A group of settings, separated from the next by a hairline (as in the badge settings). */
 function Group({ children }: { children: ReactNode }) {
   return <div className="flex flex-col gap-2 border-b border-border px-2 py-3 last:border-b-0">{children}</div>
+}
+
+/** A titled block of the Pop's settings, in the modal's order: Profile, Projects, More. */
+function Category({ title, children }: { title: string; children: ReactNode }) {
+  const id = useId()
+  return (
+    <section aria-labelledby={id} className="flex flex-col gap-3 border-b border-border px-2 pb-3 pt-3 last:border-b-0">
+      <h3 id={id} className={cn('px-2 uppercase tracking-[0.04em] text-muted-foreground', typeClass('caption'))}>
+        {title}
+      </h3>
+      {children}
+    </section>
+  )
 }
 
 /** GitHub's help page on contributions that don't show up. */
@@ -92,11 +107,17 @@ export function ProfilePanel() {
     <div className="flex flex-col pb-24 md:pb-3">
       <Group>
         <SwitchRow label="Open a profile on click" checked={on} onToggle={() => setClick({ mode: on ? 'link' : 'profile' })} />
-        {!on && <Hint>Your badge opens a modal with your role, links, GitHub activity and projects.</Hint>}
+        {!on && <Hint>On, your badge opens a modal with your role, links, GitHub activity and projects. Off, it's a link:</Hint>}
       </Group>
+      {!on && (
+        <Group>
+          <LinkSettings />
+        </Group>
+      )}
       {on && (
         <>
-          <Group>
+          {/* Who you are and where to find you: everything above the projects in the modal. */}
+          <Category title="Profile">
             <InputGroup size="compact" className="w-full">
               <InputField
                 index={0}
@@ -108,8 +129,6 @@ export function ProfilePanel() {
                 onChange={(role) => update((c) => ({ ...c, text: { ...c.text, role } }))}
               />
             </InputGroup>
-          </Group>
-          <Group>
             <InputGroup size="compact" className="w-full">
               <div
                 data-field="linkUrl"
@@ -134,18 +153,28 @@ export function ProfilePanel() {
               </div>
             </InputGroup>
             <SocialLinks collapsible={false} />
-            <GithubStatus user={githubUser(config)} />
-          </Group>
-          <Group>
-            <ProjectsEditor />
-          </Group>
-          <Group>
+            <SectionToggle section="github" label="GitHub activity">
+              <GithubStatus user={githubUser(config)} />
+            </SectionToggle>
+            <SectionToggle section="newsletter" label="Newsletter">
+              <NewsletterFields />
+            </SectionToggle>
+          </Category>
+          <Category title="Projects">
+            <SectionToggle section="projects" label="Show projects">
+              <ProjectsEditor />
+            </SectionToggle>
+          </Category>
+          <Category title="More">
+            <SectionToggle section="donate" label="Donate">
+              <DonateFields />
+            </SectionToggle>
             <SwitchRow
               label="Open links in new tab"
               checked={config.click.link.newTab}
               onToggle={() => setLink({ newTab: !config.click.link.newTab })}
             />
-          </Group>
+          </Category>
         </>
       )}
     </div>

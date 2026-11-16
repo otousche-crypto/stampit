@@ -6,7 +6,8 @@ import { SettingsPanel } from './SettingsPanel'
 import { PreviewStage, useBackdropStyle } from './PreviewPanel'
 import { ExportPanel } from './ExportPanel'
 import { ExportSheet } from './ExportSheet'
-import { ResetButton } from './ResetButton'
+import { ArrowLeft, ArrowRight } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 import { ProfilePanel, ProfileStage } from './ProfilePanel'
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import { spring } from '@/lib/springs'
@@ -68,6 +69,20 @@ function PaneStepper({ className }: { className?: string }) {
         })}
       </ol>
     </nav>
+  )
+}
+
+/** Under the settings: on to the Pop, or back to the Stamp. */
+function StepAction({ className }: { className?: string }) {
+  const { pane, setPane } = useEditor()
+  return pane === 'stamp' ? (
+    <Button variant="primary" size="compact" trailingIcon={ArrowRight} onClick={() => setPane('pop')} className={cn('w-full', className)}>
+      Edit the Pop
+    </Button>
+  ) : (
+    <Button variant="ghost" size="compact" leadingIcon={ArrowLeft} onClick={() => setPane('stamp')} className={className}>
+      Back to Stamp
+    </Button>
   )
 }
 
@@ -174,7 +189,7 @@ export function EditorLayout({ autoFocus = true }: { autoFocus?: boolean }) {
           </div>
           <PaneSettings autoFocus={autoFocus} />
           <div className="flex justify-center px-3 pb-24 pt-2">
-            <ResetButton />
+            <StepAction />
           </div>
         </Elevated>
         {/* Only while the editor is on screen (it sits under the home page). */}
@@ -192,7 +207,7 @@ export function EditorLayout({ autoFocus = true }: { autoFocus?: boolean }) {
         <PaneSettings autoFocus={autoFocus} />
       </div>
       <div className="flex shrink-0 justify-center border-t border-border px-3 py-2">
-        <ResetButton />
+        <StepAction />
       </div>
     </Card>
   )

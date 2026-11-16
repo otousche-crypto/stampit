@@ -1,6 +1,7 @@
 import { bestOn, contrastRatio, parseHex, relativeLuminance } from '../contrast'
 import { SOCIALS, type BadgeConfig, type BadgeSize, type Layout, type Palette, type SocialNetwork } from '../schema'
 import { CHANNELS, domainMatches, isValidUrl } from '../channels'
+import { newsletterTarget, type NewsletterTarget } from '../newsletter'
 import { SOCIAL_STAGGER_MS, CSS_SPRINGS, type CssSpringName } from '../springs-css'
 import { badgeRuntime } from './runtime'
 
@@ -397,7 +398,7 @@ function buildCss(
     const s = `[${PROFILE_STAGE_ATTR}]`
     rules.push(
       `${s} .${c}{display:block;animation:none}${s} .${c}>:not(dialog){display:none}`,
-      `${s} .${c} .${c}__dlg{position:static;margin:0;max-height:none;opacity:1;transform:none}${s} .${c}__dlg form{display:none}`,
+      `${s} .${c} .${c}__dlg{position:static;margin:0;max-height:none;opacity:1;transform:none}${s} .${c}__xf{display:none}`,
     )
   }
 
@@ -656,12 +657,50 @@ export function githubUser(config: BadgeConfig): string | null {
   return /^[A-Za-z0-9][A-Za-z0-9-]{0,38}$/.test(first) ? first : null
 }
 
-/** Projects with a name and a valid address, in order: each one is a link. */
+/** Projects with a name and a valid address, in order: each one is a link. None when the section is off. */
 export function profileProjects(config: BadgeConfig): { name: string; url: string; description: string }[] {
+  if (!config.click.profile.sections.projects) return []
   return config.click.profile.projects
     .map((p) => ({ name: p.name.trim(), url: p.url.trim(), description: p.description.trim() }))
     .filter((p) => p.name && isValidUrl(p.url))
 }
+
+/** The GitHub graph's user, when its section is on. */
+export function profileGithubUser(config: BadgeConfig): string | null {
+  return config.click.profile.sections.github ? githubUser(config) : null
+}
+
+/**
+ * The newsletter card, whenever its section is on: shown even before its
+ * address is set (the editor previews it; a copy is blocked until it's valid).
+ */
+export function profileNewsletter(
+  config: BadgeConfig,
+): { url: string; title: string; description: string; target: NewsletterTarget } | null {
+  const { sections, newsletter } = config.click.profile
+  if (!sections.newsletter) return null
+  const url = newsletter.url.trim()
+  const valid = isValidUrl(url)
+  return {
+    url: valid ? url : '#',
+    title: newsletter.title.trim(),
+    description: newsletter.description.trim(),
+    // A service that takes form posts: subscribe right in the modal.
+    target: valid ? newsletterTarget(url) : { kind: 'link', provider: null },
+  }
+}
+
+/** The support button, whenever its section is on (same rule as the newsletter). */
+export function profileDonate(config: BadgeConfig): { url: string; label: string } | null {
+  const { sections, donate } = config.click.profile
+  if (!sections.donate) return null
+  const url = donate.url.trim()
+  return { url: isValidUrl(url) ? url : '#', label: donate.label.trim() || 'Support my work' }
+}
+
+/** Lucide "heart", the support button's icon. */
+const HEART_ICON =
+  '<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>'
 
 /** The modal always shows a face: initials when the badge itself has no avatar. */
 function modalAvatar(config: BadgeConfig, avatar: ResolvedAvatar): ResolvedAvatar {
@@ -766,6 +805,19 @@ function profileRules(
     `.${c}__mc .${c}__mi{position:absolute;top:14px;right:14px}`,
     `.${c}__mcn{font-weight:500}`,
     `.${c}__mcd{color:var(${v}tn);font-size:13px}`,
+    // Newsletter: an optional title and line, then an email field and Subscribe.
+    `.${c}__nl{margin-top:16px}`,
+    `.${c}__nt{display:flex;flex-direction:column;gap:2px;margin-bottom:8px}`,
+    `.${c}__nf{display:flex;gap:6px}`,
+    `.${c}__nf input{flex:1;min-width:0;height:38px;padding:0 12px;border-radius:${round ? '19px' : `${inner}px`};background:${tint(6)};box-shadow:inset 0 0 0 1px var(${v}bd);color:var(${v}tb);font-size:14px;outline:none;-webkit-appearance:none;appearance:none}`,
+    `.${c}__nf input::placeholder{color:var(${v}tn);opacity:1}`,
+    `.${c}__nf input:focus-visible,.${c}__nf button:focus-visible{outline:2px solid var(${v}tb);outline-offset:2px}`,
+    `.${c}__nf button{flex:none;height:38px;padding:0 14px;border-radius:${round ? '19px' : `${inner}px`};background:var(${v}tb);color:var(${v}on);font-weight:500;cursor:pointer;transition:${transition(ctx, 'opacity', 'fast')}}`,
+    `.${c}__nf button:hover{opacity:.88}`,
+    // Support: a full-width button with a heart, after the sections.
+    `.${c}__md{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:22px;height:40px;border-radius:${round ? '20px' : `${inner}px`};background:${tint(6)};box-shadow:inset 0 0 0 1px var(${v}bd);font-weight:500;transition:${transition(ctx, 'background-color', 'fast')}}`,
+    `.${c}__md:hover{background:${tint(10)}}`,
+    `.${c}__mh2{flex:none;display:block;color:var(${v}tb)}`,
     // "Made with Stampit": a quiet signature, close under the content, brighter on hover.
     `.${c}__mf{margin:12px 0 -8px;text-align:center;font-size:11px;line-height:1.3;color:var(${v}tn)}`,
     `.${c}__mf a{color:inherit;opacity:.65;transition:${transition(ctx, 'opacity', 'fast')}}`,
@@ -815,7 +867,7 @@ function profileHtml(c: string, config: BadgeConfig, avatar: ResolvedAvatar, ope
         ? `<span class="${c}__mav" aria-hidden="true">${escapeHtml(face.initials)}</span>`
         : ''
   const lines: string[] = [
-    `<form method="dialog"><button class="${c}__x" aria-label="Close">${strokeSvg(`${c}__xi`, 16, CLOSE_ICON)}</button></form>`,
+    `<form method="dialog" class="${c}__xf"><button class="${c}__x" aria-label="Close">${strokeSvg(`${c}__xi`, 16, CLOSE_ICON)}</button></form>`,
     `<div class="${c}__mh">${faceHtml}<div><h2 id="${c}-dlg-t" class="${c}__mn">${escapeHtml(name)}</h2>${role ? `<p class="${c}__mr">${escapeHtml(role)}</p>` : ''}</div></div>`,
   ]
 
@@ -824,12 +876,32 @@ function profileHtml(c: string, config: BadgeConfig, avatar: ResolvedAvatar, ope
   for (const { network, url } of activeSocials(config)) links.push(link('ms', url, CHANNELS[network].label, channelIconSvg(network)))
   if (links.length) lines.push(`<div class="${c}__ml">${links.join('')}</div>`)
 
-  const user = githubUser(config)
+  const user = profileGithubUser(config)
   if (user) {
     const profile = `https://github.com/${user}`
     lines.push(
       // Only the bricks, untitled: the whole grid links to the profile (its name gets the total once loaded).
       `<div class="${c}__gh" data-user="${user}" data-api="${escapeHtml(stampitOrigin)}">${link('gr', profile, `GitHub contributions of @${user}`, '')}</div>`,
+    )
+  }
+
+  // Newsletter: with the links and the activity, an email field and Subscribe.
+  // Services that take sign-ups get the email posted to them; for the others,
+  // Subscribe opens the newsletter's page. Either way in a new tab.
+  const newsletter = profileNewsletter(config)
+  if (newsletter) {
+    const { target } = newsletter
+    const text = [
+      newsletter.title ? `<span class="${c}__mcn">${escapeHtml(newsletter.title)}</span>` : '',
+      newsletter.description ? `<span class="${c}__mcd">${escapeHtml(newsletter.description)}</span>` : '',
+    ].join('')
+    const form =
+      target.kind === 'form'
+        ? `action="${escapeHtml(target.action)}" method="post"`
+        : `action="${escapeHtml(newsletter.url)}" method="get"`
+    const field = target.kind === 'form' ? target.field : 'email'
+    lines.push(
+      `<div class="${c}__nl">${text ? `<div class="${c}__nt">${text}</div>` : ''}<form class="${c}__nf" ${form} target="_blank" aria-label="Newsletter"><input type="email" name="${field}" required autocomplete="email" placeholder="you@example.com" aria-label="Email address"><button type="submit">Subscribe</button></form></div>`,
     )
   }
 
@@ -841,6 +913,9 @@ function profileHtml(c: string, config: BadgeConfig, avatar: ResolvedAvatar, ope
     })
     lines.push(`<section class="${c}__sec" aria-labelledby="${c}-pj-t"><h3 id="${c}-pj-t" class="${c}__mt">Projects</h3><ul class="${c}__mj">${items.join('')}</ul></section>`)
   }
+
+  const donate = profileDonate(config)
+  if (donate) lines.push(link('md', donate.url, '', `${strokeSvg(`${c}__mh2`, 16, HEART_ICON)}${escapeHtml(donate.label)}`))
 
   // Signed at the bottom, like the badge it opens.
   lines.push(

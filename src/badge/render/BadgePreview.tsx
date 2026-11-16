@@ -84,8 +84,20 @@ export function BadgePreview({ code, interceptLinks = false, hoverDemo = false, 
       const url = link.getAttribute('href') ?? ''
       setTip({ url: url === '#' ? 'No link yet' : url, rect: link.getBoundingClientRect() })
     }
+    // A newsletter form would really subscribe: say where it goes instead.
+    const onSubmit = (event: SubmitEvent) => {
+      const form = event.target as HTMLFormElement
+      if (!host.contains(form) || form.method === 'dialog') return
+      event.preventDefault()
+      const button = form.querySelector('button') ?? form
+      setTip({ url: `Subscribes through ${new URL(form.action).hostname}`, rect: button.getBoundingClientRect() })
+    }
     host.addEventListener('click', onClick, true)
-    return () => host.removeEventListener('click', onClick, true)
+    host.addEventListener('submit', onSubmit, true)
+    return () => {
+      host.removeEventListener('click', onClick, true)
+      host.removeEventListener('submit', onSubmit, true)
+    }
   }, [interceptLinks])
 
   // Captured on the host, before the badge's own script opens its modal.

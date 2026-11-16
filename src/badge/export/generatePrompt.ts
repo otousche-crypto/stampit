@@ -12,7 +12,9 @@ import {
   generateHtml,
   initialsColor,
   resolveAvatar,
-  githubUser,
+  profileDonate,
+  profileGithubUser,
+  profileNewsletter,
   profileProjects,
   usesProfile,
   type GenerateHtmlOptions,
@@ -105,8 +107,10 @@ function profileSpec(config: BadgeConfig): string[] {
   const newTab = config.click.link.newTab
   const portfolio = config.click.link.url.trim()
   const socials = activeSocials(config)
-  const user = githubUser(config)
+  const user = profileGithubUser(config)
   const projects = profileProjects(config)
+  const newsletter = profileNewsletter(config)
+  const donate = profileDonate(config)
   const lines = [
     '- Mode: Profile. The badge is a button; clicking it opens a modal profile card. Hovering does nothing more than the hover effect.',
     "- Modal: a native <dialog>, 400px wide (at most the viewport minus 32px), centered, 24px padding; on screens up to 480px wide, a full-width sheet docked to the bottom edge (top corners rounded, max 88dvh, safe-area padding at the bottom), rising 24px as it opens; scrolls inside when taller than the viewport. Same background, bold/normal text colors, border ring and font as the badge, corner radius 12 + 12 × the badge's roundness (px), shadow 0 24px 64px rgba(0,0,0,.24). Backdrop rgba(0,0,0,.4). The page does not scroll behind it.",
@@ -127,6 +131,21 @@ function profileSpec(config: BadgeConfig): string[] {
   if (projects.length) {
     lines.push('- "Projects" section, a list of cards (faint tint of the bold text color, 1px border ring), each with the name and a short description in the normal text color, the whole card a link with an up-right arrow:')
     projects.forEach((p, i) => lines.push(`  ${i + 1}. ${p.name} — ${p.url}${p.description ? ` — "${p.description}"` : ''}`))
+  }
+  if (newsletter) {
+    const { target } = newsletter
+    lines.push(
+      `- Newsletter, 16px under the GitHub graph and before the projects, untitled: ${newsletter.title ? `"${newsletter.title}" (14px, weight 500)${newsletter.description ? ` and "${newsletter.description}" (13px, normal text color)` : ''}, 8px above ` : ''}a row with an email field (38px, faint tint of the bold text color, 1px border ring, placeholder "you@example.com", required) and a "Subscribe" button (bold text color fill, text in black or white). ${
+        target.kind === 'form'
+          ? `It's a plain <form method="post" target="_blank" action="${target.action}"> with the email in a field named "${target.field}": the service shows its confirmation in a new tab.`
+          : `It's a plain <form method="get" target="_blank" action="${newsletter.url}"> with the email in a field named "email": Subscribe opens the newsletter's page in a new tab.`
+      } No JS needed.`,
+    )
+  }
+  if (donate) {
+    lines.push(
+      `- Support button after the sections: full width, 40px high, rounded like the links, a faint tint of the bold text color with a 1px border ring, a heart icon and "${donate.label}", linking to ${donate.url}.`,
+    )
   }
   lines.push(
     '- Section titles: 12px, upper-case, letter-spacing .04em, normal text color.',

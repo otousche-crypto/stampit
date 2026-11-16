@@ -278,7 +278,7 @@ export function SelectRow<T extends string>({
       },
     }
   return (
-    <div className="flex min-h-9 items-center justify-between gap-2 pl-2">
+    <div className="flex min-h-8 items-center justify-between gap-2 pl-2">
       <span id={id} className={cn('text-muted-foreground', typeClass('body'))}>
         {label}
       </span>
@@ -326,7 +326,7 @@ export function SwitchRow({ label, checked, onToggle }: { label: string; checked
       checked={checked}
       onToggle={onToggle}
       size="default"
-      className="min-h-9 w-full flex-row-reverse justify-between pr-2 pl-2"
+      className="min-h-8 w-full flex-row-reverse justify-between pr-2 pl-2"
     />
   )
 }

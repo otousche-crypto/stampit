@@ -120,7 +120,18 @@ export const badgeConfigSchema = z.object({
     mode: z.enum(['link', 'profile']).catch('link'),
     link: z.object({ url: z.string().max(2048), newTab: z.boolean() }),
     profile: z.object({
+      /** The modal's optional sections, each switched on or off in the Pop step. */
+      sections: z.object({
+        github: z.boolean(),
+        projects: z.boolean(),
+        newsletter: z.boolean(),
+        donate: z.boolean(),
+      }),
       projects: z.array(projectSchema).max(MAX_PROJECTS),
+      /** A link to subscribe (Substack, Beehiiv…), with a line about it. */
+      newsletter: z.object({ url: z.string().max(2048), title: z.string().max(40), description: z.string().max(90) }),
+      /** A support button (Ko-fi, Buy Me a Coffee, GitHub Sponsors…). */
+      donate: z.object({ url: z.string().max(2048), label: z.string().max(32) }),
     }),
   }),
 
@@ -202,7 +213,12 @@ export function createDefaultConfig(overrides?: { id?: string; updatedAt?: strin
     click: {
       mode: 'link',
       link: { url: '', newTab: true },
-      profile: { projects: [] },
+      profile: {
+        sections: { github: true, projects: true, newsletter: false, donate: false },
+        projects: [],
+        newsletter: { url: '', title: '', description: '' },
+        donate: { url: '', label: '' },
+      },
     },
     socials: { github: '', linkedin: '', x: '', instagram: '', dribbble: '' },
   }

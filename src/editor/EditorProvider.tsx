@@ -162,13 +162,14 @@ export function EditorProvider({
       errors.text && 'text',
       errors.linkUrl && 'linkUrl',
       ...Object.keys(errors.project).map((id) => `project-${id}`),
+      errors.newsletterUrl && 'newsletterUrl',
+      errors.donateUrl && 'donateUrl',
       ...Object.keys(errors.social).map((network) => `social-${network}`),
     ].filter(Boolean) as string[]
     const target = order[0]
     if (!target) return
-    // The field may sit in the other tab: the modal's fields are in Pop.
-    const inPop = target.startsWith('project-') || (config.click.mode === 'profile' && target !== 'text')
-    setPane(inPop ? 'pop' : 'stamp')
+    // Every field but the text sits in the Pop step (the link settings too).
+    setPane(target === 'text' ? 'stamp' : 'pop')
     const smooth = !window.matchMedia('(prefers-reduced-motion: reduce)').matches
     const go = () => {
       const input = document.querySelector<HTMLInputElement>(`[data-field="${target}"] input`)
@@ -182,7 +183,7 @@ export function EditorProvider({
     requestAnimationFrame(() => {
       if (!go()) window.setTimeout(go, 250)
     })
-  }, [errors, config.click.mode])
+  }, [errors])
 
   const contrastIssues = useMemo(
     () =>

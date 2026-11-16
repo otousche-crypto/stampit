@@ -60,7 +60,7 @@ describe('generateHtml', () => {
     expect(p.html).toContain('<button type="button" class="sp-test1234__pill" aria-haspopup="dialog" aria-controls="sp-test1234-dlg"')
     expect(p.html).toContain('aria-label="Launched by Olivier Tousche, open profile"')
     expect(p.html).toContain('<dialog id="sp-test1234-dlg" class="sp-test1234__dlg" aria-labelledby="sp-test1234-dlg-t">')
-    expect(p.html).toContain('<form method="dialog">')
+    expect(p.html).toContain('<form method="dialog" class="sp-test1234__xf">')
     expect(p.html).toContain('aria-label="Portfolio, opens in a new tab"')
     expect(p.html).toContain('aria-label="LinkedIn, opens in a new tab"')
     expect(p.html).toContain('data-user="olivier"')
@@ -72,6 +72,12 @@ describe('generateHtml', () => {
     expect(p.html).not.toContain('Décadi')
     expect(p.html).not.toContain('ignored.example')
     expect(p.html).toContain('aria-label="Made with Stampit, opens in a new tab">Made with <span>Stampit</span></a>')
+    // Newsletter (Substack: Subscribe opens the page) and Donate, switched on.
+    expect(p.html).toContain('action="https://olivier.substack.com" method="get" target="_blank" aria-label="Newsletter"><input type="email" name="email"')
+    expect(p.html).toContain('Buy me a coffee</a>')
+    // The newsletter sits right after the GitHub graph, before the projects.
+    expect(p.html.indexOf('__gh"')).toBeLessThan(p.html.indexOf('__nl"'))
+    expect(p.html.indexOf('__nl"')).toBeLessThan(p.html.indexOf('-pj-t'))
     // The social links live in the modal, not beside the badge.
     expect(p.html).not.toContain('__sos')
     expect(p.css).toContain('@starting-style')
@@ -84,6 +90,32 @@ describe('generateHtml', () => {
     expect(minimal.html.match(/target="_blank"/g)).toHaveLength(1)
     // No avatar on the badge, initials in the modal.
     expect(minimal.html).toContain('<span class="sp-test1234__mav" aria-hidden="true">EL</span>')
+  })
+
+  it('shows only the sections that are on', () => {
+    const off = mergeDeep(FIXTURES['profile-full'], {
+      click: { profile: { sections: { github: false, projects: false, newsletter: false, donate: false } } },
+    })
+    const html = generateBadge(off).html
+    for (const part of ['__gh', '__mj', 'substack', 'ko-fi']) expect(html).not.toContain(part)
+    // The links stay.
+    expect(html).toContain('aria-label="LinkedIn, opens in a new tab"')
+  })
+
+  it('posts to Buttondown, Kit and Mailchimp, and opens the page for the others', () => {
+    const direct = mergeDeep(FIXTURES['profile-full'], { click: { profile: { newsletter: { url: 'https://buttondown.com/olivier' } } } })
+    const html = generateBadge(direct).html
+    expect(html).toContain('<form class="sp-test1234__nf" action="https://buttondown.com/api/emails/embed-subscribe/olivier" method="post" target="_blank" aria-label="Newsletter"><input type="email" name="email" required')
+    expect(html).toContain('<button type="submit">Subscribe</button>')
+    // Substack (the fixture): the same field, which opens the page.
+    expect(generateBadge(FIXTURES['profile-full']).html).toContain('method="get"')
+  })
+
+  it('previews Newsletter and Donate as soon as they are on, before their links are set', () => {
+    const on = mergeDeep(FIXTURES['profile-minimal'], { click: { profile: { sections: { newsletter: true, donate: true } } } })
+    const html = generateBadge(on).html
+    expect(html).toContain('<button type="submit">Subscribe</button>')
+    expect(html).toContain('Support my work</a>')
   })
 
   it('reads the GitHub user from profile links only', () => {

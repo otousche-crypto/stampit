@@ -6,6 +6,9 @@ export type EditorErrors = {
   linkUrl?: string
   /** Profile projects, by id: which field is wrong, and why. */
   project: Record<string, { field: 'name' | 'url'; message: string }>
+  /** Pop sections that are on: each needs a valid address. */
+  newsletterUrl?: string
+  donateUrl?: string
   social: Partial<Record<SocialNetwork, string>>
 }
 
@@ -22,7 +25,15 @@ export function validate(config: BadgeConfig): EditorErrors {
   } else {
     // Profile: the portfolio is optional; a project needs a name and an address (it is a link).
     if (url && !isValidUrl(url)) errors.linkUrl = "This address doesn't look right."
-    for (const project of config.click.profile.projects) {
+    const { sections, newsletter, donate } = config.click.profile
+    const required = (value: string) => {
+      const v = value.trim()
+      return !v ? 'Add the address it links to.' : isValidUrl(v) ? undefined : "This address doesn't look right."
+    }
+    if (sections.newsletter) errors.newsletterUrl = required(newsletter.url)
+    if (sections.donate) errors.donateUrl = required(donate.url)
+    // Projects only count while their section is on.
+    for (const project of sections.projects ? config.click.profile.projects : []) {
       const projectUrl = project.url.trim()
       if (!project.name.trim()) errors.project[project.id] = { field: 'name', message: 'Give this project a name.' }
       else if (!projectUrl) errors.project[project.id] = { field: 'url', message: 'Add the address it links to.' }
@@ -38,7 +49,12 @@ export function validate(config: BadgeConfig): EditorErrors {
 
 export function hasBlockingErrors(errors: EditorErrors): boolean {
   return Boolean(
-    errors.text || errors.linkUrl || Object.keys(errors.project).length || Object.keys(errors.social).length,
+    errors.text ||
+      errors.linkUrl ||
+      errors.newsletterUrl ||
+      errors.donateUrl ||
+      Object.keys(errors.project).length ||
+      Object.keys(errors.social).length,
   )
 }
 
@@ -47,6 +63,8 @@ export function blockingSummary(errors: EditorErrors): string | null {
   if (errors.text) return 'Add some text to your badge first.'
   if (errors.linkUrl) return 'Add a valid link first.'
   if (Object.keys(errors.project).length) return 'Fix the projects first.'
+  if (errors.newsletterUrl) return 'Add your newsletter link first.'
+  if (errors.donateUrl) return 'Add your support link first.'
   if (Object.keys(errors.social).length) return 'Fix the social links first.'
   return null
 }

@@ -25,7 +25,8 @@ function renderReact(source: string): string {
 /** Attribute-order-insensitive view of markup: the sorted list of tags with their attributes. */
 const tags = (markup: string) =>
   [...markup.replace(/<style>[\s\S]*?<\/style>/, '').matchAll(/<([a-z]+)([^>]*?)\/?>/g)]
-    .map(([, tag, attrs]) => `${tag} ${[...attrs.matchAll(/([a-zA-Z-]+)="([^"]*)"/g)].map(([, n, v]) => `${n.toLowerCase()}=${v}`).sort().join(' ')}`)
+    // Boolean attributes (`required`) count as empty ones, the way React writes them.
+    .map(([, tag, attrs]) => `${tag} ${[...attrs.matchAll(/([a-zA-Z-]+)(?:="([^"]*)")?/g)].map(([, n, v = '']) => `${n.toLowerCase()}=${v}`).sort().join(' ')}`)
     .sort()
 
 /** The `_spec` constant of a generated Flutter file. */
